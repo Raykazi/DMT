@@ -29,6 +29,11 @@
 
             <Separator />
 
+            <MenuItem Header="Set Destination" Click="SysContexMenuItemSetDestination_Click" IsEnabled="False" />
+            <MenuItem Header="Add Waypoint" Click="SysContexMenuItemAddWaypoint_Click" IsEnabled="False" />
+
+            <Separator/>
+
             <MenuItem Header="Show Jump Range">
                 <MenuItem Header="Remove All" DataContext="-1" Click="SetJumpRange_Click" />
                 <MenuItem Header="None" DataContext="0" Click="SetJumpRange_Click" />
@@ -205,7 +210,7 @@
                             </ToggleButton>
                         </StackPanel>
 
-                        <Slider  Width="140" Cursor="Arrow" Margin="0,2" Value="{Binding ESIOverlayScale}" Minimum="0.2" Maximum="2" TickFrequency="0.2" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1" Foreground="{x:Null}" BorderBrush="{x:Null}" Background="{x:Null}" Height="18" ToolTip="Overlay/Data Scale" SmallChange="0.2" IsSnapToTickEnabled="True" />
+                        <Slider  Width="140" Cursor="Arrow" Margin="0,2" Value="{Binding ESIOverlayScale}" Minimum="0.2" Maximum="2" TickFrequency="0.2" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1" Foreground="{x:Null}" BorderBrush="{x:Null}" Background="{x:Null}" Height="18" ToolTip="Overlay/Data Scale" SmallChange="0.2" IsSnapToTickEnabled="True"  IsMoveToPointEnabled="True"/>
                     </StackPanel>
                 </Grid>
             </Canvas>

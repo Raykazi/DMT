@@ -31,11 +31,7 @@ namespace SMT
         public ObservableCollection<StaticJumpOverlay> StaticJumpPoints;
 
         private bool m_AlwaysOnTop;
-
-        private string m_CurrentJumpCharacter;
-
-        private string m_CurrentJumpSystem;
-
+        
         private string m_DefaultRegion;
 
         private double m_IntelTextSize = 10;
@@ -88,6 +84,13 @@ namespace SMT
 
         private int m_WarningRange = 5;
 
+        private int m_FleetMaxMembersPerSystem = 5;
+
+        private bool m_FleetShowOnMap = true;
+
+        private bool m_FleetShowShipType = false;
+
+
         public MapConfig()
         {
             SetDefaults();
@@ -110,38 +113,6 @@ namespace SMT
             }
         }
 
-        [XmlIgnoreAttribute]
-        [Category("Navigation")]
-        [DisplayName("Current Jump Character")]
-        [ItemsSource(typeof(JumpCharacterItemsSource))]
-        public string CurrentJumpCharacter
-        {
-            get
-            {
-                return m_CurrentJumpCharacter;
-            }
-            set
-            {
-                m_CurrentJumpCharacter = value;
-                OnPropertyChanged("CurrentJumpCharacter");
-            }
-        }
-
-        [XmlIgnoreAttribute]
-        [Category("Navigation")]
-        [DisplayName("Current Jump System"), ReadOnly(true)]
-        public string CurrentJumpSystem
-        {
-            get
-            {
-                return m_CurrentJumpSystem;
-            }
-            set
-            {
-                m_CurrentJumpSystem = value;
-                OnPropertyChanged("CurrentJumpSystem");
-            }
-        }
 
         [Browsable(false)]
         public string DefaultColourSchemeName { get; set; }
@@ -318,11 +289,6 @@ namespace SMT
                 OnPropertyChanged("ShowJoveObservatories");
             }
         }
-
-        [XmlIgnoreAttribute]
-        [Category("Navigation")]
-        [DisplayName("Show Jump Distance")]
-        public bool ShowJumpDistance { get; set; }
 
         [Category("Misc")]
         [DisplayName("Show Negative Ratting Delta")]
@@ -675,6 +641,67 @@ namespace SMT
             }
         }
 
+        [Category("Fleet")]
+        [DisplayName("Show On Map")]
+        public bool FleetShowOnMap
+        {
+            get
+            {
+                return m_FleetShowOnMap;
+            }
+            set
+            {
+                m_FleetShowOnMap = value;
+                OnPropertyChanged("FleetShowOnMap");
+            }
+        }
+
+        [Category("Fleet")]
+        [DisplayName("Show Ship Type")]
+        public bool FleetShowShipType
+        {
+            get
+            {
+                return m_FleetShowShipType;
+            }
+            set
+            {
+                m_FleetShowShipType = value;
+                OnPropertyChanged("FleetShowShipType");
+            }
+        }
+
+        [Category("Fleet")]
+        [DisplayName("Max Fleet Per System")]
+        public int FleetMaxMembersPerSystem
+        {
+            get
+            {
+                return m_FleetMaxMembersPerSystem;
+            }
+            set
+            {
+                // clamp to 1 miniumum
+                if (value > 0)
+                {
+                    m_FleetMaxMembersPerSystem = value;
+                }
+                else
+                {
+                    m_FleetMaxMembersPerSystem = 1;
+                }
+
+
+
+                OnPropertyChanged("FleetMaxMembersPerSystem");
+            }
+        }
+
+
+
+        public bool UseESIForCharacterPositions { get; set; }
+
+
         private bool m_SyncActiveCharacterBasedOnActiveEVEClient;
         public bool SyncActiveCharacterBasedOnActiveEVEClient
         {
@@ -690,6 +717,8 @@ namespace SMT
         }
 
         private bool m_DisableJumpBridgesPathAnimation;
+        private bool m_DisableRoutePathAnimation;
+
         public bool DisableJumpBridgesPathAnimation
         {
             get => m_DisableJumpBridgesPathAnimation;
@@ -697,6 +726,16 @@ namespace SMT
             {
                 m_DisableJumpBridgesPathAnimation = value;
                 OnPropertyChanged("DisableJumpBridgesPathAnimation");
+            }
+        }
+        
+        public bool DisableRoutePathAnimation
+        {
+            get => m_DisableRoutePathAnimation;
+            set
+            {
+                m_DisableRoutePathAnimation = value;
+                OnPropertyChanged("DisableRoutePathAnimation");
             }
         }
 
@@ -732,6 +771,8 @@ namespace SMT
                 CharacterTextSize = 11,
                 SystemTextSize = 12,
 
+                FleetMemberTextColour = Colors.White,
+
                 JumpRangeInColour = Color.FromRgb(255, 165, 0),
                 JumpRangeInColourHighlight = Color.FromArgb(156, 82, 135, 155),
                 JumpRangeOverlapHighlight = Colors.DarkBlue,
@@ -764,13 +805,11 @@ namespace SMT
             ShowZKillData = true;
             ShowTrueSec = true;
             JumpRangeInAsOutline = true;
-            ShowJumpDistance = false;
-            CurrentJumpSystem = "";
             ShowActiveIncursions = true;
-            CurrentJumpCharacter = "";
             StaticJumpPoints = new ObservableCollection<StaticJumpOverlay>();
             SOVShowConflicts = true;
             SOVBasedITCU = true;
+            UseESIForCharacterPositions = true;
 
             ShowIhubVunerabilities = true;
 

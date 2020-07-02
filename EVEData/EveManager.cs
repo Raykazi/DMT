@@ -100,6 +100,7 @@ namespace SMT.EVEData
                 Directory.CreateDirectory(logosFoilder);
             }
 
+            CharacterIDToName = new SerializableDictionary<long, string>();
             AllianceIDToName = new SerializableDictionary<long, string>();
             AllianceIDToTicker = new SerializableDictionary<long, string>();
             NameToSystem = new Dictionary<string, System>();
@@ -144,6 +145,17 @@ namespace SMT.EVEData
                 EveManager.instance = value;
             }
         }
+
+
+        public bool UseESIForCharacterPositions { get; set; }
+
+
+
+        /// <summary>
+        /// Gets or sets the Alliance ID to Name dictionary
+        /// </summary>
+        public SerializableDictionary<long, string> CharacterIDToName { get; set; }
+
 
         /// <summary>
         /// Gets or sets the Alliance ID to Name dictionary
@@ -931,6 +943,19 @@ namespace SMT.EVEData
         /// <param name="name">Name (not ID) of the system</param>
         public bool DoesSystemExist(string name) => GetEveSystem(name) != null;
 
+
+        public string GetCharacterName(long id)
+        {
+            string name = string.Empty;
+            if (CharacterIDToName.Keys.Contains(id))
+            {
+                name = CharacterIDToName[id];
+            }
+
+            return name;
+        }
+
+
         /// <summary>
         /// Get the alliance name from the alliance ID
         /// </summary>
@@ -1150,6 +1175,16 @@ namespace SMT.EVEData
                 SystemIDToName[s.ID] = s.Name;
             }
 
+            if (File.Exists(SaveDataVersionFolder + @"\CharacterNames.dat"))
+            {
+                CharacterIDToName = Utils.DeserializeFromDisk<SerializableDictionary<long, string>>(SaveDataVersionFolder + @"\CharacterNames.dat");
+            }
+            if (CharacterIDToName == null)
+            {
+                CharacterIDToName = new SerializableDictionary<long, string>();
+            }
+
+
             if (File.Exists(SaveDataVersionFolder + @"\AllianceNames.dat"))
             {
                 AllianceIDToName = Utils.DeserializeFromDisk<SerializableDictionary<long, string>>(SaveDataVersionFolder + @"\AllianceNames.dat");
@@ -1231,6 +1266,46 @@ namespace SMT.EVEData
             }
         }
 
+
+        /// <summary>
+        /// Update the Character ID data for specified list
+        /// </summary>
+        public async Task ResolveCharacterIDs(List<long> IDs)
+        {
+            if (IDs.Count == 0)
+            {
+                return;
+            }
+
+            // strip out any ID's we already know..
+            List<long> UnknownIDs = new List<long>();
+            foreach (long l in IDs)
+            {
+                if (!CharacterIDToName.ContainsKey(l))
+                {
+                    UnknownIDs.Add(l);
+                }
+            }
+
+            if (UnknownIDs.Count == 0)
+            {
+                return;
+            }
+
+            ESI.NET.EsiResponse<List<ESI.NET.Models.Universe.ResolvedInfo>> esra = await ESIClient.Universe.Names(UnknownIDs);
+            if (ESIHelpers.ValidateESICall<List<ESI.NET.Models.Universe.ResolvedInfo>>(esra))
+            {
+                foreach (ESI.NET.Models.Universe.ResolvedInfo ri in esra.Data)
+                {
+                    if (ri.Category == ResolvedInfoCategory.Character)
+                    {
+                        CharacterIDToName[ri.Id] = ri.Name;
+                    }
+                }
+            }
+        }
+
+
         /// <summary>
         /// Update the Alliance and Ticker data for specified list
         /// </summary>
@@ -1305,8 +1380,10 @@ namespace SMT.EVEData
             }
 
             // now serialise the caches to disk
+            Utils.SerializeToDisk<SerializableDictionary<long, string>>(CharacterIDToName, SaveDataVersionFolder + @"\CharacterNames.dat");
             Utils.SerializeToDisk<SerializableDictionary<long, string>>(AllianceIDToName, SaveDataVersionFolder + @"\AllianceNames.dat");
             Utils.SerializeToDisk<SerializableDictionary<long, string>>(AllianceIDToTicker, SaveDataVersionFolder + @"\AllianceTickers.dat");
+
 
             Utils.SerializeToDisk<ObservableCollection<JumpBridge>>(JumpBridges, SaveDataVersionFolder + @"\JumpBridges.dat");
         }
@@ -1828,6 +1905,11 @@ namespace SMT.EVEData
                                     addToIntel = false;
                                 }
 
+                                if(line.Contains("Channel MOTD:"))
+                                {
+                                    addToIntel = false;
+                                }
+
                                 if (addToIntel)
                                 {
                                     EVEData.IntelData id = new EVEData.IntelData(line);
@@ -2247,7 +2329,6 @@ namespace SMT.EVEData
                         sc.DefendingAllianceName = AllianceIDToName[sc.DefendingAllianceID];
                     }
 
-
                     if (sc.Valid == false)
                     {
                         Application.Current.Dispatcher.Invoke((Action)(() =>
@@ -2256,7 +2337,6 @@ namespace SMT.EVEData
                         }), DispatcherPriority.Normal, null);
                     }
                 }
-
 
 
                 // super hack : I want to update the both the times and filter colour that

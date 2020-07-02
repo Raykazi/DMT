@@ -13,7 +13,7 @@ using System.Xml.Serialization;
 
 namespace SMT.EVEData
 {
-    //jumpclones
+    //jumpclones 
 
     public class LocalCharacter : Character, INotifyPropertyChanged
     {
@@ -25,6 +25,7 @@ namespace SMT.EVEData
 
         public static readonly string SaveVersion = "02";
 
+        [XmlIgnoreAttribute]
         public bool warningSystemsNeedsUpdate = false;
 
         private bool esiRouteNeedsUpdate = false;
@@ -60,7 +61,17 @@ namespace SMT.EVEData
             LabelMap = new Dictionary<long, long>();
             LabelNames = new Dictionary<long, string>();
 
+
             FleetInfo = new Fleet();
+
+            FleetInfo.IsFleetBoss = false;
+            FleetInfo.FleetID = 0;
+
+            // Random Offset to stop all the errors hitting at once
+            Random R = new Random();
+            int randomOffset = R.Next(90);
+            FleetInfo.NextFleetMembershipCheck = DateTime.Now + TimeSpan.FromSeconds(randomOffset);
+
 
             Waypoints = new ObservableCollection<string>();
             ActiveRoute = new ObservableCollection<Navigation.RoutePoint>();
@@ -424,8 +435,13 @@ namespace SMT.EVEData
                     UpdateInfoFromESI().Wait();
                 }
 
-                UpdatePositionFromESI().Wait();
-                //UpdateFleetInfo();
+                if(EveManager.Instance.UseESIForCharacterPositions)
+                {
+                    UpdatePositionFromESI().Wait();
+                }
+
+
+                UpdateFleetInfo().Wait();
 
                 if (routeNeedsUpdate)
                 {
@@ -615,7 +631,7 @@ namespace SMT.EVEData
         /// <summary>
         /// Update the characters FleetInfo
         /// </summary>
-        private async void UpdateFleetInfo()
+        private async Task UpdateFleetInfo()
         {
             if (ID == 0 || !ESILinked || ESIAuthData == null)
             {
@@ -627,26 +643,115 @@ namespace SMT.EVEData
                 ESI.NET.EsiClient esiClient = EveManager.Instance.ESIClient;
                 esiClient.SetCharacterData(ESIAuthData);
 
-                ESI.NET.EsiResponse<ESI.NET.Models.Fleets.FleetInfo> esr = await esiClient.Fleets.FleetInfo();
 
-                if (ESIHelpers.ValidateESICall<ESI.NET.Models.Fleets.FleetInfo>(esr))
+                if (FleetInfo.NextFleetMembershipCheck < DateTime.Now)
                 {
-                    FleetInfo.FleetID = esr.Data.FleetId;
+                    // route is cached for 60s, however checking this can hit the rate limit
+                    FleetInfo.NextFleetMembershipCheck = DateTime.Now + TimeSpan.FromSeconds(240);
 
-                    // in fleet, extract info
-                    ESI.NET.EsiResponse<List<ESI.NET.Models.Fleets.Member>> esrf = await esiClient.Fleets.Members(esr.Data.FleetId);
-                    if (ESIHelpers.ValidateESICall<List<ESI.NET.Models.Fleets.Member>>(esrf))
+                    ESI.NET.EsiResponse<ESI.NET.Models.Fleets.FleetInfo> esr = await esiClient.Fleets.FleetInfo();
+
+                    if (ESIHelpers.ValidateESICall<ESI.NET.Models.Fleets.FleetInfo>(esr))
                     {
-                        foreach (ESI.NET.Models.Fleets.Member fm in esrf.Data)
-                        {
-                            //fm.CharacterId
-                        }
+                        FleetInfo.FleetID = esr.Data.FleetId;
+                        FleetInfo.IsFleetBoss = esr.Data.Role == "fleet_commander" ? true : false;
+                    }
+                    else
+                    {
+                        FleetInfo.FleetID = 0;
+
+                        Application.Current.Dispatcher.Invoke((Action)(() =>
+                        { 
+                            FleetInfo.Members.Clear();
+                        }), DispatcherPriority.Normal);
+
                     }
                 }
-                else
+
+                if(FleetInfo.FleetID != 0 && FleetInfo.IsFleetBoss)
                 {
-                    FleetInfo.FleetID = 0;
-                    FleetInfo.Members.Clear();
+                    List<long> characterIDsToResolve = new List<long>();
+
+                    ESI.NET.EsiResponse<List<ESI.NET.Models.Fleets.Member>> esrf = await esiClient.Fleets.Members(FleetInfo.FleetID);
+                    if (ESIHelpers.ValidateESICall<List<ESI.NET.Models.Fleets.Member>>(esrf))
+                    {
+                        foreach(Fleet.FleetMember ff in FleetInfo.Members)
+                        {
+                            ff.IsValid = false;
+                        }
+
+                        foreach (ESI.NET.Models.Fleets.Member esifm in esrf.Data)
+                        {
+
+                            Fleet.FleetMember fm = null;
+
+                            foreach (Fleet.FleetMember ff in FleetInfo.Members)
+                            {
+                                if(ff.CharacterID == esifm.CharacterId)
+                                {
+                                    fm = ff;
+                                    fm.IsValid = true;
+                                }
+                            }
+
+                            if(fm == null)
+                            {
+                                fm = new Fleet.FleetMember();
+                                fm.IsValid = true;
+
+                                Application.Current.Dispatcher.Invoke((Action)(() =>
+                                {
+                                    FleetInfo.Members.Add(fm);
+                                }), DispatcherPriority.Normal);
+
+                            }
+
+                            fm.Name = EveManager.Instance.GetCharacterName(esifm.CharacterId);
+                            fm.Location = EveManager.Instance.GetEveSystemNameFromID(esifm.SolarSystemId);
+                            fm.CharacterID = esifm.CharacterId;
+                            if (EveManager.Instance.ShipTypes.ContainsKey(esifm.ShipTypeId.ToString()))
+                            {
+                                fm.ShipType = EveManager.Instance.ShipTypes[esifm.ShipTypeId.ToString()];
+                            }
+                            else
+                            {
+                                fm.ShipType = "Unknown : " + esifm.ShipTypeId.ToString();
+                            }
+
+                            if (String.IsNullOrEmpty(fm.Name))
+                            {
+                                characterIDsToResolve.Add(esifm.CharacterId);
+                            }
+                        }
+
+                        if (characterIDsToResolve.Count > 0)
+                        {
+                            EveManager.Instance.ResolveCharacterIDs(characterIDsToResolve).Wait();
+                        }
+
+                        foreach (Fleet.FleetMember ff in FleetInfo.Members.ToList())
+                        {
+                            if (!ff.IsValid)
+                            {
+                                Application.Current.Dispatcher.Invoke((Action)(() =>
+                                {
+                                    FleetInfo.Members.Remove(ff);
+                                }), DispatcherPriority.Normal);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // something went wrong (probably lost fleet_commander), reset this check
+                        FleetInfo.NextFleetMembershipCheck = DateTime.Now + TimeSpan.FromSeconds(60);
+                        FleetInfo.FleetID = 0;
+
+                        Application.Current.Dispatcher.Invoke((Action)(() =>
+                        {
+                            FleetInfo.Members.Clear();
+                        }), DispatcherPriority.Normal);
+                    }
+
                 }
             }
             catch { }

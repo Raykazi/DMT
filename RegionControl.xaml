@@ -37,6 +37,7 @@
 
 
             <MenuItem Header="Show Jump Range">
+                <MenuItem Header="Remove All" DataContext="-1" Click="SetJumpRange_Click" />
                 <MenuItem Header="None" DataContext="0" Click="SetJumpRange_Click" />
                 <MenuItem Header="Super/Titan  (6.0LY)" DataContext="6" Click="SetJumpRange_Click" />
                 <MenuItem Header="Carriers/Fax (7.0LY)" DataContext="7" Click="SetJumpRange_Click" />
@@ -85,7 +86,8 @@
             </zoombox1:ZoomControl>
             <Label x:Name="label"  HorizontalAlignment="Right" Margin="0,0,50,0" VerticalAlignment="Bottom" FontSize="30" Panel.ZIndex="50" FontWeight="Bold" Grid.Column="2" />
 
-            <Label x:Name="BridgeInfoL1" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Margin="20,0,0,20" VerticalAlignment="Bottom" FontSize="14" Panel.ZIndex="50" FontWeight="Bold" RenderTransformOrigin="-4.3,7.3" />
+            <StackPanel x:Name="BridgeInfoStackPanel" HorizontalAlignment="Left" Margin="20,0,0,20" VerticalAlignment="Bottom"  Panel.ZIndex="50" />
+            
             <Border BorderThickness="4" BorderBrush="Black" CornerRadius="3" Grid.ColumnSpan="3" />
             <Border BorderThickness="2" BorderBrush="Black" Background="#FF232223" CornerRadius="3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,160" x:Name="AllianceNameList" Visibility="Visible" Width="190" Panel.ZIndex="111" Grid.ColumnSpan="3">
                 <StackPanel x:Name="AllianceNameListStackPanel" VerticalAlignment="Bottom" />
@@ -395,7 +397,7 @@
                                 </ToggleButton>
                             </StackPanel>
 
-                            <Slider  Width="170" Cursor="Arrow" Margin="0,2" Value="{Binding ESIOverlayScale}" Minimum="0.1" Maximum="2" TickFrequency="0.1" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1" Height="18" ToolTip="Overlay/Data Scale" IsSnapToTickEnabled="True" />
+                            <Slider  Width="170" Cursor="Arrow" Margin="0,2" Value="{Binding ESIOverlayScale}" Minimum="0.1" Maximum="2" TickFrequency="0.1" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1" Height="18" ToolTip="Overlay/Data Scale" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" />
                         </StackPanel>
                     </Grid>
                 </Canvas>
