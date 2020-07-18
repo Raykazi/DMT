@@ -8,7 +8,7 @@ namespace SMT
     /// </summary>
     public partial class PreferencesWindow : Window
     {
-        public SMT.MapConfig MapConf;
+        public MapConfig MapConf;
 
         public PreferencesWindow()
         {

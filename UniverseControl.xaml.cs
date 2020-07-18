@@ -86,10 +86,10 @@ namespace SMT
 
             public HitTestResultBehavior HitTestCheck(HitTestResult result)
             {
-                System.Windows.Media.DrawingVisual dv = null;
-                if (result.VisualHit.GetType() == typeof(System.Windows.Media.DrawingVisual))
+                DrawingVisual dv = null;
+                if (result.VisualHit.GetType() == typeof(DrawingVisual))
                 {
-                    dv = (System.Windows.Media.DrawingVisual)result.VisualHit;
+                    dv = (DrawingVisual)result.VisualHit;
                 }
 
                 if (dv != null && DataContextData.ContainsKey(dv))
@@ -467,7 +467,7 @@ namespace SMT
 
         private void SetJumpRange_Click(object sender, RoutedEventArgs e)
         {
-            EVEData.System sys = ((System.Windows.FrameworkElement)((System.Windows.FrameworkElement)sender).Parent).DataContext as EVEData.System;
+            EVEData.System sys = ((FrameworkElement)((FrameworkElement)sender).Parent).DataContext as EVEData.System;
 
             VHRangeSpheres.ClearAllChildren();
             VHRangeHighlights.ClearAllChildren();
@@ -505,7 +505,7 @@ namespace SMT
             sysCentreCol.Freeze();
             sysRangeCol.Freeze();
 
-            System.Windows.Media.DrawingVisual rangeCircleDV = new System.Windows.Media.DrawingVisual();
+            DrawingVisual rangeCircleDV = new DrawingVisual();
             DrawingContext drawingContext = rangeCircleDV.RenderOpen();
 
             foreach (KeyValuePair<string, double> kvp in activeJumpSpheres)
@@ -550,7 +550,7 @@ namespace SMT
                     double irX = (es.ActualX - universeXMin) * universeScale; ;
                     double irZ = (universeDepth - (es.ActualZ - universeZMin)) * universeScale;
 
-                    System.Windows.Media.DrawingVisual rangeSquareDV = new System.Windows.Media.DrawingVisual();
+                    DrawingVisual rangeSquareDV = new DrawingVisual();
 
                     // Retrieve the DrawingContext from the DrawingVisual.
                     DrawingContext dcR = rangeSquareDV.RenderOpen();
@@ -793,7 +793,7 @@ namespace SMT
             MainZoomControl.Background = BackgroundColourBrush;
             UniverseMainCanvas.Background = BackgroundColourBrush;
 
-            System.Windows.FontStyle fontStyle = FontStyles.Normal;
+            FontStyle fontStyle = FontStyles.Normal;
             FontWeight fontWeight = FontWeights.Medium;
             Typeface tf = new Typeface("Verdana");
 
@@ -808,7 +808,7 @@ namespace SMT
                 Pen GatePen = new Pen(GateColourBrush, 0.6);
                 Pen ConstGatePen = new Pen(ConstellationColourBrush, 0.6);
 
-                System.Windows.Media.DrawingVisual gatesDrawingVisual = new System.Windows.Media.DrawingVisual();
+                DrawingVisual gatesDrawingVisual = new DrawingVisual();
                 DrawingContext gatesDrawingContext = gatesDrawingVisual.RenderOpen();
 
                 foreach (GateHelper gh in universeSysLinksCache)
@@ -835,7 +835,7 @@ namespace SMT
                     Pen p = new Pen(JumpBridgeColourBrush, 0.6);
                     p.DashStyle = DashStyles.Dot;
 
-                    System.Windows.Media.DrawingVisual jbDrawingVisual = new System.Windows.Media.DrawingVisual();
+                    DrawingVisual jbDrawingVisual = new DrawingVisual();
                     DrawingContext drawingContext;
                     drawingContext = jbDrawingVisual.RenderOpen();
 
@@ -864,7 +864,7 @@ namespace SMT
 
                 foreach (EVEData.System sys in EM.Systems)
                 {
-                    System.Windows.Media.DrawingVisual SystemTextVisual = new System.Windows.Media.DrawingVisual();
+                    DrawingVisual SystemTextVisual = new DrawingVisual();
                     DrawingContext systemTextDrawingContext = SystemTextVisual.RenderOpen();
 
                     double X = (sys.ActualX - universeXMin) * universeScale;
@@ -872,7 +872,7 @@ namespace SMT
                     // need to invert Z
                     double Z = (universeDepth - (sys.ActualZ - universeZMin)) * universeScale;
 
-                    System.Windows.Media.DrawingVisual systemShapeVisual = new System.Windows.Media.DrawingVisual();
+                    DrawingVisual systemShapeVisual = new DrawingVisual();
 
                     // Retrieve the DrawingContext in order to create new drawing content.
                     DrawingContext drawingContext = systemShapeVisual.RenderOpen();
@@ -930,7 +930,7 @@ namespace SMT
                     }
 
 
-                    System.Windows.Media.DrawingVisual RegionShapeVisual = new System.Windows.Media.DrawingVisual();
+                    DrawingVisual RegionShapeVisual = new DrawingVisual();
                     DrawingContext regionShapeDrawingContext = RegionShapeVisual.RenderOpen();
 
                     regionShapeDrawingContext.DrawGeometry(RegionShapeColourBrush, RegionShapePen, sg);
@@ -952,7 +952,7 @@ namespace SMT
 
                 foreach (EVEData.System sys in EM.Systems)
                 {
-                    System.Windows.Media.DrawingVisual dataDV = new System.Windows.Media.DrawingVisual();
+                    DrawingVisual dataDV = new DrawingVisual();
 
                     // Retrieve the DrawingContext in order to create new drawing content.
                     DrawingContext drawingContext = dataDV.RenderOpen();
@@ -1062,7 +1062,7 @@ namespace SMT
                         double charTextOffset = 0;
 
                         // Create an instance of a DrawingVisual.
-                        System.Windows.Media.DrawingVisual nameTextVisual = new System.Windows.Media.DrawingVisual();
+                        DrawingVisual nameTextVisual = new DrawingVisual();
 
                         // Retrieve the DrawingContext from the DrawingVisual.
                         DrawingContext dc = nameTextVisual.RenderOpen();
@@ -1113,7 +1113,7 @@ namespace SMT
                     foreach (KeyValuePair<string, int> kvp in ZKBBaseFeed)
                     {
                         // Create an instance of a DrawingVisual.
-                        System.Windows.Media.DrawingVisual zkbVisual = new System.Windows.Media.DrawingVisual();
+                        DrawingVisual zkbVisual = new DrawingVisual();
 
                         // Retrieve the DrawingContext from the DrawingVisual.
                         DrawingContext dc = zkbVisual.RenderOpen();
@@ -1170,7 +1170,7 @@ namespace SMT
                                 double X2 = (sysB.ActualX - universeXMin) * universeScale;
                                 double Y2 = (universeDepth - (sysB.ActualZ - universeZMin)) * universeScale;
 
-                                System.Windows.Media.DrawingVisual routeVisual = new System.Windows.Media.DrawingVisual();
+                                DrawingVisual routeVisual = new DrawingVisual();
 
                                 //Retrieve the DrawingContext in order to create new drawing content.
                                 DrawingContext drawingContext = routeVisual.RenderOpen();
@@ -1196,7 +1196,7 @@ namespace SMT
                                 double X1 = (sysA.ActualX - universeXMin) * universeScale; ;
                                 double Y1 = (universeDepth - (sysA.ActualZ - universeZMin)) * universeScale;
 
-                                System.Windows.Media.DrawingVisual jumpRouteVisual = new System.Windows.Media.DrawingVisual();
+                                DrawingVisual jumpRouteVisual = new DrawingVisual();
 
                                 //Retrieve the DrawingContext in order to create new drawing content.
                                 DrawingContext drawingContext = jumpRouteVisual.RenderOpen();
@@ -1282,7 +1282,7 @@ namespace SMT
                 double X = (mr.RegionX - universeXMin) * universeScale; ;
                 double Z = (universeDepth - (mr.RegionZ - universeZMin)) * universeScale;
 
-                System.Windows.Media.DrawingVisual SystemTextVisual = new System.Windows.Media.DrawingVisual();
+                DrawingVisual SystemTextVisual = new DrawingVisual();
                 DrawingContext drawingContext = SystemTextVisual.RenderOpen();
 
 #pragma warning disable CS0618
@@ -1340,7 +1340,7 @@ namespace SMT
         /// <param name="e"></param>
         private void SysContexMenuItemDotlan_Click(object sender, RoutedEventArgs e)
         {
-            EVEData.System eveSys = ((System.Windows.FrameworkElement)((System.Windows.FrameworkElement)sender).Parent).DataContext as EVEData.System;
+            EVEData.System eveSys = ((FrameworkElement)((FrameworkElement)sender).Parent).DataContext as EVEData.System;
             EVEData.MapRegion rd = EM.GetRegion(eveSys.Region);
 
             string uRL = string.Format("http://evemaps.dotlan.net/map/{0}/{1}", rd.DotLanRef, eveSys.Name);
@@ -1354,7 +1354,7 @@ namespace SMT
         /// <param name="e"></param>
         private void SysContexMenuItemZKB_Click(object sender, RoutedEventArgs e)
         {
-            EVEData.System eveSys = ((System.Windows.FrameworkElement)((System.Windows.FrameworkElement)sender).Parent).DataContext as EVEData.System;
+            EVEData.System eveSys = ((FrameworkElement)((FrameworkElement)sender).Parent).DataContext as EVEData.System;
             EVEData.MapRegion rd = EM.GetRegion(eveSys.Region);
 
             string uRL = string.Format("https://zkillboard.com/system/{0}", eveSys.ID);
@@ -1363,7 +1363,7 @@ namespace SMT
 
         private void SysContexMenuShowInRegion_Click(object sender, RoutedEventArgs e)
         {
-            EVEData.System s = ((System.Windows.Controls.MenuItem)e.OriginalSource).DataContext as EVEData.System;
+            EVEData.System s = ((MenuItem)e.OriginalSource).DataContext as EVEData.System;
 
             RoutedEventArgs newEventArgs = new RoutedEventArgs(RequestRegionSystemSelectEvent, s.Name);
             RaiseEvent(newEventArgs);
@@ -1409,7 +1409,7 @@ namespace SMT
 
         private void SysContexMenuItemSetDestination_Click(object sender, RoutedEventArgs e)
         {
-            EVEData.System eveSys = ((System.Windows.FrameworkElement)((System.Windows.FrameworkElement)sender).Parent).DataContext as EVEData.System;
+            EVEData.System eveSys = ((FrameworkElement)((FrameworkElement)sender).Parent).DataContext as EVEData.System;
             if (ActiveCharacter != null)
             {
                 ActiveCharacter.AddDestination(eveSys.ID, true);
@@ -1418,7 +1418,7 @@ namespace SMT
 
         private void SysContexMenuItemAddWaypoint_Click(object sender, RoutedEventArgs e)
         {
-            EVEData.System eveSys = ((System.Windows.FrameworkElement)((System.Windows.FrameworkElement)sender).Parent).DataContext as EVEData.System;
+            EVEData.System eveSys = ((FrameworkElement)((FrameworkElement)sender).Parent).DataContext as EVEData.System;
             if (ActiveCharacter != null)
             {
                 ActiveCharacter.AddDestination(eveSys.ID, false);

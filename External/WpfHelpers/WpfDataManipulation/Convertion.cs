@@ -84,7 +84,7 @@ namespace WpfHelpers.WpfDataManipulation
 
             using (Graphics g = Graphics.FromImage(bmpRet))
             {
-                g.DrawImage(bmpSource, 0, 0, new System.Drawing.Rectangle(0, 0, bmpSource.Width, bmpSource.Height), GraphicsUnit.Pixel);
+                g.DrawImage(bmpSource, 0, 0, new Rectangle(0, 0, bmpSource.Width, bmpSource.Height), GraphicsUnit.Pixel);
                 g.Save();
             }
 

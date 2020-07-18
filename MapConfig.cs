@@ -416,7 +416,7 @@ namespace SMT
             }
         }
 
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         [Category("Regions")]
         [DisplayName("Show Ship kill Stats")]
         public bool ShowUniverseKills
@@ -441,7 +441,7 @@ namespace SMT
             }
         }
 
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         [Category("Regions")]
         [DisplayName("Show Pod kill Stats")]
         public bool ShowUniversePods
@@ -465,7 +465,7 @@ namespace SMT
             }
         }
 
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         [Category("Regions")]
         [DisplayName("Show Ratting Stats")]
         public bool ShowUniverseRats
@@ -534,7 +534,7 @@ namespace SMT
             }
         }
 
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         [Category("Regions")]
         [DisplayName("Universe Data Scale")]
         public double UniverseDataScale

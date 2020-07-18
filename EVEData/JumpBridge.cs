@@ -33,7 +33,7 @@ namespace SMT.EVEData
 
         private bool m_Disabled;
 
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         public bool Disabled
         {
             get
