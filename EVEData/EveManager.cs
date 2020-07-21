@@ -1216,7 +1216,11 @@ namespace SMT.EVEData
             Regions = Utils.DeserializeFromDisk<List<MapRegion>>(AppDomain.CurrentDomain.BaseDirectory + @"\MapLayout.dat");
             Systems = Utils.DeserializeFromDisk<List<System>>(AppDomain.CurrentDomain.BaseDirectory + @"\Systems.dat");
             ShipTypes = Utils.DeserializeFromDisk<SerializableDictionary<string, string>>(AppDomain.CurrentDomain.BaseDirectory + @"\ShipTypes.dat");
-
+            if (Regions == null || Systems == null || ShipTypes == null)
+            {
+                CreateFromScratch();
+                return;
+            }
             foreach (System s in Systems)
             {
                 SystemIDToName[s.ID] = s.Name;
@@ -1513,38 +1517,45 @@ namespace SMT.EVEData
             // loop forever
             while (WatcherThreadShouldTerminate == false)
             {
-                DirectoryInfo di = new DirectoryInfo(eveLogFolder);
-                FileInfo[] files = di.GetFiles("*.txt");
-                foreach (FileInfo file in files)
+                try
                 {
-                    bool readFile = false;
-                    foreach (string intelFilterStr in IntelFilters)
+                    DirectoryInfo di = new DirectoryInfo(eveLogFolder);
+                    FileInfo[] files = di.GetFiles("*.txt");
+                    foreach (FileInfo file in files)
                     {
-                        if (file.Name.IndexOf(intelFilterStr, StringComparison.OrdinalIgnoreCase) >= 0)
+                        bool readFile = false;
+                        foreach (string intelFilterStr in IntelFilters)
+                        {
+                            if (file.Name.IndexOf(intelFilterStr, StringComparison.OrdinalIgnoreCase) >= 0)
+                            {
+                                readFile = true;
+                                break;
+                            }
+                        }
+
+                        // local files
+                        if (file.Name.Contains("Local_"))
                         {
                             readFile = true;
-                            break;
+                        }
+
+                        // only read files from the last day
+                        if (file.CreationTime > DateTime.Now.AddDays(-1) && readFile)
+                        {
+                            FileStream ifs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                            ifs.Seek(0, SeekOrigin.End);
+                            Thread.Sleep(100);
+                            ifs.Close();
+                            Thread.Sleep(100);
                         }
                     }
 
-                    // local files
-                    if (file.Name.Contains("Local_"))
-                    {
-                        readFile = true;
-                    }
-
-                    // only read files from the last day
-                    if (file.CreationTime > DateTime.Now.AddDays(-1) && readFile)
-                    {
-                        FileStream ifs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                        ifs.Seek(0, SeekOrigin.End);
-                        Thread.Sleep(100);
-                        ifs.Close();
-                        Thread.Sleep(100);
-                    }
+                    Thread.Sleep(2000);
+                } catch (DirectoryNotFoundException)
+                {
+                    Directory.CreateDirectory(eveLogFolder);
+                    //MessageBox.Show($"{eveLogFolder} could not be found.", "Do you even play EVE Online??");
                 }
-
-                Thread.Sleep(2000);
             }
         }
 
