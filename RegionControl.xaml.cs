@@ -1,4 +1,5 @@
 using SMT.EVEData;
+using SMT.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -672,6 +673,19 @@ namespace SMT
             foreach (LocalCharacter c in EM.LocalCharacters)
             {
                 // ignore characters out of this Map..
+                if (!Region.IsSystemOnMap(c.Location))
+                {
+                    continue;
+                }
+
+                if (!NameTrackingLocationMap.ContainsKey(c.Location))
+                {
+                    NameTrackingLocationMap[c.Location] = new List<KeyValuePair<bool, string>>();
+                }
+                NameTrackingLocationMap[c.Location].Add(new KeyValuePair<bool, string>(true, c.Name));
+            }
+            foreach(DMTCharacter c in EM.DMTCharacters)
+            {
                 if (!Region.IsSystemOnMap(c.Location))
                 {
                     continue;

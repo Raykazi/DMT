@@ -6,8 +6,14 @@ using ESI.NET;
 using ESI.NET.Enumerations;
 using ESI.NET.Models.SSO;
 using Microsoft.Extensions.Options;
+using MQTTnet;
+using MQTTnet.Client;
+using MQTTnet.Client.Options;
+using MQTTnet.Extensions.ManagedClient;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using SMT.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -53,11 +59,44 @@ namespace SMT.EVEData
 
         private bool WatcherThreadShouldTerminate = false;
 
+        // Create a new MQTT client.
+        private MqttFactory factory = new MqttFactory();
+        private static IManagedMqttClient mqttClient;
+        private IMqttClientOptions mqttOptions;
+        JsonSerializer serializer = new JsonSerializer();
+        public void SendCharLocation(LocalCharacter c)
+        {
+            if (!mqttClient.IsConnected || c.Location.Length == 0)
+                return;
+            c.LastUpdate = DateTime.Now;
+            string payload = JsonConvert.SerializeObject(c);
+            var message = new MqttApplicationMessageBuilder()
+               .WithTopic($"location/{c.Name}")
+               .WithPayload(payload)
+               .WithExactlyOnceQoS()
+               .WithRetainFlag()
+               .Build();
+            mqttClient.PublishAsync(message);
+        }
         /// <summary>
         /// Initializes a new instance of the <see cref="EveManager" /> class
         /// </summary>
         public EveManager(string version)
         {
+            serializer.Converters.Add(new JavaScriptDateTimeConverter());
+            serializer.NullValueHandling = NullValueHandling.Ignore;
+            mqttClient = factory.CreateManagedMqttClient();
+#if DEBUG
+            mqttOptions = new MqttClientOptionsBuilder()
+                .WithClientId(Guid.NewGuid().ToString())
+                .WithTcpServer("127.0.0.1", 1738)
+                .Build();
+#else
+            mqttOptions = new MqttClientOptionsBuilder()
+                .WithClientId(Guid.NewGuid().ToString())
+                .WithTcpServer("dmt.windrammers.com", 1738)
+                .Build();
+#endif
             LocalCharacters = new BindingList<LocalCharacter>();
             VersionStr = version;
 
@@ -1673,7 +1712,7 @@ namespace SMT.EVEData
         /// <summary>
         /// Initialise the eve manager
         /// </summary>
-        private void Init()
+        private async void Init()
         {
             IOptions<EsiConfig> config = Options.Create(new EsiConfig()
             {
@@ -1720,6 +1759,72 @@ namespace SMT.EVEData
             StartUpdateCoalitionInfo();
 
             StartBackgroundThread();
+
+            var managedOptions = new ManagedMqttClientOptionsBuilder()
+              .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
+              .WithClientOptions(mqttOptions)
+              .Build();
+            await mqttClient.StartAsync(managedOptions);
+            mqttClient.UseConnectedHandler(async e =>
+            {
+                MessageBox.Show("### CONNECTED WITH SERVER ###");
+                var topic = new MqttTopicFilter().Topic = "location/#";
+                await mqttClient.SubscribeAsync(topic);
+                MessageBox.Show("### SUBSCRIBED ###");
+            });
+            var message = new MqttApplicationMessageBuilder()
+                .WithTopic("login")
+                .WithPayload(Environment.UserName)
+                .WithExactlyOnceQoS()
+                .WithRetainFlag()
+                .Build();
+            await mqttClient.PublishAsync(message, CancellationToken.None); // Since 3.0.5 with CancellationToken
+            mqttClient.UseApplicationMessageReceivedHandler(HandleMessages);
+            DMTCharacters.CollectionChanged += DMTCharacters_CollectionChanged;
+        }
+
+        private void DMTCharacters_CollectionChanged(object sender, global::System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public ObservableCollection<DMTCharacter> DMTCharacters = new ObservableCollection<DMTCharacter>();
+        private void HandleMessages(MqttApplicationMessageReceivedEventArgs e)
+        {
+            string payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+            if (e.ApplicationMessage.Topic.Contains("location"))
+            {
+                var dmtc = JsonConvert.DeserializeObject<DMTCharacter>(payload);
+                //Check to see if we own them. #Slavery
+                foreach (LocalCharacter lc in LocalCharacters)
+                {
+                    if (dmtc.Name == lc.Name)
+                    {
+                        return;
+                    }
+                }
+                bool found = false;
+                for (int i = 0; i < DMTCharacters.Count; i++)
+                {
+                    if (DMTCharacters[i].Name == dmtc.Name)
+                    {
+                        DMTCharacters[i] = dmtc;
+                        found = true;
+                    }
+                }
+                if (!found)
+                {
+                    DMTCharacters.Add(dmtc);
+                }
+            }
+            else
+            {
+                switch (e.ApplicationMessage.Topic)
+                {
+                    case "location/corp":
+                        break;
+                }
+            }
         }
 
         /// <summary>
@@ -1883,6 +1988,7 @@ namespace SMT.EVEData
                                         if (c.LocalChatFile == changedFile)
                                         {
                                             c.Location = system;
+                                            EveManager.Instance.SendCharLocation(c);
                                         }
                                     }
                                 }), DispatcherPriority.Normal, null);
@@ -1914,7 +2020,7 @@ namespace SMT.EVEData
                                     addToIntel = false;
                                 }
 
-                                if(line.Contains("Channel MOTD:"))
+                                if (line.Contains("Channel MOTD:"))
                                 {
                                     addToIntel = false;
                                 }
@@ -2003,13 +2109,13 @@ namespace SMT.EVEData
                     c.Region = string.Empty;
 
                     LocalCharacters.Add(c);
+                    SendCharLocation(c);
                 }
             }
             catch
             {
             }
         }
-
         /// <summary>
         /// Start the Low Frequency Update Thread
         /// </summary>
@@ -2225,9 +2331,9 @@ namespace SMT.EVEData
             try
             {
 
- 
 
-                foreach(SOVCampaign sc in ActiveSovCampaigns)
+
+                foreach (SOVCampaign sc in ActiveSovCampaigns)
                 {
                     sc.Valid = false;
                 }
@@ -2245,7 +2351,7 @@ namespace SMT.EVEData
 
                         foreach (SOVCampaign asc in ActiveSovCampaigns)
                         {
-                            if(asc.CampaignID == c.CampaignId )
+                            if (asc.CampaignID == c.CampaignId)
                             {
                                 ss = asc;
                             }
@@ -2271,12 +2377,12 @@ namespace SMT.EVEData
 
                             };
 
-                            if(c.EventType == "ihub_defense")
+                            if (c.EventType == "ihub_defense")
                             {
                                 ss.Type = "IHub";
                             }
 
-                            if(c.EventType == "tcu_defense")
+                            if (c.EventType == "tcu_defense")
                             {
                                 ss.Type = "TCU";
                             }
@@ -2299,7 +2405,7 @@ namespace SMT.EVEData
                         }
                         else
                         {
-                            if(!allianceIDsToResolve.Contains(ss.DefendingAllianceID))
+                            if (!allianceIDsToResolve.Contains(ss.DefendingAllianceID))
                             {
                                 allianceIDsToResolve.Add(ss.DefendingAllianceID);
                             }

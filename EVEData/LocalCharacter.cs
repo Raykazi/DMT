@@ -44,6 +44,8 @@ namespace SMT.EVEData
         /// </summary>
         private bool routeNeedsUpdate = false;
 
+        public DateTime LastUpdate { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Character" /> class
         /// </summary>
@@ -101,6 +103,7 @@ namespace SMT.EVEData
             Name = name;
             LocalChatFile = lcf;
             Location = location;
+            EveManager.Instance.SendCharLocation(this);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -840,11 +843,19 @@ namespace SMT.EVEData
             await EveManager.Instance.ResolveAllianceIDs(AllianceToResolve);
         }
 
+        int i = 0;
         /// <summary>
         /// Update the characters position from ESI (will override the position read from any log files
         /// </summary>
         private async Task UpdatePositionFromESI()
         {
+            if(i % 30 == 0)
+            {
+                EveManager.Instance.SendCharLocation(this);
+                if (i >= 600)
+                    i = -1;
+            }
+            i++;
             if (ID == 0 || !ESILinked || ESIAuthData == null)
             {
                 return;
