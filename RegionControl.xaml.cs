@@ -30,7 +30,7 @@ namespace SMT
         private const double SYSTEM_TEXT_Y_OFFSET = 2;
         private const int SYSTEM_Z_INDEX = 22;
 
-        private Dictionary<string, List<KeyValuePair<bool, string>>> NameTrackingLocationMap = new Dictionary<string, List<KeyValuePair<bool, string>>>();
+        private Dictionary<string, List<KeyValuePair<int, string>>> NameTrackingLocationMap = new Dictionary<string, List<KeyValuePair<int, string>>>();
 
         // Store the Dynamic Map elements so they can seperately be cleared
         private List<UIElement> DynamicMapElements;
@@ -680,9 +680,9 @@ namespace SMT
 
                 if (!NameTrackingLocationMap.ContainsKey(c.Location))
                 {
-                    NameTrackingLocationMap[c.Location] = new List<KeyValuePair<bool, string>>();
+                    NameTrackingLocationMap[c.Location] = new List<KeyValuePair<int, string>>();
                 }
-                NameTrackingLocationMap[c.Location].Add(new KeyValuePair<bool, string>(true, c.Name));
+                NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(0,  c.Name));
             }
             foreach(DMTCharacter c in EM.DMTCharacters)
             {
@@ -693,9 +693,9 @@ namespace SMT
 
                 if (!NameTrackingLocationMap.ContainsKey(c.Location))
                 {
-                    NameTrackingLocationMap[c.Location] = new List<KeyValuePair<bool, string>>();
+                    NameTrackingLocationMap[c.Location] = new List<KeyValuePair<int, string>>();
                 }
-                NameTrackingLocationMap[c.Location].Add(new KeyValuePair<bool, string>(true, c.Name));
+                NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(1,  c.Name));
             }
 
             if (ActiveCharacter != null && MapConf.FleetShowOnMap)
@@ -729,7 +729,7 @@ namespace SMT
 
                         if (!NameTrackingLocationMap.ContainsKey(fm.Location))
                         {
-                            NameTrackingLocationMap[fm.Location] = new List<KeyValuePair<bool, string>>();
+                            NameTrackingLocationMap[fm.Location] = new List<KeyValuePair<int, string>>();
                         }
 
                         string displayName = fm.Name;
@@ -737,7 +737,7 @@ namespace SMT
                         {
                             displayName += " (" + fm.ShipType + ")";
                         }
-                        NameTrackingLocationMap[fm.Location].Add(new KeyValuePair<bool, string>(false, displayName));
+                        NameTrackingLocationMap[fm.Location].Add(new KeyValuePair<int, string>(3, displayName));
                     }
                 }
             }
@@ -745,15 +745,15 @@ namespace SMT
 
             foreach (string lkvpk in NameTrackingLocationMap.Keys)
             {
-                List<KeyValuePair<bool, string>> lkvp = NameTrackingLocationMap[lkvpk];
+                List<KeyValuePair<int, string>> lkvp = NameTrackingLocationMap[lkvpk];
                 MapSystem ms = Region.MapSystems[lkvpk];
 
 
                 bool addIndividualFleetMembers = true;
                 int fleetMemberCount = 0;
-                foreach(KeyValuePair<bool, string> kvp in lkvp)
+                foreach(KeyValuePair<int, string> kvp in lkvp)
                 {
-                    if(kvp.Key == false)
+                    if(kvp.Key == 3)
                     {
                         fleetMemberCount++;
                     }
@@ -771,13 +771,28 @@ namespace SMT
                 SolidColorBrush fleetMemberText = new SolidColorBrush(MapConf.ActiveColourScheme.FleetMemberTextColour);
                 SolidColorBrush localCharacterText = new SolidColorBrush(MapConf.ActiveColourScheme.CharacterTextColour);
 
-                foreach (KeyValuePair<bool, string> kvp in lkvp)
+                foreach (KeyValuePair<int, string> kvp in lkvp)
                 {
-                    if(kvp.Key || kvp.Key == false && addIndividualFleetMembers)
+                    if(kvp.Key >=0 && addIndividualFleetMembers)
                     {
                         Label charText = new Label();
                         charText.Content = kvp.Value;
-                        charText.Foreground = kvp.Key ? localCharacterText : fleetMemberText;
+                        switch(kvp.Key)
+                        {
+                            case 0:
+                                charText.Foreground = localCharacterText;
+                                break;
+                                
+                            case 1: //TODO Give these nerds some customization @Zahzi
+                                charText.Foreground = new SolidColorBrush(Color.FromRgb(35,255,0));
+                                break;
+                            case 2://TODO if we release this to the alliance (hope we dont) they get some other color
+                                break;
+                            case 3:
+                                charText.Foreground = fleetMemberText;
+                                break;
+                        }
+                        //charText.Foreground = kvp.Key == 0 ? localCharacterText : fleetMemberText;
                         charText.IsHitTestVisible = false;
 
                         if (MapConf.ActiveColourScheme.CharacterTextSize > 0)
