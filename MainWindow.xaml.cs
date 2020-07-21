@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -33,7 +33,7 @@ namespace SMT
 
         private PreferencesWindow preferencesWindow;
 
-        private System.Windows.Threading.DispatcherTimer uiRefreshTimer;
+        private DispatcherTimer uiRefreshTimer;
 
         private MediaPlayer mediaPlayer;
         /// <summary>
@@ -198,7 +198,7 @@ namespace SMT
 
 
 
-            uiRefreshTimer = new System.Windows.Threading.DispatcherTimer();
+            uiRefreshTimer = new DispatcherTimer();
             uiRefreshTimer.Tick += UiRefreshTimer_Tick;
             uiRefreshTimer.Interval = new TimeSpan(0, 0, 1);
             uiRefreshTimer.Start();

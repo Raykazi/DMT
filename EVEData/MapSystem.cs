@@ -18,7 +18,7 @@ namespace SMT.EVEData
         /// <summary>
         ///  Gets or sets the actual actual eve system
         /// </summary>
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         public System ActualSystem { get; set; }
 
         /// <summary>

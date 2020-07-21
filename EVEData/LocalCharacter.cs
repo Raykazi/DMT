@@ -17,15 +17,15 @@ namespace SMT.EVEData
 
     public class LocalCharacter : Character, INotifyPropertyChanged
     {
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         public object ActiveRouteLock;
 
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         public SemaphoreSlim UpdateLock;
 
         public static readonly string SaveVersion = "02";
 
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         public bool warningSystemsNeedsUpdate = false;
 
         private bool esiRouteNeedsUpdate = false;
@@ -43,6 +43,8 @@ namespace SMT.EVEData
         /// Does the route need updating
         /// </summary>
         private bool routeNeedsUpdate = false;
+
+        public DateTime LastUpdate { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Character" /> class
@@ -101,6 +103,7 @@ namespace SMT.EVEData
             Name = name;
             LocalChatFile = lcf;
             Location = location;
+            EveManager.Instance.SendCharLocation(this);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -108,19 +111,19 @@ namespace SMT.EVEData
         /// <summary>
         /// Gets or sets the current active route
         /// </summary>
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         public ObservableCollection<Navigation.RoutePoint> ActiveRoute { get; set; }
 
         /// <summary>
         /// Gets or sets the character structure dictionary
         /// </summary>
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         public Dictionary<string, List<StructureIDs.StructureIdData>> DockableStructures { get; set; }
 
         /// <summary>
         /// Gets or sets the ESI access token
         /// </summary>
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         public string ESIAccessToken { get; set; }
 
         /// <summary>
@@ -133,8 +136,8 @@ namespace SMT.EVEData
         /// </summary>
         public string ESIAuthCode { get; set; }
 
-        [XmlIgnoreAttribute]
-        public ESI.NET.Models.SSO.AuthorizedCharacterData ESIAuthData { get; set; }
+        [XmlIgnore]
+        public AuthorizedCharacterData ESIAuthData { get; set; }
 
         /// <summary>
         /// Gets or sets if this character is linked with ESI
@@ -149,15 +152,15 @@ namespace SMT.EVEData
         /// <summary>
         /// Gets or sets the current fleet info for this character
         /// </summary>
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         public Fleet FleetInfo { get; set; }
 
         public SerializableDictionary<String, ObservableCollection<Structure>> KnownStructures { get; set; }
 
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         public Dictionary<long, long> LabelMap { get; set; }
 
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         public Dictionary<long, string> LabelNames { get; set; }
 
         /// <summary>
@@ -211,7 +214,7 @@ namespace SMT.EVEData
         /// <summary>
         /// Gets or sets the character standings dictionary
         /// </summary>
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         public Dictionary<long, float> Standings { get; set; }
 
         public bool UseAnsiblexGates
@@ -243,7 +246,7 @@ namespace SMT.EVEData
         /// <summary>
         /// Gets or sets the current list of Waypoints
         /// </summary>
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         public ObservableCollection<string> Waypoints { get; set; }
 
         /// <summary>
@@ -287,7 +290,7 @@ namespace SMT.EVEData
                 try
                 {
                     ESI.NET.EsiResponse<ESI.NET.Models.SearchResults> esr = await esiClient.Search.Query(SearchType.Character, JumpBridgeFilterString, SearchCategory.Structure);
-                    if (EVEData.ESIHelpers.ValidateESICall<ESI.NET.Models.SearchResults>(esr))
+                    if (EVEData.ESIHelpers.ValidateESICall(esr))
                     {
                         if (esr.Data.Structures == null)
                         {
@@ -298,7 +301,7 @@ namespace SMT.EVEData
                         {
                             ESI.NET.EsiResponse<ESI.NET.Models.Universe.Structure> esrs = await esiClient.Universe.Structure(stationID);
 
-                            if (EVEData.ESIHelpers.ValidateESICall<ESI.NET.Models.Universe.Structure>(esrs))
+                            if (EVEData.ESIHelpers.ValidateESICall(esrs))
                             {
                                 SystemJumpGateList[stationID] = esrs.Data;
 
@@ -617,7 +620,7 @@ namespace SMT.EVEData
                     esiClient.SetCharacterData(ESIAuthData);
 
                     ESI.NET.EsiResponse<string> esr = await esiClient.UserInterface.Waypoint(SysID, false, firstRoute);
-                    if (EVEData.ESIHelpers.ValidateESICall<string>(esr))
+                    if (EVEData.ESIHelpers.ValidateESICall(esr))
                     {
                         //                        routeNeedsUpdate = true;
                     }
@@ -651,7 +654,7 @@ namespace SMT.EVEData
 
                     ESI.NET.EsiResponse<ESI.NET.Models.Fleets.FleetInfo> esr = await esiClient.Fleets.FleetInfo();
 
-                    if (ESIHelpers.ValidateESICall<ESI.NET.Models.Fleets.FleetInfo>(esr))
+                    if (ESIHelpers.ValidateESICall(esr))
                     {
                         FleetInfo.FleetID = esr.Data.FleetId;
                         FleetInfo.IsFleetBoss = esr.Data.Role == "fleet_commander" ? true : false;
@@ -673,7 +676,7 @@ namespace SMT.EVEData
                     List<long> characterIDsToResolve = new List<long>();
 
                     ESI.NET.EsiResponse<List<ESI.NET.Models.Fleets.Member>> esrf = await esiClient.Fleets.Members(FleetInfo.FleetID);
-                    if (ESIHelpers.ValidateESICall<List<ESI.NET.Models.Fleets.Member>>(esrf))
+                    if (ESIHelpers.ValidateESICall(esrf))
                     {
                         foreach(Fleet.FleetMember ff in FleetInfo.Members)
                         {
@@ -782,7 +785,7 @@ namespace SMT.EVEData
                 {
                     ESI.NET.EsiResponse<ESI.NET.Models.Character.Information> esr = await esiClient.Character.Information((int)ID);
 
-                    if (EVEData.ESIHelpers.ValidateESICall<ESI.NET.Models.Character.Information>(esr))
+                    if (EVEData.ESIHelpers.ValidateESICall(esr))
                     {
                         CorporationID = esr.Data.CorporationId;
                         AllianceID = esr.Data.AllianceId;
@@ -804,7 +807,7 @@ namespace SMT.EVEData
                         ESI.NET.EsiResponse<List<ESI.NET.Models.Contacts.Contact>> esr = await esiClient.Contacts.ListForAlliance(page);
 
 
-                        if (EVEData.ESIHelpers.ValidateESICall<List<ESI.NET.Models.Contacts.Contact>>(esr))
+                        if (EVEData.ESIHelpers.ValidateESICall(esr))
                         {
                             if (esr.Pages.HasValue)
                             {
@@ -840,11 +843,19 @@ namespace SMT.EVEData
             await EveManager.Instance.ResolveAllianceIDs(AllianceToResolve);
         }
 
+        int i = 0;
         /// <summary>
         /// Update the characters position from ESI (will override the position read from any log files
         /// </summary>
         private async Task UpdatePositionFromESI()
         {
+            if(i % 30 == 0)
+            {
+                EveManager.Instance.SendCharLocation(this);
+                if (i >= 600)
+                    i = -1;
+            }
+            i++;
             if (ID == 0 || !ESILinked || ESIAuthData == null)
             {
                 return;
@@ -856,7 +867,7 @@ namespace SMT.EVEData
                 esiClient.SetCharacterData(ESIAuthData);
                 ESI.NET.EsiResponse<ESI.NET.Models.Location.Location> esr = await esiClient.Location.Location();
 
-                if (ESIHelpers.ValidateESICall<ESI.NET.Models.Location.Location>(esr))
+                if (ESIHelpers.ValidateESICall(esr))
                 {
                     if (!EveManager.Instance.SystemIDToName.Keys.Contains(esr.Data.SolarSystemId))
                     {

@@ -1,4 +1,5 @@
 using SMT.EVEData;
+using SMT.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -29,10 +30,10 @@ namespace SMT
         private const double SYSTEM_TEXT_Y_OFFSET = 2;
         private const int SYSTEM_Z_INDEX = 22;
 
-        private Dictionary<string, List<KeyValuePair<bool, string>>> NameTrackingLocationMap = new Dictionary<string, List<KeyValuePair<bool, string>>>();
+        private Dictionary<string, List<KeyValuePair<int, string>>> NameTrackingLocationMap = new Dictionary<string, List<KeyValuePair<int, string>>>();
 
         // Store the Dynamic Map elements so they can seperately be cleared
-        private List<System.Windows.UIElement> DynamicMapElements;
+        private List<UIElement> DynamicMapElements;
 
         private LocalCharacter m_ActiveCharacter;
 
@@ -110,13 +111,13 @@ namespace SMT
 
         private string currentJumpCharacter;
 
-        private EVEData.EveManager.JumpShip jumpShipType;
+        private EveManager.JumpShip jumpShipType;
 
         private string currentCharacterJumpSystem;
 
         private bool showJumpDistance;
 
-        private Dictionary<string, EVEData.EveManager.JumpShip> activeJumpSpheres;
+        private Dictionary<string, EveManager.JumpShip> activeJumpSpheres;
 
 
         /// <summary>
@@ -127,7 +128,7 @@ namespace SMT
             InitializeComponent();
             DataContext = this;
 
-            activeJumpSpheres = new Dictionary<string, EVEData.EveManager.JumpShip>();
+            activeJumpSpheres = new Dictionary<string, EveManager.JumpShip>();
         }
 
 
@@ -184,7 +185,7 @@ namespace SMT
         }
 
         public MapConfig MapConf { get; set; }
-        public EVEData.MapRegion Region { get; set; }
+        public MapRegion Region { get; set; }
         public string SelectedSystem { get; set; }
 
         public bool ShowJumpBridges
@@ -477,7 +478,7 @@ namespace SMT
             GlobalSystemDropDownAC.ItemsSource = globalSystemList;
 
 
-            List<EVEData.MapSystem> newList = Region.MapSystems.Values.ToList().OrderBy(o => o.Name).ToList();
+            List<MapSystem> newList = Region.MapSystems.Values.ToList().OrderBy(o => o.Name).ToList();
             SystemDropDownAC.ItemsSource = newList;
 
             PropertyChanged += MapObjectChanged;
@@ -569,7 +570,7 @@ namespace SMT
             EM.UpdateIDsForMapRegion(regionName);
 
             // check its a valid system
-            EVEData.MapRegion mr = EM.GetRegion(regionName);
+            MapRegion mr = EM.GetRegion(regionName);
             if (mr == null)
             {
                 return;
@@ -580,7 +581,7 @@ namespace SMT
             RegionNameLabel.Content = mr.Name;
             MapConf.DefaultRegion = mr.Name;
 
-            List<EVEData.MapSystem> newList = Region.MapSystems.Values.ToList().OrderBy(o => o.Name).ToList();
+            List<MapSystem> newList = Region.MapSystems.Values.ToList().OrderBy(o => o.Name).ToList();
             SystemDropDownAC.ItemsSource = newList;
 
             // SJS Disabled until ticket resolved with CCP
@@ -630,7 +631,7 @@ namespace SMT
 
             // now setup the anom data
 
-            EVEData.AnomData system = ANOMManager.GetSystemAnomData(name);
+            AnomData system = ANOMManager.GetSystemAnomData(name);
             ANOMManager.ActiveSystem = system;
             ///AnomSigList.ItemsSource = system.Anoms.Values;
         }
@@ -669,7 +670,7 @@ namespace SMT
 
             NameTrackingLocationMap.Clear();
 
-            foreach (EVEData.LocalCharacter c in EM.LocalCharacters)
+            foreach (LocalCharacter c in EM.LocalCharacters)
             {
                 // ignore characters out of this Map..
                 if (!Region.IsSystemOnMap(c.Location))
@@ -679,9 +680,22 @@ namespace SMT
 
                 if (!NameTrackingLocationMap.ContainsKey(c.Location))
                 {
-                    NameTrackingLocationMap[c.Location] = new List<KeyValuePair<bool, string>>();
+                    NameTrackingLocationMap[c.Location] = new List<KeyValuePair<int, string>>();
                 }
-                NameTrackingLocationMap[c.Location].Add(new KeyValuePair<bool, string>(true, c.Name));
+                NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(0,  c.Name));
+            }
+            foreach(DMTCharacter c in EM.DMTCharacters)
+            {
+                if (!Region.IsSystemOnMap(c.Location))
+                {
+                    continue;
+                }
+
+                if (!NameTrackingLocationMap.ContainsKey(c.Location))
+                {
+                    NameTrackingLocationMap[c.Location] = new List<KeyValuePair<int, string>>();
+                }
+                NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(1,  c.Name));
             }
 
             if (ActiveCharacter != null && MapConf.FleetShowOnMap)
@@ -696,7 +710,7 @@ namespace SMT
 
                     // check its not one of our characters
                     bool addFleetMember = true;
-                    foreach (EVEData.LocalCharacter c in EM.LocalCharacters)
+                    foreach (LocalCharacter c in EM.LocalCharacters)
                     {
                         if (c.Name == fm.Name)
                         {
@@ -715,7 +729,7 @@ namespace SMT
 
                         if (!NameTrackingLocationMap.ContainsKey(fm.Location))
                         {
-                            NameTrackingLocationMap[fm.Location] = new List<KeyValuePair<bool, string>>();
+                            NameTrackingLocationMap[fm.Location] = new List<KeyValuePair<int, string>>();
                         }
 
                         string displayName = fm.Name;
@@ -723,7 +737,7 @@ namespace SMT
                         {
                             displayName += " (" + fm.ShipType + ")";
                         }
-                        NameTrackingLocationMap[fm.Location].Add(new KeyValuePair<bool, string>(false, displayName));
+                        NameTrackingLocationMap[fm.Location].Add(new KeyValuePair<int, string>(3, displayName));
                     }
                 }
             }
@@ -731,15 +745,15 @@ namespace SMT
 
             foreach (string lkvpk in NameTrackingLocationMap.Keys)
             {
-                List<KeyValuePair<bool, string>> lkvp = NameTrackingLocationMap[lkvpk];
-                EVEData.MapSystem ms = Region.MapSystems[lkvpk];
+                List<KeyValuePair<int, string>> lkvp = NameTrackingLocationMap[lkvpk];
+                MapSystem ms = Region.MapSystems[lkvpk];
 
 
                 bool addIndividualFleetMembers = true;
                 int fleetMemberCount = 0;
-                foreach(KeyValuePair<bool, string> kvp in lkvp)
+                foreach(KeyValuePair<int, string> kvp in lkvp)
                 {
-                    if(kvp.Key == false)
+                    if(kvp.Key == 3)
                     {
                         fleetMemberCount++;
                     }
@@ -757,13 +771,28 @@ namespace SMT
                 SolidColorBrush fleetMemberText = new SolidColorBrush(MapConf.ActiveColourScheme.FleetMemberTextColour);
                 SolidColorBrush localCharacterText = new SolidColorBrush(MapConf.ActiveColourScheme.CharacterTextColour);
 
-                foreach (KeyValuePair<bool, string> kvp in lkvp)
+                foreach (KeyValuePair<int, string> kvp in lkvp)
                 {
-                    if(kvp.Key || kvp.Key == false && addIndividualFleetMembers)
+                    if(kvp.Key >=0 && addIndividualFleetMembers)
                     {
                         Label charText = new Label();
                         charText.Content = kvp.Value;
-                        charText.Foreground = kvp.Key ? localCharacterText : fleetMemberText;
+                        switch(kvp.Key)
+                        {
+                            case 0:
+                                charText.Foreground = localCharacterText;
+                                break;
+                                
+                            case 1: //TODO Give these nerds some customization @Zahzi
+                                charText.Foreground = new SolidColorBrush(Color.FromRgb(35,255,0));
+                                break;
+                            case 2://TODO if we release this to the alliance (hope we dont) they get some other color
+                                break;
+                            case 3:
+                                charText.Foreground = fleetMemberText;
+                                break;
+                        }
+                        //charText.Foreground = kvp.Key == 0 ? localCharacterText : fleetMemberText;
                         charText.IsHitTestVisible = false;
 
                         if (MapConf.ActiveColourScheme.CharacterTextSize > 0)
@@ -850,7 +879,7 @@ namespace SMT
 
             List<string> WarningZoneHighlights = new List<string>();
 
-            foreach (EVEData.LocalCharacter c in EM.LocalCharacters)
+            foreach (LocalCharacter c in EM.LocalCharacters)
             {
                 if (MapConf.ShowDangerZone && c.WarningSystems != null)
                 {
@@ -871,7 +900,7 @@ namespace SMT
             {
                 if (Region.IsSystemOnMap(s))
                 {
-                    EVEData.MapSystem mss = Region.MapSystems[s];
+                    MapSystem mss = Region.MapSystems[s];
                     Shape WarninghighlightSystemCircle = new Ellipse() { Height = warningCircleSize, Width = warningCircleSize };
                     WarninghighlightSystemCircle.Stroke = new SolidColorBrush(Colors.IndianRed);
                     WarninghighlightSystemCircle.StrokeThickness = 3;
@@ -963,7 +992,7 @@ namespace SMT
 
 
 
-            foreach (EVEData.MapSystem sys in Region.MapSystems.Values.ToList())
+            foreach (MapSystem sys in Region.MapSystems.Values.ToList())
             {
                 infoColour = dataColor;
                 long SystemAlliance = 0;
@@ -1465,7 +1494,7 @@ namespace SMT
 
             Dictionary<string, int> ZKBBaseFeed = new Dictionary<string, int>();
             {
-                foreach (EVEData.ZKillRedisQ.ZKBDataSimple zs in EM.ZKillFeed.KillStream)
+                foreach (ZKillRedisQ.ZKBDataSimple zs in EM.ZKillFeed.KillStream)
                 {
                     if (ZKBBaseFeed.Keys.Contains(zs.SystemName))
                     {
@@ -1477,9 +1506,9 @@ namespace SMT
                     }
                 }
 
-                foreach (KeyValuePair<string, EVEData.MapSystem> kvp in Region.MapSystems)
+                foreach (KeyValuePair<string, MapSystem> kvp in Region.MapSystems)
                 {
-                    EVEData.MapSystem sys = kvp.Value;
+                    MapSystem sys = kvp.Value;
 
                     if (ZKBBaseFeed.Keys.Contains(sys.ActualSystem.Name))
                     {
@@ -1505,7 +1534,7 @@ namespace SMT
                 return;
             }
 
-            EVEData.MapSystem selectedSys = Region.MapSystems[name];
+            MapSystem selectedSys = Region.MapSystems[name];
             if (selectedSys != null)
             {
                 double circleSize = 32;
@@ -1582,8 +1611,8 @@ namespace SMT
                         continue;
                     }
 
-                    EVEData.MapSystem from = Region.MapSystems[Start];
-                    EVEData.MapSystem to = Region.MapSystems[End];
+                    MapSystem from = Region.MapSystems[Start];
+                    MapSystem to = Region.MapSystems[End];
 
                     Line routeLine = new Line();
 
@@ -1642,13 +1671,13 @@ namespace SMT
             Brush intelBlobBrush = new SolidColorBrush(MapConf.ActiveColourScheme.IntelOverlayColour);
             Brush intelClearBlobBrush = new SolidColorBrush(MapConf.ActiveColourScheme.IntelClearOverlayColour);
 
-            foreach (EVEData.IntelData id in EM.IntelDataList)
+            foreach (IntelData id in EM.IntelDataList)
             {
                 foreach (string sysStr in id.Systems)
                 {
                     if (Region.IsSystemOnMap(sysStr))
                     {
-                        EVEData.MapSystem sys = Region.MapSystems[sysStr];
+                        MapSystem sys = Region.MapSystems[sysStr];
 
                         double radiusScale = (DateTime.Now - id.IntelTime).TotalSeconds / (double)MapConf.MaxIntelSeconds;
 
@@ -1739,9 +1768,9 @@ namespace SMT
 
   
 
-            foreach (KeyValuePair<string, EVEData.MapSystem> kvp in Region.MapSystems)
+            foreach (KeyValuePair<string, MapSystem> kvp in Region.MapSystems)
             {
-                EVEData.MapSystem system = kvp.Value;
+                MapSystem system = kvp.Value;
 
                 Coalition SystemCoalition = null;
 
@@ -2079,7 +2108,7 @@ namespace SMT
                 {
                     if (Region.IsSystemOnMap(jumpTo))
                     {
-                        EVEData.MapSystem to = Region.MapSystems[jumpTo];
+                        MapSystem to = Region.MapSystems[jumpTo];
 
                         bool NeedsAdd = true;
                         foreach (GateHelper gh in systemLinks)
@@ -2342,11 +2371,11 @@ namespace SMT
 
             if (ShowJumpBridges && EM.JumpBridges != null)
             {
-                foreach (EVEData.JumpBridge jb in EM.JumpBridges)
+                foreach (JumpBridge jb in EM.JumpBridges)
                 {
                     if (Region.IsSystemOnMap(jb.From) || Region.IsSystemOnMap(jb.To))
                     {
-                        EVEData.MapSystem from;
+                        MapSystem from;
 
                         if (!Region.IsSystemOnMap(jb.From))
                         {
@@ -2383,7 +2412,7 @@ namespace SMT
                         }
                         else
                         {
-                            EVEData.MapSystem to = Region.MapSystems[jb.To];
+                            MapSystem to = Region.MapSystems[jb.To];
                             endPoint = new Point(to.LayoutX, to.LayoutY);
                         }
 
@@ -2408,7 +2437,7 @@ namespace SMT
                         PathGeometry pathGeometry = new PathGeometry();
                         pathGeometry.Figures = pfcollection;
 
-                        System.Windows.Shapes.Path path = new System.Windows.Shapes.Path();
+                        Path path = new Path();
                         path.Data = pathGeometry;
 
                         path.StrokeThickness = 2;
@@ -2573,7 +2602,7 @@ namespace SMT
             }
         }
 
-        public void UpdateActiveCharacter(EVEData.LocalCharacter c = null )
+        public void UpdateActiveCharacter(LocalCharacter c = null )
         {
             if (ActiveCharacter != c && c !=null)
             {
@@ -2613,7 +2642,7 @@ namespace SMT
         {
             FollowCharacter = false;
 
-            EVEData.MapRegion rd = RegionSelectCB.SelectedItem as EVEData.MapRegion;
+            MapRegion rd = RegionSelectCB.SelectedItem as MapRegion;
             if (rd == null)
             {
                 return;
@@ -2624,7 +2653,7 @@ namespace SMT
 
         private void SetJumpRange_Click(object sender, RoutedEventArgs e)
         {
-            EVEData.MapSystem eveSys = ((System.Windows.FrameworkElement)((System.Windows.FrameworkElement)sender).Parent).DataContext as EVEData.MapSystem;
+            MapSystem eveSys = ((FrameworkElement)((FrameworkElement)sender).Parent).DataContext as MapSystem;
 
             MenuItem mi = sender as MenuItem;
             if (mi != null)
@@ -2691,7 +2720,7 @@ namespace SMT
         {
             Shape obj = sender as Shape;
 
-            EVEData.MapSystem selectedSys = obj.DataContext as EVEData.MapSystem;
+            MapSystem selectedSys = obj.DataContext as MapSystem;
 
             if (e.ChangedButton == MouseButton.Left)
             {
@@ -2709,7 +2738,7 @@ namespace SMT
 
                 if (e.ClickCount == 2 && selectedSys.Region != Region.Name)
                 {
-                    foreach (EVEData.MapRegion rd in EM.Regions)
+                    foreach (MapRegion rd in EM.Regions)
                     {
                         if (rd.Name == selectedSys.Region)
                         {
@@ -2881,7 +2910,7 @@ namespace SMT
         {
             Shape obj = sender as Shape;
 
-            EVEData.MapSystem selectedSys = obj.DataContext as EVEData.MapSystem;
+            MapSystem selectedSys = obj.DataContext as MapSystem;
 
             Thickness one = new Thickness(1);
 
@@ -2951,7 +2980,7 @@ namespace SMT
 
                 if (ShowJumpBridges)
                 {
-                    foreach (EVEData.JumpBridge jb in EM.JumpBridges)
+                    foreach (JumpBridge jb in EM.JumpBridges)
                     {
                         if (selectedSys.Name == jb.From)
                         {
@@ -3003,7 +3032,7 @@ namespace SMT
                 }
 
                 // update Thera Info
-                foreach (EVEData.TheraConnection tc in EM.TheraConnections)
+                foreach (TheraConnection tc in EM.TheraConnections)
                 {
                     if (selectedSys.Name == tc.System)
                     {
@@ -3033,7 +3062,7 @@ namespace SMT
         /// <param name="e"></param>
         private void SysContexMenuItemAddWaypoint_Click(object sender, RoutedEventArgs e)
         {
-            EVEData.MapSystem eveSys = ((System.Windows.FrameworkElement)((System.Windows.FrameworkElement)sender).Parent).DataContext as EVEData.MapSystem;
+            MapSystem eveSys = ((FrameworkElement)((FrameworkElement)sender).Parent).DataContext as MapSystem;
             if (ActiveCharacter != null)
             {
                 ActiveCharacter.AddDestination(eveSys.ActualSystem.ID, false);
@@ -3047,7 +3076,7 @@ namespace SMT
         /// <param name="e"></param>
         private void SysContexMenuItemCopy_Click(object sender, RoutedEventArgs e)
         {
-            EVEData.MapSystem eveSys = ((System.Windows.FrameworkElement)((System.Windows.FrameworkElement)sender).Parent).DataContext as EVEData.MapSystem;
+            MapSystem eveSys = ((FrameworkElement)((FrameworkElement)sender).Parent).DataContext as MapSystem;
 
             try
             {
@@ -3074,8 +3103,8 @@ namespace SMT
         /// <param name="e"></param>
         private void SysContexMenuItemDotlan_Click(object sender, RoutedEventArgs e)
         {
-            EVEData.MapSystem eveSys = ((System.Windows.FrameworkElement)((System.Windows.FrameworkElement)sender).Parent).DataContext as EVEData.MapSystem;
-            EVEData.MapRegion rd = EM.GetRegion(eveSys.Region);
+            MapSystem eveSys = ((FrameworkElement)((FrameworkElement)sender).Parent).DataContext as MapSystem;
+            MapRegion rd = EM.GetRegion(eveSys.Region);
 
             string uRL = string.Format("http://evemaps.dotlan.net/map/{0}/{1}", rd.DotLanRef, eveSys.Name);
             System.Diagnostics.Process.Start(uRL);
@@ -3088,7 +3117,7 @@ namespace SMT
         /// <param name="e"></param>
         private void SysContexMenuItemSetDestination_Click(object sender, RoutedEventArgs e)
         {
-            EVEData.MapSystem eveSys = ((System.Windows.FrameworkElement)((System.Windows.FrameworkElement)sender).Parent).DataContext as EVEData.MapSystem;
+            MapSystem eveSys = ((FrameworkElement)((FrameworkElement)sender).Parent).DataContext as MapSystem;
             if (ActiveCharacter != null)
             {
                 ActiveCharacter.AddDestination(eveSys.ActualSystem.ID, true);
@@ -3097,7 +3126,7 @@ namespace SMT
 
         private void SysContexMenuItemShowInUniverse_Click(object sender, RoutedEventArgs e)
         {
-            EVEData.MapSystem eveSys = ((System.Windows.FrameworkElement)((System.Windows.FrameworkElement)sender).Parent).DataContext as EVEData.MapSystem;
+            MapSystem eveSys = ((FrameworkElement)((FrameworkElement)sender).Parent).DataContext as MapSystem;
 
             RoutedEventArgs newEventArgs = new RoutedEventArgs(UniverseSystemSelectEvent, eveSys.Name);
             RaiseEvent(newEventArgs);
@@ -3110,8 +3139,8 @@ namespace SMT
         /// <param name="e"></param>
         private void SysContexMenuItemZKB_Click(object sender, RoutedEventArgs e)
         {
-            EVEData.MapSystem eveSys = ((System.Windows.FrameworkElement)((System.Windows.FrameworkElement)sender).Parent).DataContext as EVEData.MapSystem;
-            EVEData.MapRegion rd = EM.GetRegion(eveSys.Region);
+            MapSystem eveSys = ((FrameworkElement)((FrameworkElement)sender).Parent).DataContext as MapSystem;
+            MapRegion rd = EM.GetRegion(eveSys.Region);
 
             string uRL = string.Format("https://zkillboard.com/system/{0}", eveSys.ActualSystem.ID);
             System.Diagnostics.Process.Start(uRL);
@@ -3119,7 +3148,7 @@ namespace SMT
 
         private void SystemDropDownAC_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            EVEData.MapSystem sd = SystemDropDownAC.SelectedItem as EVEData.MapSystem;
+            MapSystem sd = SystemDropDownAC.SelectedItem as MapSystem;
 
             if (sd != null)
             {
@@ -3151,8 +3180,8 @@ namespace SMT
 
         private struct GateHelper
         {
-            public EVEData.MapSystem from { get; set; }
-            public EVEData.MapSystem to { get; set; }
+            public MapSystem from { get; set; }
+            public MapSystem to { get; set; }
         }
     }
 }
