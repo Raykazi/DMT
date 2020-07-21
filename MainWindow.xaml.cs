@@ -111,7 +111,8 @@ namespace SMT
             EVEManager.UseESIForCharacterPositions = MapConf.UseESIForCharacterPositions;
 
             // if we want to re-build the data as we've changed the format, recreate it all from scratch
-            bool initFromScratch = false;
+            //bool initFromScratch = false;
+            bool initFromScratch = !File.Exists(AppDomain.CurrentDomain.BaseDirectory + @"\MapLayout.dat");
             if (initFromScratch)
             {
                 EVEManager.CreateFromScratch();
