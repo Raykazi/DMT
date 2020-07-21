@@ -110,9 +110,9 @@
     <Reference Include="DotNetProjects.Wpf.Extended.Toolkit, Version=4.6.82.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
       <HintPath>packages\DotNetProjects.Extended.Wpf.Toolkit.4.6.82\lib\net40\DotNetProjects.Wpf.Extended.Toolkit.dll</HintPath>
     </Reference>
-    <Reference Include="ESI.NET, Version=2020.6.26.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ESI.NET, Version=2.19.19.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\ESI.NET\ESI.NET\bin\Debug\net472\ESI.NET.dll</HintPath>
+      <HintPath>.\ESI.NET.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Extensions.Configuration, Version=3.1.6.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Extensions.Configuration.3.1.6\lib\netstandard2.0\Microsoft.Extensions.Configuration.dll</HintPath>
