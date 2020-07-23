@@ -256,6 +256,7 @@
     <Compile Include="External\nAlpha\VertexCounter.cs" />
     <Compile Include="GitHubRelease.cs" />
     <Compile Include="Models\DMTCharacter.cs" />
+    <Compile Include="Models\DMTIntel.cs" />
     <Compile Include="NewVersionWindow.xaml.cs">
       <DependentUpon>NewVersionWindow.xaml</DependentUpon>
     </Compile>

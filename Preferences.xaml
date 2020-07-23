@@ -59,7 +59,7 @@
                                     <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowNegativeRattingDelta}" Content="Show Negative Ratting Delta"/>
                                     <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowRattingDataAsDelta}" Content="Show Ratting Data as Delta"/>
                                     <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowSimpleSecurityView}" Content="Show Simple Security View (Just HS/LS/null)"/>
-                                    
+
 
                                 </StackPanel>
                             </GroupBox>
@@ -96,7 +96,7 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0">
-                            <GroupBox Header="General" Margin="4" Height="355">
+                            <GroupBox Header="General" Margin="4" Height="200">
                                 <StackPanel>
 
                                     <CheckBox IsChecked="{Binding Path=PlayIntelSound}" Margin="0,2">Warning Sound</CheckBox>
@@ -114,6 +114,10 @@
                                     </StackPanel>
 
                                 </StackPanel>
+                            </GroupBox>
+                            <GroupBox Header="DMT" Height="155">
+                                <CheckBox IsChecked="{Binding SubscribeToAllIntel}" Margin="0,2,8,114" Content="Subscribe To All Intel Channels"/>
+
                             </GroupBox>
 
                         </StackPanel>
@@ -173,7 +177,7 @@
                                 <StackPanel>
                                     <CheckBox IsChecked="{Binding Path=FleetShowOnMap}" Margin="0,2">Show Fleet Members</CheckBox>
                                     <CheckBox IsChecked="{Binding Path=FleetShowShipType}" Margin="0,2">Show Fleet Member Ship Type</CheckBox>
-                                    
+
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <xctk:IntegerUpDown Value="{Binding Path=FleetMaxMembersPerSystem}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="70" Minimum="1" Maximum="30" Background="Transparent"  Foreground="White" />
                                         <Label Content="Max Fleet Members Display"/>

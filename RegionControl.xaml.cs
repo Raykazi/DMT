@@ -783,7 +783,7 @@ namespace SMT
                                 charText.Foreground = localCharacterText;
                                 break;
                                 
-                            case 1: //TODO Give these nerds some customization @Zahzi
+                            case 1: //TODO Give these nerds some customization @Zahzi or @Maj (MapConf.ActiveColourScheme.CharacterTextColour)
                                 charText.Foreground = new SolidColorBrush(Color.FromRgb(35,255,0));
                                 break;
                             case 2://TODO if we release this to the alliance (hope we dont) they get some other color

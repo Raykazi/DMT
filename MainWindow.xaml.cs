@@ -417,6 +417,15 @@ namespace SMT
                 }
             }
 
+            if (e.PropertyName == "")
+            {
+                if (!MapConf.SubscribeToAllIntel)
+                {
+                    EVEManager.SubscribeAllIntel = false;
+                    EVEManager.UnsubscribeAllIntel();
+                }
+            }
+
             if (e.PropertyName == "WarningRange")
             {
                 foreach (EVEData.LocalCharacter lc in EVEManager.LocalCharacters)
@@ -790,7 +799,7 @@ namespace SMT
         private void OnIntelAdded(List<string> intelsystems)
         {
             bool playSound = false;
-
+            
             if (MapConf.PlayIntelSound)
             {
                 if (MapConf.PlaySoundOnlyInDangerZone)

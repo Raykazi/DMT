@@ -59,11 +59,12 @@ namespace SMT.EVEData
 
         private bool WatcherThreadShouldTerminate = false;
 
+        public bool SubscribeAllIntel = false;
+
         // Create a new MQTT client.
         private MqttFactory factory = new MqttFactory();
         private static IManagedMqttClient mqttClient;
         private IMqttClientOptions mqttOptions;
-        JsonSerializer serializer = new JsonSerializer();
         public void SendCharLocation(LocalCharacter c)
         {
             if (!mqttClient.IsConnected || c.Location.Length == 0)
@@ -74,22 +75,43 @@ namespace SMT.EVEData
                .WithTopic($"location/{c.Name}")
                .WithPayload(payload)
                .WithExactlyOnceQoS()
-               .WithRetainFlag()
                .Build();
             mqttClient.PublishAsync(message);
         }
+
+        private void SendIntel(string changedFile, IntelData id)
+        {
+            if (!mqttClient.IsConnected)
+                return;
+            int startPos = changedFile.LastIndexOf('\\') + 1;
+            int endPos = changedFile.IndexOf('_');
+            string intelChannel = changedFile.Substring(startPos, (endPos - startPos));
+            DMTIntel intel = new DMTIntel(intelChannel, id);
+            string payload = JsonConvert.SerializeObject(intel);
+            var message = new MqttApplicationMessageBuilder()
+                .WithTopic($"intel/{intel.Channel}")
+                .WithPayload(payload)
+                .WithExactlyOnceQoS()
+                .WithRetainFlag()
+                .Build();
+            mqttClient.PublishAsync(message);
+        }
+
+        public void UnsubscribeAllIntel()
+        {
+
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="EveManager" /> class
         /// </summary>
         public EveManager(string version)
         {
-            serializer.Converters.Add(new JavaScriptDateTimeConverter());
-            serializer.NullValueHandling = NullValueHandling.Ignore;
             mqttClient = factory.CreateManagedMqttClient();
 #if DEBUG
             mqttOptions = new MqttClientOptionsBuilder()
                 .WithClientId(Guid.NewGuid().ToString())
-                .WithTcpServer("127.0.0.1", 1738)
+                .WithTcpServer("127.0.0.1", 2052)
                 .Build();
 #else
             mqttOptions = new MqttClientOptionsBuilder()
@@ -1458,6 +1480,8 @@ namespace SMT.EVEData
                     if (line != string.Empty)
                     {
                         IntelFilters.Add(line);
+                        if (!SubscribeAllIntel)
+                            mqttClient.SubscribeAsync("intel/" + line);
                     }
                 }
             }
@@ -1551,7 +1575,8 @@ namespace SMT.EVEData
                     }
 
                     Thread.Sleep(2000);
-                } catch (DirectoryNotFoundException)
+                }
+                catch (DirectoryNotFoundException)
                 {
                     Directory.CreateDirectory(eveLogFolder);
                     //MessageBox.Show($"{eveLogFolder} could not be found.", "Do you even play EVE Online??");
@@ -1779,13 +1804,12 @@ namespace SMT.EVEData
             mqttClient.UseConnectedHandler(async e =>
             {
                 MessageBox.Show("### CONNECTED WITH SERVER ###");
-                var topic = new MqttTopicFilter().Topic = "location/#";
-                await mqttClient.SubscribeAsync(topic);
+                await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "location/#" });
                 MessageBox.Show("### SUBSCRIBED ###");
             });
             var message = new MqttApplicationMessageBuilder()
                 .WithTopic("login")
-                .WithPayload(Environment.UserName)
+                .WithPayload(Environment.UserName) //TODO Zahzi will eventually get me an auth token from SEAT
                 .WithExactlyOnceQoS()
                 .WithRetainFlag()
                 .Build();
@@ -2065,7 +2089,8 @@ namespace SMT.EVEData
                                     }
 
                                     IntelDataList.Insert(0, id);
-
+                                    //TODO Mqtt publish raw intel here
+                                    SendIntel(changedFile, id);
                                     if (IntelAddedEvent != null)
                                     {
                                         IntelAddedEvent(id.Systems);
@@ -2090,6 +2115,16 @@ namespace SMT.EVEData
             }
         }
 
+        public void ActiveCharacterCleared(string exception = "")
+        {
+            foreach (LocalCharacter character in LocalCharacters)
+            {
+                if (character.Name != exception)
+                {
+                    character.Active = false;
+                }
+            }
+        }
         /// <summary>
         /// Load the character data from disk
         /// </summary>
