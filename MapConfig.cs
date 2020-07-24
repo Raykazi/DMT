@@ -92,6 +92,7 @@ namespace SMT
 
         private bool m_FleetShowShipType = false;
 
+        private bool m_SubscribeAllIntell = false;
 
         public MapConfig()
         {
@@ -217,6 +218,19 @@ namespace SMT
         [Category("Intel")]
         [DisplayName("Limit Sound to Dangerzone")]
         public bool PlaySoundOnlyInDangerZone { get; set; }
+
+        [Category("Intel")]
+        [DisplayName("Subscribe To All Intel Channels")]
+        public bool SubscribeToAllIntel
+        {
+            get { return m_SubscribeAllIntell; }
+            set
+            {
+                m_SubscribeAllIntell = value;
+                OnPropertyChanged("SubscribeToAllIntel");
+
+            }
+        }
 
         [Category("Incursions")]
         [DisplayName("Show Active Incursions")]
@@ -812,7 +826,7 @@ namespace SMT
 
         public void SetDefaults()
         {
-            DefaultRegion = "Molden Heath";
+            DefaultRegion = "Impass";
             ShowSystemPopup = true;
             MaxIntelSeconds = 120;
             UpcomingSovMinutes = 30;
@@ -835,6 +849,7 @@ namespace SMT
             UniverseMaxZoomDisplaySystemsText = 2.0f;
 
             WarningRange = 5;
+            SubscribeToAllIntel = false;
         }
 
         protected void OnPropertyChanged(string name)

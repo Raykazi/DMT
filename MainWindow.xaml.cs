@@ -215,6 +215,7 @@ namespace SMT
                 lc.WarningSystemRange = MapConf.WarningRange;
                 lc.Location = "";
             }
+            EVEManager.MqttInit();
 
         }
 
@@ -414,6 +415,18 @@ namespace SMT
                 else
                 {
                     this.Topmost = false;
+                }
+            }
+
+            if (e.PropertyName == "SubscribeToAllIntel")
+            {
+                if (!MapConf.SubscribeToAllIntel)
+                {
+                    EVEManager.SubscribeAllIntelChannels = false;
+                    EVEManager.UnsubscribeAllIntel();
+                } else
+                {
+                    EVEManager.SubscribeIntel("",true);
                 }
             }
 
@@ -790,7 +803,7 @@ namespace SMT
         private void OnIntelAdded(List<string> intelsystems)
         {
             bool playSound = false;
-
+            
             if (MapConf.PlayIntelSound)
             {
                 if (MapConf.PlaySoundOnlyInDangerZone)

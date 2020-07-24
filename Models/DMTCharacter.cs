@@ -33,9 +33,10 @@ namespace SMT.Models
         public long Id { get; set; }
         public string Name { get; set; }
         public DateTime LastUpdated { get; set; }
+        public bool Active { get; set; }
     }
 
-    public partial class EsiAuthData
+    public class EsiAuthData
     {
         public long AllianceId { get; set; }
         public long CharacterId { get; set; }
@@ -50,7 +51,7 @@ namespace SMT.Models
         public string TokenType { get; set; }
     }
 
-    public partial class FleetInfo
+    public class FleetInfo
     {
         public bool IsFleetBoss { get; set; }
         public DateTimeOffset NextFleetMembershipCheck { get; set; }
