@@ -1845,19 +1845,22 @@ namespace SMT.EVEData
                     break;
                 case "intel":
                     var intel = JsonConvert.DeserializeObject<DMTIntel>(payload);
-                    foreach(var idl in IntelDataList)
+                    bool found2 = false;
+                    foreach (var idl in IntelDataList)
                     {
 
-                        bool found2 = false;
-                        if(idl.RawIntelString == intel.RawIntel)
+                        if (idl.RawIntelString == intel.RawIntel)
                         {
                             found2 = true;
                         }
-                        if(!found2)                        
+                    }
+                    if (!found2)
+                    {
+                        var newIdl = new IntelData(intel.RawIntel);
+                        Application.Current.Dispatcher.Invoke((Action)(() =>
                         {
-                            var newIdl = new IntelData(idl.RawIntelString);
                             IntelDataList.Insert(0, newIdl);
-                        }
+                        }), DispatcherPriority.Normal, null);
                     }
                     break;
             }
@@ -1897,7 +1900,7 @@ namespace SMT.EVEData
             int startPos = changedFile.LastIndexOf('\\') + 1;
             int endPos = changedFile.IndexOf('_');
             string intelChannel = changedFile.Substring(startPos, (endPos - startPos));
-            DMTIntel intel = new DMTIntel(intelChannel, id);
+            DMTIntel intel = new DMTIntel() { Channel = intelChannel, Intel = id.IntelString, RawIntel = id.RawIntelString, Systems = id.Systems, Time = id.IntelTime };
             string payload = JsonConvert.SerializeObject(intel);
             var message = new MqttApplicationMessageBuilder()
                 .WithTopic($"intel/{intel.Channel}")

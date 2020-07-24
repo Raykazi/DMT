@@ -15,13 +15,13 @@ namespace SMT.Models
         public string Intel { get; set; }
         public List<string> Systems { get; set; }
 
-        public DMTIntel(string channel, IntelData data)
-        {
-            Channel = channel;
-            Intel = data.IntelString;
-            RawIntel = data.RawIntelString;
-            Time = data.IntelTime;
-            Systems = data.Systems;
-        }
+        //public DMTIntel(string channel, IntelData data)
+        //{
+        //    Channel = channel;
+        //    Intel = data.IntelString;
+        //    RawIntel = data.RawIntelString;
+        //    Time = data.IntelTime;
+        //    Systems = data.Systems;
+        //}
     }
 }
