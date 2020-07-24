@@ -59,66 +59,19 @@ namespace SMT.EVEData
 
         private bool WatcherThreadShouldTerminate = false;
 
-        public bool SubscribeAllIntel = false;
+        public bool SubscribeAllIntelChannels = false;
 
         // Create a new MQTT client.
         private MqttFactory factory = new MqttFactory();
         private static IManagedMqttClient mqttClient;
         private IMqttClientOptions mqttOptions;
-        public void SendCharLocation(LocalCharacter c)
-        {
-            if (!mqttClient.IsConnected || c.Location.Length == 0)
-                return;
-            c.LastUpdate = DateTime.Now;
-            string payload = JsonConvert.SerializeObject(c);
-            var message = new MqttApplicationMessageBuilder()
-               .WithTopic($"location/{c.Name}")
-               .WithPayload(payload)
-               .WithExactlyOnceQoS()
-               .Build();
-            mqttClient.PublishAsync(message);
-        }
-
-        private void SendIntel(string changedFile, IntelData id)
-        {
-            if (!mqttClient.IsConnected)
-                return;
-            int startPos = changedFile.LastIndexOf('\\') + 1;
-            int endPos = changedFile.IndexOf('_');
-            string intelChannel = changedFile.Substring(startPos, (endPos - startPos));
-            DMTIntel intel = new DMTIntel(intelChannel, id);
-            string payload = JsonConvert.SerializeObject(intel);
-            var message = new MqttApplicationMessageBuilder()
-                .WithTopic($"intel/{intel.Channel}")
-                .WithPayload(payload)
-                .WithExactlyOnceQoS()
-                .WithRetainFlag()
-                .Build();
-            mqttClient.PublishAsync(message);
-        }
-
-        public void UnsubscribeAllIntel()
-        {
-
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EveManager" /> class
         /// </summary>
         public EveManager(string version)
         {
-            mqttClient = factory.CreateManagedMqttClient();
-#if DEBUG
-            mqttOptions = new MqttClientOptionsBuilder()
-                .WithClientId(Guid.NewGuid().ToString())
-                .WithTcpServer("127.0.0.1", 2052)
-                .Build();
-#else
-            mqttOptions = new MqttClientOptionsBuilder()
-                .WithClientId(Guid.NewGuid().ToString())
-                .WithTcpServer("dmt.windrammers.com", 1738)
-                .Build();
-#endif
+
             LocalCharacters = new BindingList<LocalCharacter>();
             VersionStr = version;
 
@@ -1480,8 +1433,6 @@ namespace SMT.EVEData
                     if (line != string.Empty)
                     {
                         IntelFilters.Add(line);
-                        if (!SubscribeAllIntel)
-                            mqttClient.SubscribeAsync("intel/" + line);
                     }
                 }
             }
@@ -1795,16 +1746,36 @@ namespace SMT.EVEData
             StartUpdateCoalitionInfo();
 
             StartBackgroundThread();
-
+            DMTCharacters.CollectionChanged += DMTCharacters_CollectionChanged;
+        }
+        public async void MqttInit()
+        {
+            mqttClient = factory.CreateManagedMqttClient();
+#if DEBUG
+            mqttOptions = new MqttClientOptionsBuilder()
+                .WithClientId(Guid.NewGuid().ToString())
+                .WithTcpServer("127.0.0.1", 1738)
+                .Build();
+#else
+            mqttOptions = new MqttClientOptionsBuilder()
+                .WithClientId(Guid.NewGuid().ToString())
+                .WithTcpServer("dmt.windrammers.com", 1738)
+                .Build();
+#endif
             var managedOptions = new ManagedMqttClientOptionsBuilder()
-              .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
-              .WithClientOptions(mqttOptions)
-              .Build();
+             .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
+             .WithClientOptions(mqttOptions)
+             .Build();
             await mqttClient.StartAsync(managedOptions);
+            //while (!mqttClient.IsConnected)
+            //{
+            //    Thread.Sleep(5);
+            //}
             mqttClient.UseConnectedHandler(async e =>
             {
                 MessageBox.Show("### CONNECTED WITH SERVER ###");
                 await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "location/#" });
+                MqttIntelInit();
                 MessageBox.Show("### SUBSCRIBED ###");
             });
             var message = new MqttApplicationMessageBuilder()
@@ -1815,53 +1786,148 @@ namespace SMT.EVEData
                 .Build();
             await mqttClient.PublishAsync(message, CancellationToken.None); // Since 3.0.5 with CancellationToken
             mqttClient.UseApplicationMessageReceivedHandler(HandleMessages);
-            DMTCharacters.CollectionChanged += DMTCharacters_CollectionChanged;
+            await Task.FromResult(true);
         }
-
-        private void DMTCharacters_CollectionChanged(object sender, global::System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        public void MqttIntelInit()
         {
-            //throw new NotImplementedException();
-        }
-
-        public ObservableCollection<DMTCharacter> DMTCharacters = new ObservableCollection<DMTCharacter>();
-        private void HandleMessages(MqttApplicationMessageReceivedEventArgs e)
-        {
-            string payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
-            if (e.ApplicationMessage.Topic.Contains("location"))
+            if (!SubscribeAllIntelChannels)
             {
-                var dmtc = JsonConvert.DeserializeObject<DMTCharacter>(payload);
-                //Check to see if we own them. #Slavery
-                foreach (LocalCharacter lc in LocalCharacters)
+                foreach (var channel in IntelFilters)
                 {
-                    if (dmtc.Name == lc.Name)
-                    {
-                        return;
-                    }
-                }
-                bool found = false;
-                for (int i = 0; i < DMTCharacters.Count; i++)
-                {
-                    if (DMTCharacters[i].Name == dmtc.Name)
-                    {
-                        DMTCharacters[i] = dmtc;
-                        found = true;
-                    }
-                }
-                if (!found)
-                {
-                    DMTCharacters.Add(dmtc);
+                    SubscribeIntel("intel/" + channel, false);
                 }
             }
             else
             {
-                switch (e.ApplicationMessage.Topic)
-                {
-                    case "location/corp":
-                        break;
-                }
+                SubscribeIntel("", true);
             }
         }
 
+        private void HandleMessages(MqttApplicationMessageReceivedEventArgs e)
+        {
+            string payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+            string fulltopic = e.ApplicationMessage.Topic;
+            string topic;
+            string subtopic;
+            if (fulltopic.Contains("/"))
+            {
+                topic = fulltopic.Substring(0, fulltopic.IndexOf('/'));
+            }
+            else
+            {
+                topic = fulltopic;
+            }
+            switch(topic)
+            {
+                case "location":
+                    var dmtc = JsonConvert.DeserializeObject<DMTCharacter>(payload);
+                    //Check to see if we own them. #Slavery
+                    foreach (LocalCharacter lc in LocalCharacters)
+                    {
+                        if (dmtc.Name == lc.Name)
+                        {
+                            return;
+                        }
+                    }
+                    bool found = false;
+                    for (int i = 0; i < DMTCharacters.Count; i++)
+                    {
+                        if (DMTCharacters[i].Name == dmtc.Name)
+                        {
+                            DMTCharacters[i] = dmtc;
+                            found = true;
+                        }
+                    }
+                    if (!found)
+                    {
+                        DMTCharacters.Add(dmtc);
+                    }
+                    break;
+                case "intel":
+                    var intel = JsonConvert.DeserializeObject<DMTIntel>(payload);
+                    foreach(var idl in IntelDataList)
+                    {
+
+                        bool found2 = false;
+                        if(idl.RawIntelString == intel.RawIntel)
+                        {
+                            found2 = true;
+                        }
+                        if(!found2)                        
+                        {
+                            var newIdl = new IntelData(idl.RawIntelString);
+                            IntelDataList.Insert(0, newIdl);
+                        }
+                    }
+                    break;
+            }
+            //if (e.ApplicationMessage.Topic.Contains("location"))
+            //{
+
+            //}
+            //else
+            //{
+            //    switch (e.ApplicationMessage.Topic)
+            //    {
+            //        case "location/corp":
+            //            break;
+            //    }
+            //}
+        }
+
+        public void SendCharLocation(LocalCharacter c)
+        {
+            if (mqttClient == null) return;
+            if (!mqttClient.IsConnected || c.Location.Length == 0)
+                return;
+            c.LastUpdate = DateTime.Now;
+            string payload = JsonConvert.SerializeObject(c);
+            var message = new MqttApplicationMessageBuilder()
+               .WithTopic($"location/{c.Name}")
+               .WithPayload(payload)
+               .WithExactlyOnceQoS()
+               .Build();
+            mqttClient.PublishAsync(message);
+        }
+
+        private void SendIntel(string changedFile, IntelData id)
+        {
+            if (!mqttClient.IsConnected)
+                return;
+            int startPos = changedFile.LastIndexOf('\\') + 1;
+            int endPos = changedFile.IndexOf('_');
+            string intelChannel = changedFile.Substring(startPos, (endPos - startPos));
+            DMTIntel intel = new DMTIntel(intelChannel, id);
+            string payload = JsonConvert.SerializeObject(intel);
+            var message = new MqttApplicationMessageBuilder()
+                .WithTopic($"intel/{intel.Channel}")
+                .WithPayload(payload)
+                .WithExactlyOnceQoS()
+                .WithRetainFlag()
+                .Build();
+            mqttClient.PublishAsync(message);
+        }
+        public async void SubscribeIntel(string channel = "", bool all = false)
+        {
+            if (!mqttClient.IsConnected) return;
+            if (all)
+                await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "intel/#" });
+            else
+                await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic =  channel });
+        }
+
+        public async void UnsubscribeAllIntel()
+        {
+            if (!mqttClient.IsConnected) return;
+            await mqttClient.UnsubscribeAsync("intel");
+            MqttIntelInit();
+        }
+
+        public ObservableCollection<DMTCharacter> DMTCharacters = new ObservableCollection<DMTCharacter>();
+        private void DMTCharacters_CollectionChanged(object sender, global::System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            //throw new NotImplementedException();
+        }
         /// <summary>
         /// Initialise the Thera Connection Data from EVE-Scout
         /// </summary>

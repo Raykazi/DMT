@@ -215,6 +215,7 @@ namespace SMT
                 lc.WarningSystemRange = MapConf.WarningRange;
                 lc.Location = "";
             }
+            EVEManager.MqttInit();
 
         }
 
@@ -417,12 +418,15 @@ namespace SMT
                 }
             }
 
-            if (e.PropertyName == "")
+            if (e.PropertyName == "SubscribeToAllIntel")
             {
                 if (!MapConf.SubscribeToAllIntel)
                 {
-                    EVEManager.SubscribeAllIntel = false;
+                    EVEManager.SubscribeAllIntelChannels = false;
                     EVEManager.UnsubscribeAllIntel();
+                } else
+                {
+                    EVEManager.SubscribeIntel("",true);
                 }
             }
 
