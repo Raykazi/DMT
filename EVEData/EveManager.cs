@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // EVE Manager
 //-----------------------------------------------------------------------
 
@@ -1860,6 +1860,7 @@ namespace SMT.EVEData
                 case "intel":
                     var intel = JsonConvert.DeserializeObject<DMTIntel>(payload);
                     bool found2 = false;
+                    if(IntelFilters.Contains(intel.Channel)) return;//Ignore intel were already monitoring
                     foreach (var idl in IntelDataList)
                     {
 
