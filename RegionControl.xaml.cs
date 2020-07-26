@@ -784,7 +784,7 @@ namespace SMT
                                 break;
                                 
                             case 1: //TODO Give these nerds some customization @Zahzi or @Maj (MapConf.ActiveColourScheme.CharacterTextColour)
-                                charText.Foreground = new SolidColorBrush(Color.FromRgb(35,255,0));
+                                charText.Foreground = new SolidColorBrush(Color.FromRgb(119, 221, 119));
                                 break;
                             case 2://TODO if we release this to the alliance (hope we dont) they get some other color
                                 break;
