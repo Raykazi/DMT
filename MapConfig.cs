@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Windows.Media;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
@@ -20,6 +23,30 @@ namespace SMT
             }
             return sizes;
         }
+    }
+    public class DMTConfig : INotifyPropertyChanged
+    {
+        public string DMTUrl { get; set; }
+        public string DMTToken { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public static DMTConfig LoadSettings(string json)
+        {
+            return JsonConvert.DeserializeObject<DMTConfig>(json);
+        }
+        internal static void SaveSettings(string fileName, DMTConfig dmtConfig)
+        {
+            File.WriteAllText(fileName, JsonConvert.SerializeObject(dmtConfig));
+        }
+        protected void OnPropertyChanged(string name)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(name));
+            }
+        }
+
     }
 
     public class MapConfig : INotifyPropertyChanged

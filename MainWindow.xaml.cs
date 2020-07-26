@@ -1,4 +1,5 @@
 using Microsoft.Win32;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -36,6 +37,8 @@ namespace SMT
         private DispatcherTimer uiRefreshTimer;
 
         private MediaPlayer mediaPlayer;
+
+        private DMTConfig dmtConfig;
         /// <summary>
         /// Main Window
         /// </summary>
@@ -102,10 +105,25 @@ namespace SMT
                 MapConf = new MapConfig();
                 MapConf.SetDefaultColours();
             }
+            
+            string dmtConfigFileName = "DMTConfig.json";
+            if(File.Exists(dmtConfigFileName))
+            {
+                var json = File.ReadAllText(dmtConfigFileName);
+                dmtConfig = DMTConfig.LoadSettings(json); //Didnt feel like adding another json reference to this file.
+            }
+            else
+            {
+                DMTConfig dmtConfig = new DMTConfig() { DMTToken = "Change Me", DMTUrl = "change.me.please" };
+                DMTConfig.SaveSettings(dmtConfigFileName ,dmtConfig);
+                MessageBox.Show($"Please edit {dmtConfigFileName} with your DMT Server Url & DMT Token.", "First Time Setup");
+                Environment.Exit(0);
+            }
+
 
             // Create the main EVE manager
 
-            EVEManager = new EVEData.EveManager(SMT_VERSION);
+            EVEManager = new EVEData.EveManager(SMT_VERSION, dmtConfig);
             EVEData.EveManager.Instance = EVEManager;
 
             EVEManager.UseESIForCharacterPositions = MapConf.UseESIForCharacterPositions;

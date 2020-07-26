@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // EVE Manager
 //-----------------------------------------------------------------------
 
@@ -65,15 +65,17 @@ namespace SMT.EVEData
         private MqttFactory factory = new MqttFactory();
         private static IManagedMqttClient mqttClient;
         private IMqttClientOptions mqttOptions;
+        private DMTConfig dmtConfig;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EveManager" /> class
         /// </summary>
-        public EveManager(string version)
+        public EveManager(string version, DMTConfig config)
         {
 
             LocalCharacters = new BindingList<LocalCharacter>();
             VersionStr = version;
+            dmtConfig = config;
 
             // ensure we have the cache folder setup
             DataCacheFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\SMTCache";
@@ -1752,25 +1754,24 @@ namespace SMT.EVEData
         {
             mqttClient = factory.CreateManagedMqttClient();
 #if DEBUG
-            mqttOptions = new MqttClientOptionsBuilder()
-                .WithClientId(Guid.NewGuid().ToString())
+            mqttOptions = new MqttClientOptionsBuilder()                
                 .WithTcpServer("127.0.0.1", 1738)
+                .WithClientId(dmtConfig.DMTToken)
+                .WithCredentials($"{Environment.MachineName} \\{ Environment.UserName}", VersionStr)
                 .Build();
 #else
             mqttOptions = new MqttClientOptionsBuilder()
-                .WithClientId(Guid.NewGuid().ToString())
-                .WithTcpServer("dmt.windrammers.com", 1738)
+                .WithTcpServer(dmtConfig.DMTUrl, 1738)
+                .WithClientId(dmtConfig.DMTToken)
+                .WithCredentials(Environment.UserName, VersionStr)
                 .Build();
 #endif
             var managedOptions = new ManagedMqttClientOptionsBuilder()
-             .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
+             .WithAutoReconnectDelay(TimeSpan.FromSeconds(30))
              .WithClientOptions(mqttOptions)
              .Build();
             await mqttClient.StartAsync(managedOptions);
-            //while (!mqttClient.IsConnected)
-            //{
-            //    Thread.Sleep(5);
-            //}
+            mqttClient.ConnectingFailedHandler = new ConnectingFailedHandlerDelegate(OnMqttFailed);
             mqttClient.UseConnectedHandler(async e =>
             {
                 MessageBox.Show("### CONNECTED WITH SERVER ###");
@@ -1778,16 +1779,29 @@ namespace SMT.EVEData
                 MqttIntelInit();
                 MessageBox.Show("### SUBSCRIBED ###");
             });
-            var message = new MqttApplicationMessageBuilder()
-                .WithTopic("login")
-                .WithPayload(Environment.UserName) //TODO Zahzi will eventually get me an auth token from SEAT
-                .WithExactlyOnceQoS()
-                .WithRetainFlag()
-                .Build();
-            await mqttClient.PublishAsync(message, CancellationToken.None); // Since 3.0.5 with CancellationToken
             mqttClient.UseApplicationMessageReceivedHandler(HandleMessages);
             await Task.FromResult(true);
         }
+
+        private void OnMqttFailed(ManagedProcessFailedEventArgs obj)
+        {
+            Exception ex = obj.Exception;
+            if (ex.Message.Contains("ClientIdentifierNotValid") || ex.Message.Contains("NotAuthorized"))
+            {
+                MessageBox.Show("DMT Auth Token invalid. Please check DMTToken in DMTConfig.json", "Error");
+                mqttClient.StopAsync();
+            }
+            if (ex.Message.Contains("BadUserNameOrPassword"))
+            {
+                MessageBox.Show("Your banned kid. Uninstall DMT. Alt+F4ing.....", "B A N N E D !");
+                mqttClient.StopAsync();
+                Application.Current.Dispatcher.Invoke((Action)(() =>
+                {
+                    Environment.Exit(0);
+                }), DispatcherPriority.Normal, null);
+            }
+        }
+
         public void MqttIntelInit()
         {
             if (!SubscribeAllIntelChannels)
@@ -1817,7 +1831,7 @@ namespace SMT.EVEData
             {
                 topic = fulltopic;
             }
-            switch(topic)
+            switch (topic)
             {
                 case "location":
                     var dmtc = JsonConvert.DeserializeObject<DMTCharacter>(payload);
@@ -1846,6 +1860,7 @@ namespace SMT.EVEData
                 case "intel":
                     var intel = JsonConvert.DeserializeObject<DMTIntel>(payload);
                     bool found2 = false;
+                    if(IntelFilters.Contains(intel.Channel)) return;//Ignore intel were already monitoring
                     foreach (var idl in IntelDataList)
                     {
 
@@ -1916,7 +1931,7 @@ namespace SMT.EVEData
             if (all)
                 await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "intel/#" });
             else
-                await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic =  channel });
+                await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = channel });
         }
 
         public async void UnsubscribeAllIntel()
