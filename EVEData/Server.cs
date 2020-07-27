@@ -1,5 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Navigation;
 using System.Windows.Threading;
 
 namespace SMT.EVEData
@@ -10,6 +13,8 @@ namespace SMT.EVEData
         private int m_serverVersion;
 
         private DateTime m_serverTime;
+        private Color m_mqttStatusColor;
+        private string m_mqttStatus;
 
         public Server()
         {
@@ -63,6 +68,32 @@ namespace SMT.EVEData
             {
                 m_serverVersion = value;
                 OnPropertyChanged("ServerVersion");
+            }
+        }
+        public Color MqttStatusColor
+        {
+            get
+            {
+                return m_mqttStatusColor;
+
+            }
+            set
+            {
+                m_mqttStatusColor = value;
+                OnPropertyChanged("MqttStatus");
+
+            }
+        }
+        public string MqttStatus
+        {
+            get
+            {
+                return m_mqttStatus;
+            }
+            set
+            {
+                m_mqttStatus = value;
+                OnPropertyChanged("MqttStatus");
             }
         }
 

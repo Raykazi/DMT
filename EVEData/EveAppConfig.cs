@@ -1,24 +1,25 @@
 ﻿//-----------------------------------------------------------------------
 // EVE App Config
 //-----------------------------------------------------------------------
-
+using DMT.Helper;
 namespace SMT.EVEData
 {
     public class EveAppConfig
     {
+        //DMTOauth auth = new DMTOauth();
         /// <summary>
         /// Client ID from the EVE Developer setup
         /// </summary>
-        public const string ClientID = "17117b94e5754fbe9f0b2f012a82534f";
+        public const string ClientID = DMTOauth.ClientID;
 
         /// <summary>
         /// Secret Key from the EVE Developer setup
         /// </summary>
-        public const string SecretKey = "wBu3XqySGXqvlbnldthXSvGUBipceevJgAwsJq3w";
+        public const string SecretKey = DMTOauth.SecretKey;
 
         /// <summary>
         /// Callback URL for eve
         /// </summary>
-        public const string CallbackURL = @"http://localhost:20220/callback/";
+        public const string CallbackURL = DMTOauth.CallbackURL;
     }
 }

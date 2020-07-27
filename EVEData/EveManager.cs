@@ -8,6 +8,8 @@ using ESI.NET.Models.SSO;
 using Microsoft.Extensions.Options;
 using MQTTnet;
 using MQTTnet.Client;
+using MQTTnet.Client.Connecting;
+using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
 using MQTTnet.Extensions.ManagedClient;
 using Newtonsoft.Json;
@@ -18,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -1756,14 +1759,14 @@ namespace SMT.EVEData
 #if DEBUG
             mqttOptions = new MqttClientOptionsBuilder()                
                 .WithTcpServer("127.0.0.1", 1738)
-                .WithClientId(dmtConfig.DMTToken)
-                .WithCredentials($"{Environment.MachineName} \\{ Environment.UserName}", VersionStr)
+                .WithClientId($"{Environment.MachineName}\\{Environment.UserName}")
+                .WithCredentials(dmtConfig.DMTToken, VersionStr)
                 .Build();
 #else
             mqttOptions = new MqttClientOptionsBuilder()
                 .WithTcpServer(dmtConfig.DMTUrl, 1738)
-                .WithClientId(dmtConfig.DMTToken)
-                .WithCredentials(Environment.UserName, VersionStr)
+                .WithClientId($"{Environment.MachineName}\\{Environment.UserName}")
+                .WithCredentials(dmtConfig.DMTToken, VersionStr)
                 .Build();
 #endif
             var managedOptions = new ManagedMqttClientOptionsBuilder()
@@ -1771,16 +1774,53 @@ namespace SMT.EVEData
              .WithClientOptions(mqttOptions)
              .Build();
             await mqttClient.StartAsync(managedOptions);
-            mqttClient.ConnectingFailedHandler = new ConnectingFailedHandlerDelegate(OnMqttFailed);
-            mqttClient.UseConnectedHandler(async e =>
+
+            if (ServerInfo != null)
             {
-                MessageBox.Show("### CONNECTED WITH SERVER ###");
-                await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "location/#" });
-                MqttIntelInit();
-                MessageBox.Show("### SUBSCRIBED ###");
-            });
+                ServerInfo.MqttStatus = "Connecting";
+                ServerInfo.MqttStatusColor = Colors.Orange;
+            }
+            mqttClient.ConnectingFailedHandler = new ConnectingFailedHandlerDelegate(OnMqttFailed);
+            mqttClient.UseConnectedHandler(OnMqttConnect);
             mqttClient.UseApplicationMessageReceivedHandler(HandleMessages);
+            mqttClient.UseDisconnectedHandler(OnMqttDisconnect);
             await Task.FromResult(true);
+        }
+
+        private async void OnMqttConnect(MqttClientConnectedEventArgs arg)
+        {
+            if (ServerInfo != null)
+            {
+                ServerInfo.MqttStatus = "Connected";
+                ServerInfo.MqttStatusColor = Colors.Green;
+            }
+            await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "location/#" });
+            await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "info/jbs" });
+            MqttIntelInit();
+        }
+
+        private int mqttConnects = 0;
+        private void OnMqttDisconnect(MqttClientDisconnectedEventArgs arg)
+        {
+            if (mqttConnects >= 5 && mqttClient.IsStarted)
+            {
+                mqttClient.StopAsync();
+                ServerInfo.MqttStatus = "Server might be offline. Ray????";
+                ServerInfo.MqttStatusColor = Colors.Red;
+            } else
+            {
+                if(arg.ClientWasConnected)
+                {
+                    ServerInfo.MqttStatus = "Reconnecting";
+                    ServerInfo.MqttStatusColor = Colors.Orange;
+                } else
+                {
+                    ServerInfo.MqttStatus = $"Connection Attempt #{mqttConnects+1}";
+                    ServerInfo.MqttStatusColor = Colors.Orange;
+
+                }
+            }
+            mqttConnects++;
         }
 
         private void OnMqttFailed(ManagedProcessFailedEventArgs obj)
@@ -1788,13 +1828,25 @@ namespace SMT.EVEData
             Exception ex = obj.Exception;
             if (ex.Message.Contains("ClientIdentifierNotValid") || ex.Message.Contains("NotAuthorized"))
             {
+                ServerInfo.MqttStatus = "DMT Auth Token invalid. Please check DMTToken in DMTConfig.json";
+                ServerInfo.MqttStatusColor = Colors.Red;
                 MessageBox.Show("DMT Auth Token invalid. Please check DMTToken in DMTConfig.json", "Error");
                 mqttClient.StopAsync();
             }
+            if(ex.Message.Contains("ServerUnavailable"))
+            {
+                ServerInfo.MqttStatus = "Download the latest version.";
+                ServerInfo.MqttStatusColor = Colors.Red;
+                mqttClient.StopAsync();
+                MessageBox.Show("New Update. Go download please.");
+                Application.Current.Shutdown(0);
+            }
             if (ex.Message.Contains("BadUserNameOrPassword"))
             {
-                MessageBox.Show("Your banned kid. Uninstall DMT. Alt+F4ing.....", "B A N N E D !");
                 mqttClient.StopAsync();
+                ServerInfo.MqttStatus = "Banned";
+                ServerInfo.MqttStatusColor = Colors.Red;
+                MessageBox.Show("Your banned kid. Uninstall DMT. Alt+F4ing.....", "B A N N E D !");
                 Application.Current.Dispatcher.Invoke((Action)(() =>
                 {
                     Environment.Exit(0);
