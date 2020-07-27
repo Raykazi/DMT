@@ -27,7 +27,7 @@ namespace SMT
     {
         public static MainWindow AppWindow;
 
-        public const string SMT_VERSION = "SMT_089";
+        public const string SMT_VERSION = "DMT_000";
 
 
         private LogonWindow logonBrowserWindow;
@@ -54,8 +54,9 @@ namespace SMT
 
 
             InitializeComponent();
+            DependencyPropertyDescriptor dpd = DependencyPropertyDescriptor.FromProperty(TextBlock.TextProperty, typeof(TextBlock));
 
-            Title = "SMT (Pathos, Crashier Test Dummy : " + SMT_VERSION + ")";
+            Title = "DMT (Gimpy Edition : " + SMT_VERSION + ")";
 
             CheckGitHubVersion();
 
@@ -175,7 +176,11 @@ namespace SMT
             RegionsViewUC.RequestRegion += RegionsViewUC_RequestRegion;
 
             AppStatusBar.DataContext = EVEManager.ServerInfo;
-
+            
+            dpd.AddValueChanged(this.mqttStatus, (sender, ars) =>
+            {
+                mqttStatusColor.Fill = new SolidColorBrush(EVEManager.ServerInfo.MqttStatusColor);
+            });
             // load the anom data
             string anomDataFilename = EVEManager.SaveDataVersionFolder + @"\Anoms.dat";
             if (File.Exists(anomDataFilename))
@@ -600,13 +605,13 @@ namespace SMT
 
         private void CheckGitHubVersion()
         {
-            string url = @"https://api.github.com/repos/slazanger/smt/releases/latest";
+            string url = @"https://api.github.com/repos/Raykazi/DMT/releases/latest";
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = WebRequestMethods.Http.Get;
             request.Timeout = 20000;
             request.Proxy = null;
-            request.UserAgent = "SMT/0.xx";
+            request.UserAgent = "DMT/0.xx";
 
             request.BeginGetResponse(new AsyncCallback(CheckGitHubVersionCallback), request);
         }
@@ -630,16 +635,12 @@ namespace SMT
                         {
                             if (releaseInfo.TagName != SMT_VERSION)
                             {
-                                Application.Current.Dispatcher.Invoke((Action)(() =>
+                                Application.Current.Dispatcher.Invoke(() =>
                                 {
-                                    NewVersionWindow nw = new NewVersionWindow();
-                                    nw.ReleaseInfo = releaseInfo.Body;
-                                    nw.CurrentVersion = SMT_VERSION;
-                                    nw.NewVersion = releaseInfo.TagName;
-                                    nw.ReleaseURL = releaseInfo.HtmlUrl.ToString();
-                                    nw.Owner = this;
-                                    nw.ShowDialog();
-                                }), DispatcherPriority.ApplicationIdle);
+                                    MessageBox.Show("Update required.");
+                                    System.Diagnostics.Process.Start($"https://github.com/Raykazi/DMT/releases/tag/{releaseInfo.TagName}");
+                                    Application.Current.Shutdown(0);
+                                }, DispatcherPriority.ApplicationIdle);
                             }
                         }
                     }
@@ -650,9 +651,9 @@ namespace SMT
             }
         }
 
-        #endregion
+#endregion
 
-        #region Characters
+#region Characters
 
         public EVEData.LocalCharacter ActiveCharacter { get; set; }
 
@@ -781,9 +782,9 @@ namespace SMT
 
 
 
-        #endregion
+#endregion
 
-        #region intel
+#region intel
 
         private void RawIntelBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
@@ -872,9 +873,9 @@ namespace SMT
         }
 
 
-        #endregion intel
+#endregion intel
 
-        #region Thera
+#region Thera
 
         /// <summary>
         /// Update Thera Button Clicked
@@ -903,9 +904,9 @@ namespace SMT
             }
         }
 
-        #endregion Thera
+#endregion Thera
 
-        #region Route
+#region Route
 
         private void AddWaypointsBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -967,9 +968,9 @@ namespace SMT
         }
 
 
-        #endregion Route
+#endregion Route
 
-        #region JumpBridges
+#region JumpBridges
 
         private async void ImportJumpGatesBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -1189,9 +1190,9 @@ namespace SMT
         }
 
 
-        #endregion JumpBridges
+#endregion JumpBridges
 
-        #region ZKillBoard
+#region ZKillBoard
 
         private bool zkbFilterByRegion = true;
 
@@ -1302,9 +1303,9 @@ namespace SMT
         }
 
 
-        #endregion ZKillboard
+#endregion ZKillboard
 
-        #region Anoms
+#region Anoms
 
         /// <summary>
         /// Clear system Anoms button clicked
@@ -1345,7 +1346,7 @@ namespace SMT
 
 
 
-        #endregion Anoms
+#endregion Anoms
 
     }
 
