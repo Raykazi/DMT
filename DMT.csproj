@@ -126,9 +126,9 @@
     <Reference Include="DataGridThemes, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\DataGridThemes.1.0.0\lib\net40\DataGridThemes.dll</HintPath>
     </Reference>
-    <Reference Include="DMT, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="DMT, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\DMT Server\bin\Debug\DMT.dll</HintPath>
+      <HintPath>.\DMT.dll</HintPath>
     </Reference>
     <Reference Include="DotNetKit.Wpf.AutoCompleteComboBox, Version=1.3.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\DotNetKit.Wpf.AutoCompleteComboBox.1.3.3\lib\net45\DotNetKit.Wpf.AutoCompleteComboBox.dll</HintPath>
