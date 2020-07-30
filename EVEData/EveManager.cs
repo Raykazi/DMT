@@ -1889,8 +1889,11 @@ namespace SMT.EVEData
                     //Check to see if we own them. #Slavery
                     if(!dmtc.BroadcastLocation)
                     {
-                        if (DMTCharacters.Contains(dmtc))
-                            DMTCharacters.Remove(dmtc);
+                        foreach(var ch in DMTCharacters)
+                        {
+                            if(ch.Name == dmtc.Name)
+                                DMTCharacters.Remove(ch);
+                        }
                     } else
                     {
                         foreach (LocalCharacter lc in LocalCharacters)

@@ -851,10 +851,10 @@ namespace SMT.EVEData
         /// </summary>
         private async Task UpdatePositionFromESI()
         {
-            if(i % 30 == 0)
+            if(i % 10 == 0)
             {
                 EveManager.Instance.SendCharLocation(this);
-                if (i >= 600)
+                if (i >= 300)
                     i = -1;
             }
             i++;

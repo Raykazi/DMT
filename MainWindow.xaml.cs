@@ -251,8 +251,8 @@ namespace SMT
                 {
                     if (c.Name == selected.Name)
                     {
-
                         c.BroadcastLocation = true;
+                        EVEManager.SendCharLocation(c);
                     }
                 }
             }
@@ -266,8 +266,8 @@ namespace SMT
                 {
                     if (c.Name == selected.Name)
                     {
-
                         c.BroadcastLocation = false;
+                        EVEManager.SendCharLocation(c);
                     }
                 }
             }
