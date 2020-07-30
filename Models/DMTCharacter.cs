@@ -11,12 +11,8 @@ namespace SMT.Models
     {
         public bool WarningSystemsNeedsUpdate { get; set; }
         public List<object> ActiveRoute { get; set; }
-        public string EsiAccessToken { get; set; }
-        public DateTimeOffset EsiAccessTokenExpiry { get; set; }
-        public string EsiAuthCode { get; set; }
         public EsiAuthData EsiAuthData { get; set; }
         public bool EsiLinked { get; set; }
-        public string EsiRefreshToken { get; set; }
         public FleetInfo FleetInfo { get; set; }
         public string LocalChatFile { get; set; }
         public string Location { get; set; }
@@ -34,6 +30,7 @@ namespace SMT.Models
         public string Name { get; set; }
         public DateTime LastUpdated { get; set; }
         public bool Active { get; set; }
+        public bool BroadcastLocation { get; set; }
     }
 
     public class EsiAuthData
@@ -43,12 +40,7 @@ namespace SMT.Models
         public string CharacterName { get; set; }
         public string CharacterOwnerHash { get; set; }
         public long CorporationId { get; set; }
-        public DateTimeOffset ExpiresOn { get; set; }
         public long FactionId { get; set; }
-        public string RefreshToken { get; set; }
-        public string Scopes { get; set; }
-        public string Token { get; set; }
-        public string TokenType { get; set; }
     }
 
     public class FleetInfo

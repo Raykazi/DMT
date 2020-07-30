@@ -13,14 +13,12 @@ using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
 using MQTTnet.Extensions.ManagedClient;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using SMT.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -1759,6 +1757,7 @@ namespace SMT.EVEData
 #if DEBUG
             mqttOptions = new MqttClientOptionsBuilder()                
                 .WithTcpServer("127.0.0.1", 1738)
+                //.WithTcpServer(dmtConfig.DMTUrl, 1738)
                 .WithClientId($"{Environment.MachineName}\\{Environment.UserName}")
                 .WithCredentials(dmtConfig.DMTToken, VersionStr)
                 .Build();
@@ -1888,25 +1887,32 @@ namespace SMT.EVEData
                 case "location":
                     var dmtc = JsonConvert.DeserializeObject<DMTCharacter>(payload);
                     //Check to see if we own them. #Slavery
-                    foreach (LocalCharacter lc in LocalCharacters)
+                    if(!dmtc.BroadcastLocation)
                     {
-                        if (dmtc.Name == lc.Name)
+                        if (DMTCharacters.Contains(dmtc))
+                            DMTCharacters.Remove(dmtc);
+                    } else
+                    {
+                        foreach (LocalCharacter lc in LocalCharacters)
                         {
-                            return;
+                            if (dmtc.Name == lc.Name)
+                            {
+                                return;
+                            }
                         }
-                    }
-                    bool found = false;
-                    for (int i = 0; i < DMTCharacters.Count; i++)
-                    {
-                        if (DMTCharacters[i].Name == dmtc.Name)
+                        bool found = false;
+                        for (int i = 0; i < DMTCharacters.Count; i++)
                         {
-                            DMTCharacters[i] = dmtc;
-                            found = true;
+                            if (DMTCharacters[i].Name == dmtc.Name)
+                            {
+                                DMTCharacters[i] = dmtc;
+                                found = true;
+                            }
                         }
-                    }
-                    if (!found)
-                    {
-                        DMTCharacters.Add(dmtc);
+                        if (!found)
+                        {
+                            DMTCharacters.Add(dmtc);
+                        }
                     }
                     break;
                 case "intel":

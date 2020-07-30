@@ -1,5 +1,6 @@
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using SMT.EVEData;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -106,9 +107,9 @@ namespace SMT
                 MapConf = new MapConfig();
                 MapConf.SetDefaultColours();
             }
-            
+
             string dmtConfigFileName = "DMTConfig.json";
-            if(File.Exists(dmtConfigFileName))
+            if (File.Exists(dmtConfigFileName))
             {
                 var json = File.ReadAllText(dmtConfigFileName);
                 dmtConfig = DMTConfig.LoadSettings(json); //Didnt feel like adding another json reference to this file.
@@ -116,7 +117,7 @@ namespace SMT
             else
             {
                 DMTConfig dmtConfig = new DMTConfig() { DMTToken = "Change Me", DMTUrl = "change.me.please" };
-                DMTConfig.SaveSettings(dmtConfigFileName ,dmtConfig);
+                DMTConfig.SaveSettings(dmtConfigFileName, dmtConfig);
                 MessageBox.Show($"Please edit {dmtConfigFileName} with your DMT Server Url & DMT Token.", "First Time Setup");
                 Environment.Exit(0);
             }
@@ -159,7 +160,7 @@ namespace SMT
 
             SovCampaignList.ItemsSource = EVEManager.ActiveSovCampaigns;
             EVEManager.ActiveSovCampaigns.CollectionChanged += ActiveSovCampaigns_CollectionChanged;
-           
+
             RegionUC.MapConf = MapConf;
             RegionUC.Init();
             RegionUC.SelectRegion(MapConf.DefaultRegion);
@@ -176,7 +177,7 @@ namespace SMT
             RegionsViewUC.RequestRegion += RegionsViewUC_RequestRegion;
 
             AppStatusBar.DataContext = EVEManager.ServerInfo;
-            
+
             dpd.AddValueChanged(this.mqttStatus, (sender, ars) =>
             {
                 mqttStatusColor.Fill = new SolidColorBrush(EVEManager.ServerInfo.MqttStatusColor);
@@ -241,7 +242,36 @@ namespace SMT
             EVEManager.MqttInit();
 
         }
+        private void BroadcastOnCheck(object sender, RoutedEventArgs e)
+        {
+            var selected = (LocalCharacter)CharactersList.SelectedItem;
+            if (EVEManager.LocalCharacters.Contains(selected))
+            {                
+                foreach (var c in EVEManager.LocalCharacters)
+                {
+                    if (c.Name == selected.Name)
+                    {
 
+                        c.BroadcastLocation = true;
+                    }
+                }
+            }
+        }
+        private void BroadcastOnUnCheck(object sender, RoutedEventArgs e)
+        {
+            var selected = (LocalCharacter)CharactersList.SelectedItem;
+            if (EVEManager.LocalCharacters.Contains(selected))
+            {
+                foreach (var c in EVEManager.LocalCharacters)
+                {
+                    if (c.Name == selected.Name)
+                    {
+
+                        c.BroadcastLocation = false;
+                    }
+                }
+            }
+        }
         private void ActiveSovCampaigns_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             CollectionViewSource.GetDefaultView(SovCampaignList.ItemsSource).Refresh();
@@ -369,7 +399,7 @@ namespace SMT
             if (uiRefreshCounter == 5)
             {
                 uiRefreshCounter = 0;
-                if(FleetMembersList.ItemsSource != null)
+                if (FleetMembersList.ItemsSource != null)
                 {
                     CollectionViewSource.GetDefaultView(FleetMembersList.ItemsSource).Refresh();
                 }
@@ -447,9 +477,10 @@ namespace SMT
                 {
                     EVEManager.SubscribeAllIntelChannels = false;
                     EVEManager.UnsubscribeAllIntel();
-                } else
+                }
+                else
                 {
-                    EVEManager.SubscribeIntel("",true);
+                    EVEManager.SubscribeIntel("", true);
                 }
             }
 
@@ -651,9 +682,9 @@ namespace SMT
             }
         }
 
-#endregion
+        #endregion
 
-#region Characters
+        #region Characters
 
         public EVEData.LocalCharacter ActiveCharacter { get; set; }
 
@@ -782,9 +813,9 @@ namespace SMT
 
 
 
-#endregion
+        #endregion
 
-#region intel
+        #region intel
 
         private void RawIntelBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
@@ -822,7 +853,7 @@ namespace SMT
         private void OnIntelAdded(List<string> intelsystems)
         {
             bool playSound = false;
-            
+
             if (MapConf.PlayIntelSound)
             {
                 if (MapConf.PlaySoundOnlyInDangerZone)
@@ -856,11 +887,11 @@ namespace SMT
                 }
             }
 
-            if (playSound )
+            if (playSound)
             {
                 mediaPlayer.Stop();
                 mediaPlayer.Position = new TimeSpan(0, 0, 0);
-                mediaPlayer.Play(); 
+                mediaPlayer.Play();
             }
         }
 
@@ -873,9 +904,9 @@ namespace SMT
         }
 
 
-#endregion intel
+        #endregion intel
 
-#region Thera
+        #region Thera
 
         /// <summary>
         /// Update Thera Button Clicked
@@ -904,9 +935,9 @@ namespace SMT
             }
         }
 
-#endregion Thera
+        #endregion Thera
 
-#region Route
+        #region Route
 
         private void AddWaypointsBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -968,9 +999,9 @@ namespace SMT
         }
 
 
-#endregion Route
+        #endregion Route
 
-#region JumpBridges
+        #region JumpBridges
 
         private async void ImportJumpGatesBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -1190,9 +1221,9 @@ namespace SMT
         }
 
 
-#endregion JumpBridges
+        #endregion JumpBridges
 
-#region ZKillBoard
+        #region ZKillBoard
 
         private bool zkbFilterByRegion = true;
 
@@ -1303,9 +1334,9 @@ namespace SMT
         }
 
 
-#endregion ZKillboard
+        #endregion ZKillboard
 
-#region Anoms
+        #region Anoms
 
         /// <summary>
         /// Clear system Anoms button clicked
@@ -1346,7 +1377,7 @@ namespace SMT
 
 
 
-#endregion Anoms
+        #endregion Anoms
 
     }
 
@@ -1359,17 +1390,17 @@ namespace SMT
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            TimeSpan ts = (TimeSpan) value;
+            TimeSpan ts = (TimeSpan)value;
 
 
             string Output = "";
 
-            if(ts.Ticks < 0)
+            if (ts.Ticks < 0)
             {
                 Output += "-";
             }
 
-            if(ts.Days != 0)
+            if (ts.Days != 0)
             {
                 Output += Math.Abs(ts.Days) + "d ";
             }
@@ -1378,7 +1409,7 @@ namespace SMT
             {
                 Output += Math.Abs(ts.Hours) + "h ";
             }
-            
+
             Output += Math.Abs(ts.Minutes) + "m ";
 
 

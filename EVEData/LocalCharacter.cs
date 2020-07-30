@@ -249,6 +249,7 @@ namespace SMT.EVEData
         [XmlIgnore]
         public ObservableCollection<string> Waypoints { get; set; }
         public bool Active { get;  set; }
+        public bool BroadcastLocation { get; set; }
 
         /// <summary>
         /// Add Destination to the route
