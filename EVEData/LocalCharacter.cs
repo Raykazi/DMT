@@ -51,6 +51,7 @@ namespace SMT.EVEData
         /// </summary>
         public LocalCharacter()
         {
+
             UseAnsiblexGates = true;
 
             ESILinked = false;
@@ -89,6 +90,7 @@ namespace SMT.EVEData
 
 
             KnownStructures = new SerializableDictionary<string, ObservableCollection<Structure>>();
+            BroadcastLocation = true;
         }
 
         /// <summary>
