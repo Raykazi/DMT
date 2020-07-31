@@ -166,7 +166,7 @@
                             <xcadl:LayoutAnchorable Title="Characters" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="CharactersContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
                                 <ScrollViewer Background="{DynamicResource ButtonBackground}">
                                     <StackPanel>
-                                        <DataGrid  x:Name="CharactersList" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" MouseDoubleClick="CharactersList_MouseDoubleClick" HeadersVisibility="Column" SelectionUnit="FullRow" GridLinesVisibility="None" IsSynchronizedWithCurrentItem="False">
+                                        <DataGrid  x:Name="CharactersList" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" CanUserAddRows="False" MouseDoubleClick="CharactersList_MouseDoubleClick" HeadersVisibility="Column" SelectionUnit="FullRow" GridLinesVisibility="None" IsSynchronizedWithCurrentItem="False">
 
                                             <DataGrid.ContextMenu>
                                                 <ContextMenu>
@@ -176,9 +176,17 @@
 
 
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserReorder="False" Width="*" />
-                                                <DataGridTextColumn Header="Location" Binding="{Binding Location}" CanUserReorder="False" Width="*" />
-                                                <DataGridTextColumn Header="Region" Binding="{Binding Region}" CanUserReorder="False" Width="*" />
+                                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
+                                                <DataGridTextColumn Header="Location" Binding="{Binding Location}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
+                                                <DataGridTextColumn Header="Region" Binding="{Binding Region}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
+                                                <DataGridCheckBoxColumn Header="Broadcast"  Binding="{Binding Path=BroadcastLocation}"  CanUserReorder="False" Width="*" IsReadOnly="False">
+                                                    <DataGridCheckBoxColumn.CellStyle>
+                                                        <Style>
+                                                            <EventSetter Event="CheckBox.Checked" Handler="BroadcastOnCheck"/>
+                                                            <EventSetter Event="CheckBox.Unchecked" Handler="BroadcastOnUnCheck"/>
+                                                        </Style>
+                                                    </DataGridCheckBoxColumn.CellStyle>
+                                                </DataGridCheckBoxColumn>
                                             </DataGrid.Columns>
                                         </DataGrid>
                                         <CheckBox Content="Show Characters On Map" IsChecked="{Binding MapConf.ShowCharacterNamesOnMap}" Margin="3"/>
