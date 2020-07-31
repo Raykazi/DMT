@@ -1932,7 +1932,7 @@ namespace SMT.EVEData
                     }
                     if (!found2)
                     {
-                        var newIdl = new IntelData(intel.RawIntel);
+                        var newIdl = new IntelData(intel.RawIntel, intel.Channel);
                         Application.Current.Dispatcher.Invoke((Action)(() =>
                         {
                             IntelDataList.Insert(0, newIdl);
@@ -2032,7 +2032,7 @@ namespace SMT.EVEData
         private void IntelFileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
             string changedFile = e.FullPath;
-
+            string idlName = e.Name.Substring(0, e.Name.IndexOf("_"));
             bool processFile = false;
             bool localChat = false;
 
@@ -2207,7 +2207,7 @@ namespace SMT.EVEData
 
                                 if (addToIntel)
                                 {
-                                    IntelData id = new IntelData(line);
+                                    IntelData id = new IntelData(line, idlName);
 
                                     foreach (string s in id.IntelString.Split(' '))
                                     {
