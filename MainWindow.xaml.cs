@@ -246,7 +246,7 @@ namespace SMT
         {
             var selected = (LocalCharacter)CharactersList.SelectedItem;
             if (EVEManager.LocalCharacters.Contains(selected))
-            {                
+            {
                 foreach (var c in EVEManager.LocalCharacters)
                 {
                     if (c.Name == selected.Name)
@@ -556,7 +556,7 @@ namespace SMT
 
         #endregion
 
-        #region Universe Control 
+        #region Universe Control
 
         private void UniverseUC_RequestRegionSystem(object sender, RoutedEventArgs e)
         {
@@ -1047,6 +1047,32 @@ namespace SMT
 
                             Thread.Sleep(2000);
                         }
+
+                        foreach (char cc in chars)
+                        {
+                            string search = cc+ basesearch;
+                            List<EVEData.JumpBridge> jbl = await c.FindJumpGates(search);
+
+                            foreach (EVEData.JumpBridge jb in jbl)
+                            {
+                                bool found = false;
+
+                                foreach (EVEData.JumpBridge jbr in EVEManager.JumpBridges)
+                                {
+                                    if ((jb.From == jbr.From && jb.To == jbr.To) || (jb.From == jbr.To && jb.To == jbr.From))
+                                    {
+                                        found = true;
+                                    }
+                                }
+
+                                if (!found)
+                                {
+                                    EVEManager.JumpBridges.Add(jb);
+                                }
+                            }
+
+                            Thread.Sleep(2000);
+                        }
                     }
                     else
                     {
@@ -1485,4 +1511,3 @@ namespace SMT
 
 
 }
-
