@@ -121,7 +121,7 @@ namespace SMT
                 MessageBox.Show($"Please edit {dmtConfigFileName} with your DMT Server Url & DMT Token.", "First Time Setup");
                 Environment.Exit(0);
             }
-
+            
 
             // Create the main EVE manager
 
@@ -220,7 +220,7 @@ namespace SMT
             Closed += MainWindow_Closed;
 
             EVEManager.IntelAddedEvent += OnIntelAdded;
-
+            EVEManager.JbSyncedEvent += EVEManager_JbSyncedEvent;
 
 
             uiRefreshTimer = new DispatcherTimer();
@@ -242,6 +242,52 @@ namespace SMT
             EVEManager.MqttInit();
 
         }
+
+        private void EVEManager_JbSyncedEvent()
+        {
+            Application.Current.Dispatcher.Invoke((Action)(() =>
+            {
+                foreach (string jb in EVEManager.DMTBridges)
+                {
+                    string[] bits = jb.Split(' ');
+                    if (bits.Length > 3)
+                    {
+                        long IDFrom = 0;
+                        long.TryParse(bits[0], out IDFrom);
+
+                        string from = bits[1];
+                        string to = bits[3];
+                        EVEManager.AddUpdateJumpBridge(from, to, IDFrom);
+
+                    }
+                }
+                Navigation.ClearJumpBridges();
+                Navigation.UpdateJumpBridges(EVEManager.JumpBridges.ToList());
+                RegionUC.ReDrawMap(true);
+            }), DispatcherPriority.Normal, null);
+        }
+
+        private void JbSyncedEvent(List<string> jbs)
+        {
+            foreach (string jb in jbs)
+            {
+                string[] bits = jb.Split(' ');
+                if (bits.Length > 3)
+                {
+                    long IDFrom = 0;
+                    long.TryParse(bits[0], out IDFrom);
+
+                    string from = bits[1];
+                    string to = bits[3];
+
+                    EVEManager.AddUpdateJumpBridge(from, to, IDFrom);
+                }
+            }
+            Navigation.ClearJumpBridges();
+            Navigation.UpdateJumpBridges(EVEManager.JumpBridges.ToList());
+            RegionUC.ReDrawMap(true);
+        }
+
         private void BroadcastOnCheck(object sender, RoutedEventArgs e)
         {
             var selected = (LocalCharacter)CharactersList.SelectedItem;
@@ -1111,6 +1157,7 @@ namespace SMT
 
         }
 
+
         private void ImportPasteJumpGatesBtn_Click(object sender, RoutedEventArgs e)
         {
             if (!Clipboard.ContainsText(TextDataFormat.Text))
@@ -1405,6 +1452,10 @@ namespace SMT
 
         #endregion Anoms
 
+        private void SyncDMTBtn_Click(object sender, RoutedEventArgs e)
+        {
+            EVEManager_JbSyncedEvent();
+        }
     }
 
 

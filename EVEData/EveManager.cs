@@ -135,6 +135,9 @@ namespace SMT.EVEData
         /// </summary>
         public event IntelAddedEventHandler IntelAddedEvent;
 
+        public delegate void JBSyncedEventHandler();
+        public event JBSyncedEventHandler JbSyncedEvent;
+
         public enum JumpShip
         {
             Dread,
@@ -1620,7 +1623,6 @@ namespace SMT.EVEData
 
             request.BeginGetResponse(new AsyncCallback(UpdateTheraConnectionsCallback), request);
         }
-
         internal void AddUpdateJumpBridge(string from, string to, long stationID)
         {
             // validate
@@ -1755,7 +1757,7 @@ namespace SMT.EVEData
         {
             mqttClient = factory.CreateManagedMqttClient();
 #if DEBUG
-            mqttOptions = new MqttClientOptionsBuilder()                
+            mqttOptions = new MqttClientOptionsBuilder()
                 .WithTcpServer("127.0.0.1", 1738)
                 //.WithTcpServer(dmtConfig.DMTUrl, 1738)
                 .WithClientId($"{Environment.MachineName}\\{Environment.UserName}")
@@ -1795,6 +1797,7 @@ namespace SMT.EVEData
             }
             await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "location/#" });
             await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "info/jbs" });
+            await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "info/dmt_stats" });
             MqttIntelInit();
         }
 
@@ -1806,15 +1809,17 @@ namespace SMT.EVEData
                 mqttClient.StopAsync();
                 ServerInfo.MqttStatus = "Server might be offline. Ray????";
                 ServerInfo.MqttStatusColor = Colors.Red;
-            } else
+            }
+            else
             {
-                if(arg.ClientWasConnected)
+                if (arg.ClientWasConnected)
                 {
                     ServerInfo.MqttStatus = "Reconnecting";
                     ServerInfo.MqttStatusColor = Colors.Orange;
-                } else
+                }
+                else
                 {
-                    ServerInfo.MqttStatus = $"Connection Attempt #{mqttConnects+1}";
+                    ServerInfo.MqttStatus = $"Connection Attempt #{mqttConnects + 1}";
                     ServerInfo.MqttStatusColor = Colors.Orange;
 
                 }
@@ -1832,7 +1837,7 @@ namespace SMT.EVEData
                 MessageBox.Show("DMT Auth Token invalid. Please check DMTToken in DMTConfig.json", "Error");
                 mqttClient.StopAsync();
             }
-            if(ex.Message.Contains("ServerUnavailable"))
+            if (ex.Message.Contains("ServerUnavailable"))
             {
                 ServerInfo.MqttStatus = "Download the latest version.";
                 ServerInfo.MqttStatusColor = Colors.Red;
@@ -1872,8 +1877,8 @@ namespace SMT.EVEData
         {
             string payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
             string fulltopic = e.ApplicationMessage.Topic;
-            string topic;
-            string subtopic;
+            string topic = "";
+            string subtopic = "";
             if (fulltopic.Contains("/"))
             {
                 topic = fulltopic.Substring(0, fulltopic.IndexOf('/'));
@@ -1882,19 +1887,20 @@ namespace SMT.EVEData
             {
                 topic = fulltopic;
             }
-            switch (topic)
+            switch (fulltopic)
             {
                 case "location":
                     var dmtc = JsonConvert.DeserializeObject<DMTCharacter>(payload);
                     //Check to see if we own them. #Slavery
-                    if(!dmtc.BroadcastLocation)
+                    if (!dmtc.BroadcastLocation)
                     {
-                        foreach(var ch in DMTCharacters)
+                        foreach (var ch in DMTCharacters)
                         {
-                            if(ch.Name == dmtc.Name)
+                            if (ch.Name == dmtc.Name)
                                 DMTCharacters.Remove(ch);
                         }
-                    } else
+                    }
+                    else
                     {
                         foreach (LocalCharacter lc in LocalCharacters)
                         {
@@ -1921,7 +1927,7 @@ namespace SMT.EVEData
                 case "intel":
                     var intel = JsonConvert.DeserializeObject<DMTIntel>(payload);
                     bool found2 = false;
-                    if(IntelFilters.Contains(intel.Channel)) return;//Ignore intel were already monitoring
+                    if (IntelFilters.Contains(intel.Channel)) return;//Ignore intel were already monitoring
                     foreach (var idl in IntelDataList)
                     {
 
@@ -1939,20 +1945,13 @@ namespace SMT.EVEData
                         }), DispatcherPriority.Normal, null);
                     }
                     break;
+                case "info/jbs":
+                    DMTBridges = JsonConvert.DeserializeObject<List<string>>(payload);
+                    if (JbSyncedEvent != null) JbSyncedEvent();
+                    break;
             }
-            //if (e.ApplicationMessage.Topic.Contains("location"))
-            //{
-
-            //}
-            //else
-            //{
-            //    switch (e.ApplicationMessage.Topic)
-            //    {
-            //        case "location/corp":
-            //            break;
-            //    }
-            //}
         }
+        public List<string> DMTBridges = new List<string>();
 
         public void SendCharLocation(LocalCharacter c)
         {
