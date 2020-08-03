@@ -1,4 +1,5 @@
 
+using ESI.NET.Models.Universe;
 using SMT.EVEData;
 using SMT.Models;
 using System;
@@ -34,10 +35,7 @@ namespace SMT
         private Dictionary<string, List<KeyValuePair<int, string>>> NameTrackingLocationMap = new Dictionary<string, List<KeyValuePair<int, string>>>();
 
         // Store the Dynamic Map elements so they can seperately be cleared
-        private List<System.Windows.UIElement> DynamicMapElements;
-        private List<System.Windows.UIElement> DynamicMapElementsRangeMarkers;
-        private List<System.Windows.UIElement> DynamicMapElementsRouteHighlight;
-        private List<System.Windows.UIElement> DynamicMapElementsCharacters;
+        private List<UIElement> DynamicMapElements;
 
         private LocalCharacter m_ActiveCharacter;
 
@@ -108,6 +106,19 @@ namespace SMT
             new Point(2,2),
             new Point(16,2),
             new Point(16,16),
+        };
+        private List<Point> SystemIcon_Ansiplex = new List<Point>
+        {
+            new Point(2,10),
+            new Point(4,8),
+            new Point(4,10),
+            new Point(16,10),
+            new Point(16,8),
+            new Point(18,10),
+            new Point(16,12),
+            new Point(16,10),
+            new Point(4,10),
+            new Point(4,12),
         };
 
         // Timer to Re-draw the map
@@ -400,7 +411,7 @@ namespace SMT
 
         public void AddSovConflictsToMap()
         {
-            if(!ShowSystemTimers)
+            if (!ShowSystemTimers)
             {
                 return;
             }
@@ -435,7 +446,7 @@ namespace SMT
                     MainCanvas.Children.Add(SovFightLogo);
 
 
-                    if(sc.IsActive || sc.Type == "IHub")
+                    if (sc.IsActive || sc.Type == "IHub")
                     {
                         Shape activeSovFightShape = new Ellipse() { Height = SYSTEM_SHAPE_SIZE + 18, Width = SYSTEM_SHAPE_SIZE + 18 };
 
@@ -464,10 +475,6 @@ namespace SMT
             SelectedSystem = string.Empty;
 
             DynamicMapElements = new List<UIElement>();
-            DynamicMapElementsRangeMarkers = new List<UIElement>();
-            DynamicMapElementsRouteHighlight = new List<UIElement>();
-            DynamicMapElementsCharacters = new List<UIElement>();
-
 
             ActiveCharacter = null;
 
@@ -543,24 +550,6 @@ namespace SMT
                     MainCanvas.Children.Remove(uie);
                 }
                 DynamicMapElements.Clear();
-
-                foreach (UIElement uie in DynamicMapElementsRangeMarkers)
-                {
-                    MainCanvas.Children.Remove(uie);
-                }
-                DynamicMapElementsRangeMarkers.Clear();
-
-                foreach (UIElement uie in DynamicMapElementsRouteHighlight)
-                {
-                    MainCanvas.Children.Remove(uie);
-                }
-                DynamicMapElementsRouteHighlight.Clear();
-
-                foreach (UIElement uie in DynamicMapElementsCharacters)
-                {
-                    MainCanvas.Children.Remove(uie);
-                }
-                DynamicMapElementsCharacters.Clear();
             }
 
             AddCharactersToMap();
@@ -687,7 +676,7 @@ namespace SMT
         private void AddCharactersToMap()
         {
             // Cache all characters in the same system so we can render them on seperate lines
-            if(!MapConf.ShowCharacterNamesOnMap)
+            if (!MapConf.ShowCharacterNamesOnMap)
             {
                 return;
             }
@@ -708,9 +697,9 @@ namespace SMT
                 {
                     NameTrackingLocationMap[c.Location] = new List<KeyValuePair<int, string>>();
                 }
-                NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(0,  c.Name));
+                NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(0, c.Name));
             }
-            foreach(DMTCharacter c in EM.DMTCharacters)
+            foreach (DMTCharacter c in EM.DMTCharacters)
             {
                 if (!Region.IsSystemOnMap(c.Location))
                 {
@@ -721,7 +710,7 @@ namespace SMT
                 {
                     NameTrackingLocationMap[c.Location] = new List<KeyValuePair<int, string>>();
                 }
-                NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(1,  c.Name));
+                NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(1, c.Name));
             }
 
             if (ActiveCharacter != null && MapConf.FleetShowOnMap)
@@ -759,7 +748,7 @@ namespace SMT
                         }
 
                         string displayName = fm.Name;
-                        if(MapConf.FleetShowShipType)
+                        if (MapConf.FleetShowShipType)
                         {
                             displayName += " (" + fm.ShipType + ")";
                         }
@@ -777,15 +766,15 @@ namespace SMT
 
                 bool addIndividualFleetMembers = true;
                 int fleetMemberCount = 0;
-                foreach(KeyValuePair<int, string> kvp in lkvp)
+                foreach (KeyValuePair<int, string> kvp in lkvp)
                 {
-                    if(kvp.Key == 3)
+                    if (kvp.Key == 3)
                     {
                         fleetMemberCount++;
                     }
                 }
 
-                if(fleetMemberCount > MapConf.FleetMaxMembersPerSystem)
+                if (fleetMemberCount > MapConf.FleetMaxMembersPerSystem)
                 {
                     addIndividualFleetMembers = false;
                 }
@@ -799,11 +788,11 @@ namespace SMT
 
                 foreach (KeyValuePair<int, string> kvp in lkvp)
                 {
-                    if(kvp.Key >=0 && addIndividualFleetMembers)
+                    if (kvp.Key >= 0 && addIndividualFleetMembers)
                     {
                         Label charText = new Label();
                         charText.Content = kvp.Value;
-                        switch(kvp.Key)
+                        switch (kvp.Key)
                         {
                             case 0:
                                 charText.Foreground = localCharacterText;
@@ -1400,7 +1389,7 @@ namespace SMT
                     bool AddHighlight = false;
                     bool DoubleHighlight = false;
 
-                    // check character
+                    // check character 
                     if (!string.IsNullOrEmpty(currentJumpCharacter))
                     {
                         double Distance = EM.GetRangeBetweenSystems(currentCharacterJumpSystem, sys.Name);
@@ -1428,7 +1417,7 @@ namespace SMT
 
                     foreach (string key in activeJumpSpheres.Keys)
                     {
-                        if(!string.IsNullOrEmpty(currentJumpCharacter) && key == currentCharacterJumpSystem)
+                        if (!string.IsNullOrEmpty(currentJumpCharacter) && key == currentCharacterJumpSystem)
                         {
                             continue;
                         }
@@ -1593,7 +1582,7 @@ namespace SMT
                 DoubleAnimation da = new DoubleAnimation();
                 da.From = 0;
                 da.To = 360;
-                da.Duration = new Duration(TimeSpan.FromSeconds(6));
+                da.Duration = new Duration(TimeSpan.FromSeconds(12));
                 Timeline.SetDesiredFrameRate(da, 20);
 
                 try
@@ -1613,7 +1602,7 @@ namespace SMT
                 return;
 
             Brush RouteBrush = new SolidColorBrush(Colors.Yellow);
-            Brush RouteAnsiblexBrush = new SolidColorBrush(Colors.DarkGray);
+            Brush RouteAnsiblexBrush = new SolidColorBrush(Colors.DarkMagenta);
 
 
             // no active route
@@ -1648,7 +1637,6 @@ namespace SMT
                     routeLine.X2 = to.LayoutX;
                     routeLine.Y2 = to.LayoutY;
 
-
                     routeLine.StrokeThickness = 5;
                     routeLine.Visibility = Visibility.Visible;
                     if (ActiveCharacter.ActiveRoute[i - 1].GateToTake == Navigation.GateType.Ansibex)
@@ -1682,9 +1670,8 @@ namespace SMT
                         routeLine.BeginAnimation(Shape.StrokeDashOffsetProperty, da);
                     }
 
-                    Canvas.SetZIndex(routeLine, 19);
+                    Canvas.SetZIndex(routeLine, 18);
                     MainCanvas.Children.Add(routeLine);
-
                     DynamicMapElements.Add(routeLine);
                 }
             }
@@ -2091,13 +2078,13 @@ namespace SMT
                     sovADM.Content = $"{system.ActualSystem.IHubOccupancyLevel:f1}";
                     sovADM.HorizontalContentAlignment = HorizontalAlignment.Center;
                     sovADM.VerticalContentAlignment = VerticalAlignment.Center;
-                    sovADM.Width = SYSTEM_SHAPE_SIZE+2;
-                    sovADM.Height = SYSTEM_SHAPE_SIZE+2;
+                    sovADM.Width = SYSTEM_SHAPE_SIZE + 2;
+                    sovADM.Height = SYSTEM_SHAPE_SIZE + 2;
                     sovADM.Foreground = DarkTextColourBrush;
 
 
-                    Canvas.SetLeft(sovADM, system.LayoutX - (SYSTEM_SHAPE_OFFSET+1));
-                    Canvas.SetTop(sovADM, system.LayoutY - (SYSTEM_SHAPE_OFFSET+1));
+                    Canvas.SetLeft(sovADM, system.LayoutX - (SYSTEM_SHAPE_OFFSET + 1));
+                    Canvas.SetTop(sovADM, system.LayoutY - (SYSTEM_SHAPE_OFFSET + 1));
                     Canvas.SetZIndex(sovADM, SYSTEM_Z_INDEX - 1);
                     MainCanvas.Children.Add(sovADM);
                 }
@@ -2194,7 +2181,7 @@ namespace SMT
                     MainCanvas.Children.Add(CynoBeaconLogo);
                 }
 
-                if (MapConf.ShowJoveObservatories && system.ActualSystem.HasJoveObservatory && !ShowSystemADM && !ShowSystemTimers)
+                if (MapConf.ShowJoveObservatories && system.ActualSystem.HasJoveObservatory && !ShowSystemADM && !ShowSystemTimers && !ShowJumpBridges)
                 {
                     Image JoveLogo = new Image
                     {
@@ -2402,7 +2389,7 @@ namespace SMT
                 {
                     if (Region.IsSystemOnMap(jb.From) || Region.IsSystemOnMap(jb.To))
                     {
-                        EVEData.MapSystem from;
+                        MapSystem from;
                         EVEData.System to;
 
                         if (!Region.IsSystemOnMap(jb.From))
@@ -2414,6 +2401,18 @@ namespace SMT
                         {
                             from = Region.MapSystems[jb.From];
                             to = EM.GetEveSystem(jb.To);
+                            Polygon jbFrom = new Polygon();
+                            foreach (Point p in SystemIcon_Ansiplex)
+                            {
+                                jbFrom.Points.Add(p);
+                            }
+                            jbFrom.Stroke = SysOutlineBrush;
+                            jbFrom.StrokeLineJoin = PenLineJoin.Round;
+                            jbFrom.Fill = FriendlyJumpBridgeBrush;
+                            Canvas.SetLeft(jbFrom, from.LayoutX - SYSTEM_SHAPE_OFFSET);
+                            Canvas.SetTop(jbFrom, from.LayoutY - SYSTEM_SHAPE_OFFSET);
+                            Canvas.SetZIndex(jbFrom, SYSTEM_Z_INDEX + 5);
+                            MainCanvas.Children.Add(jbFrom);
                         }
 
                         Point startPoint = new Point(from.LayoutX, from.LayoutY);
@@ -2427,11 +2426,8 @@ namespace SMT
                             Canvas.SetLeft(jbOutofSystemBlob, endPoint.X - 3);
                             Canvas.SetTop(jbOutofSystemBlob, endPoint.Y - 3);
                             Canvas.SetZIndex(jbOutofSystemBlob, 19);
-
-                            MainCanvas.Children.Add(jbOutofSystemBlob);
-
                             Label jbOutofRegionText = new Label();
-
+                            MainCanvas.Children.Add(jbOutofSystemBlob);
 
                             if (jb.Disabled)
                             {
@@ -2444,38 +2440,58 @@ namespace SMT
                                 jbOutofRegionText.Foreground = FriendlyJumpBridgeBrush;
                             }
                             jbOutofSystemBlob.Fill = jbOutofSystemBlob.Stroke;
-
                             jbOutofRegionText.Content = $"{to.Name}\n({to.Region})";
-                            jbOutofRegionText.FontSize = SYSTEM_TEXT_TEXT_SIZE+1;
+                            jbOutofRegionText.FontSize = SYSTEM_TEXT_TEXT_SIZE + 1;
                             jbOutofRegionText.IsHitTestVisible = false;
 
                             Canvas.SetLeft(jbOutofRegionText, from.LayoutX - 20);
                             Canvas.SetTop(jbOutofRegionText, from.LayoutY - 60);
                             Canvas.SetZIndex(jbOutofRegionText, SYSTEM_Z_INDEX);
-
                             MainCanvas.Children.Add(jbOutofRegionText);
-
-
                         }
                         else
                         {
                             EVEData.MapSystem toSys = Region.MapSystems[jb.To];
                             endPoint = new Point(toSys.LayoutX, toSys.LayoutY);
+                            Polygon jbTo = new Polygon();
+                            foreach (Point p in SystemIcon_Ansiplex)
+                            {
+                                jbTo.Points.Add(p);
+                            }
+                            jbTo.Stroke = SysOutlineBrush;
+                            jbTo.StrokeLineJoin = PenLineJoin.Round;
+                            jbTo.Fill = FriendlyJumpBridgeBrush;
+                            Canvas.SetLeft(jbTo, toSys.LayoutX - SYSTEM_SHAPE_OFFSET);
+                            Canvas.SetTop(jbTo, toSys.LayoutY - SYSTEM_SHAPE_OFFSET);
+                            Canvas.SetZIndex(jbTo, SYSTEM_Z_INDEX + 5);
+                            MainCanvas.Children.Add(jbTo);
                         }
 
+                        Vector dir = Point.Subtract(startPoint, endPoint);
 
-                        Line jbLine = new Line();
+                        double jbDistance = Point.Subtract(startPoint, endPoint).Length;
 
-                        jbLine.X1 = startPoint.X;
-                        jbLine.Y1 = startPoint.Y;
+                        Size arcSize = new Size(jbDistance + 60, jbDistance + 60);
 
-                        jbLine.X2 = endPoint.X;
-                        jbLine.Y2 = endPoint.Y;
+                        ArcSegment arcseg = new ArcSegment(endPoint, arcSize, 140, false, SweepDirection.Clockwise, true);
 
+                        PathSegmentCollection pscollection = new PathSegmentCollection();
+                        pscollection.Add(arcseg);
 
+                        PathFigure pf = new PathFigure();
+                        pf.Segments = pscollection;
+                        pf.StartPoint = startPoint;
 
+                        PathFigureCollection pfcollection = new PathFigureCollection();
+                        pfcollection.Add(pf);
 
-                        jbLine.StrokeThickness = 2;
+                        PathGeometry pathGeometry = new PathGeometry();
+                        pathGeometry.Figures = pfcollection;
+
+                        Path path = new Path();
+                        path.Data = pathGeometry;
+
+                        path.StrokeThickness = 2;
 
                         DoubleCollection dashes = new DoubleCollection();
 
@@ -2483,17 +2499,17 @@ namespace SMT
                         {
                             dashes.Add(1.0);
                             dashes.Add(1.0);
-                            jbLine.Stroke = FriendlyJumpBridgeBrush;
+                            path.Stroke = FriendlyJumpBridgeBrush;
 
                         }
                         else
                         {
                             dashes.Add(1.0);
                             dashes.Add(3.0);
-                            jbLine.Stroke = DisabledJumpBridgeBrush;
+                            path.Stroke = DisabledJumpBridgeBrush;
                         }
 
-                        jbLine.StrokeDashArray = dashes;
+                        path.StrokeDashArray = dashes;
 
                         // animate the jump bridges
                         DoubleAnimation da = new DoubleAnimation();
@@ -2503,16 +2519,23 @@ namespace SMT
                         da.Duration = new Duration(TimeSpan.FromSeconds(100));
                         da.RepeatBehavior = RepeatBehavior.Forever;
                         Timeline.SetDesiredFrameRate(da, 20);
+                        // Storyboard.SetTargetProperty(path, new PropertyPath(Shape.StrokeDashOffsetProperty));
+                        // Storyboard.SetTargetName()
+                        // Storyboard sb = new Storyboard();
+                        // sb.Children.Add(da);
+
+                        path.StrokeDashArray = dashes;
 
                         if (!MapConf.DisableJumpBridgesPathAnimation)
                         {
-                            jbLine.BeginAnimation(Shape.StrokeDashOffsetProperty, da);
+                            path.BeginAnimation(Shape.StrokeDashOffsetProperty, da);
                         }
 
+                        // path.BeginStoryboard(sb);
 
-                        Canvas.SetZIndex(jbLine, 19);
+                        Canvas.SetZIndex(path, 19);
 
-                        MainCanvas.Children.Add(jbLine);
+                        MainCanvas.Children.Add(path);
                     }
                 }
             }
@@ -2630,9 +2653,9 @@ namespace SMT
             }
         }
 
-        public void UpdateActiveCharacter(LocalCharacter c = null )
+        public void UpdateActiveCharacter(LocalCharacter c = null)
         {
-            if (ActiveCharacter != c && c !=null)
+            if (ActiveCharacter != c && c != null)
             {
                 ActiveCharacter = c;
             }
@@ -2713,7 +2736,7 @@ namespace SMT
 
                 if (mi.DataContext as string == "0")
                 {
-                    if(activeJumpSpheres.Keys.Contains(eveSys.Name))
+                    if (activeJumpSpheres.Keys.Contains(eveSys.Name))
                     {
                         activeJumpSpheres.Remove(eveSys.Name);
                     }
@@ -2726,7 +2749,7 @@ namespace SMT
                     currentCharacterJumpSystem = "";
                 }
 
-                if(!string.IsNullOrEmpty(currentJumpCharacter))
+                if (!string.IsNullOrEmpty(currentJumpCharacter))
                 {
                     showJumpDistance = true;
                 }
@@ -3008,24 +3031,20 @@ namespace SMT
 
                 if (ShowJumpBridges)
                 {
-                    foreach (EVEData.JumpBridge jb in EM.JumpBridges)
+                    foreach (JumpBridge jb in EM.JumpBridges)
                     {
-
                         if (selectedSys.Name == jb.From)
                         {
                             Label jbl = new Label();
                             jbl.Padding = one;
                             jbl.Margin = one;
-                            jbl.Foreground = new SolidColorBrush(MapConf.ActiveColourScheme.PopupText);
-
                             jbl.Content = $"JB\t: {jb.To}";
-
-                            if(!Region.IsSystemOnMap(jb.To))
+                            jbl.Foreground = new SolidColorBrush(MapConf.ActiveColourScheme.PopupText);
+                            if (!Region.IsSystemOnMap(jb.To))
                             {
                                 EVEData.System sys = EM.GetEveSystem(jb.To);
                                 jbl.Content += $" ({sys.Region})";
                             }
-
                             SystemInfoPopupSP.Children.Add(jbl);
                         }
 
@@ -3034,20 +3053,15 @@ namespace SMT
                             Label jbl = new Label();
                             jbl.Padding = one;
                             jbl.Margin = one;
-                            jbl.Foreground = new SolidColorBrush(MapConf.ActiveColourScheme.PopupText);
-
                             jbl.Content = $"JB\t: {jb.From}";
-
+                            jbl.Foreground = new SolidColorBrush(MapConf.ActiveColourScheme.PopupText);
                             if (!Region.IsSystemOnMap(jb.From))
                             {
                                 EVEData.System sys = EM.GetEveSystem(jb.From);
                                 jbl.Content += $" ({sys.Region})";
                             }
-
                             SystemInfoPopupSP.Children.Add(jbl);
                         }
-
-
                     }
                 }
 
