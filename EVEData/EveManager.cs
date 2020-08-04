@@ -1755,6 +1755,7 @@ namespace SMT.EVEData
         }
         public async void MqttInit()
         {
+            IntelDataList.ListChanged += IntelDataList_ListChanged;
             mqttClient = factory.CreateManagedMqttClient();
 #if DEBUG
             mqttOptions = new MqttClientOptionsBuilder()
@@ -1944,7 +1945,6 @@ namespace SMT.EVEData
 
         private void CheckIntel(bool v, IntelData newIdl)
         {
-            IntelDataList.ListChanged += IntelDataList_ListChanged;
             Application.Current.Dispatcher.Invoke((Action)(() =>
             {
                 lock (IntelLocker)
@@ -1954,7 +1954,7 @@ namespace SMT.EVEData
                         bool found2 = false;
                         foreach (var idl in IntelDataList)
                         {
-                            if (idl.RawIntelString == newIdl.RawIntelString)
+                            if (idl.IntelString == newIdl.IntelString)
                             {
                                 found2 = true;
                                 return;
@@ -1978,14 +1978,13 @@ namespace SMT.EVEData
             if (e.ListChangedType == ListChangedType.ItemAdded)
             {
                 var newID = IntelDataList[e.NewIndex];
+                
                 for (int i = 0; i < IntelDataList.Count; i++)
                 {
-                    if (IntelDataList[i].RawIntelString == newID.RawIntelString && i != e.NewIndex)
+                    if (IntelDataList[i].IntelString == newID.IntelString && i != e.NewIndex)
                     {
                         IntelDataList.RemoveAt(i);
                     }
-                    if (IntelDataList[i].IntelString == newID.IntelString && i != e.NewIndex)
-                        IntelDataList.RemoveAt(i); 
                 }
             }
         }
