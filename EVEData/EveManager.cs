@@ -1755,11 +1755,12 @@ namespace SMT.EVEData
         }
         public async void MqttInit()
         {
+            IntelDataList.ListChanged += IntelDataList_ListChanged;
             mqttClient = factory.CreateManagedMqttClient();
 #if DEBUG
             mqttOptions = new MqttClientOptionsBuilder()
-                .WithTcpServer("127.0.0.1", 1738)
-                //.WithTcpServer(dmtConfig.DMTUrl, 1738)
+                //.WithTcpServer("127.0.0.1", 1738)
+                .WithTcpServer(dmtConfig.DMTUrl, 1738)
                 .WithClientId($"{Environment.MachineName}\\{Environment.UserName}")
                 .WithCredentials(dmtConfig.DMTToken, VersionStr)
                 .Build();
@@ -1877,17 +1878,20 @@ namespace SMT.EVEData
         {
             string payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
             string fulltopic = e.ApplicationMessage.Topic;
-            string topic = "";
+            string[] topics = fulltopic.Split('/');
+            string topic = topics[0];
             string subtopic = "";
-            if (fulltopic.Contains("/"))
-            {
-                topic = fulltopic.Substring(0, fulltopic.IndexOf('/'));
-            }
-            else
-            {
-                topic = fulltopic;
-            }
-            switch (fulltopic)
+            if (topics.Count() >= 2)
+                subtopic = topics[1];
+            //if (fulltopic.Contains("/"))
+            //{
+            //    topic = fulltopic.Substring(0, fulltopic.IndexOf('/'));
+            //}
+            //else
+            //{
+            //    topic = fulltopic;
+            //}
+            switch (topic)
             {
                 case "location":
                     var dmtc = JsonConvert.DeserializeObject<DMTCharacter>(payload);
@@ -1926,32 +1930,68 @@ namespace SMT.EVEData
                     break;
                 case "intel":
                     var intel = JsonConvert.DeserializeObject<DMTIntel>(payload);
-                    bool found2 = false;
-                    if (IntelFilters.Contains(intel.Channel)) return;//Ignore intel were already monitoring
-                    foreach (var idl in IntelDataList)
-                    {
-
-                        if (idl.RawIntelString == intel.RawIntel)
-                        {
-                            found2 = true;
-                        }
-                    }
-                    if (!found2)
-                    {
-                        var newIdl = new IntelData(intel.RawIntel, intel.Channel);
-                        Application.Current.Dispatcher.Invoke((Action)(() =>
-                        {
-                            IntelDataList.Insert(0, newIdl);
-                        }), DispatcherPriority.Normal, null);
-                    }
+                    var newIdl = new IntelData(intel.RawIntel, intel.Channel);
+                    CheckIntel(false, newIdl);
                     break;
-                case "info/jbs":
-                    DMTBridges = JsonConvert.DeserializeObject<List<string>>(payload);
-                    if (JbSyncedEvent != null) JbSyncedEvent();
+                case "info":
+                    if (subtopic == "jbs")
+                    {
+                        DMTBridges = JsonConvert.DeserializeObject<List<string>>(payload);
+                        if (JbSyncedEvent != null) JbSyncedEvent();
+                    }
                     break;
             }
         }
+
+        private void CheckIntel(bool v, IntelData newIdl)
+        {
+            Application.Current.Dispatcher.Invoke((Action)(() =>
+            {
+                lock (IntelLocker)
+                {
+                    try
+                    {
+                        bool found2 = false;
+                        foreach (var idl in IntelDataList)
+                        {
+                            if (idl.IntelString == newIdl.IntelString)
+                            {
+                                found2 = true;
+                                return;
+                            }
+                        }
+                        if (!found2)
+                        {
+                            IntelDataList.Insert(0, newIdl);
+                        }
+                    }
+                    finally
+                    {
+                    }
+                }
+            }), DispatcherPriority.Normal, null);
+            IntelAddedEvent?.Invoke(newIdl.Systems);
+        }
+
+        private void IntelDataList_ListChanged(object sender, ListChangedEventArgs e)
+        {
+            if (e.ListChangedType == ListChangedType.ItemAdded)
+            {
+                var newID = IntelDataList[e.NewIndex];
+                
+                for (int i = 0; i < IntelDataList.Count; i++)
+                {
+                    if (IntelDataList[i].IntelString == newID.IntelString && i != e.NewIndex)
+                    {
+                        IntelDataList.RemoveAt(i);
+                    }
+                }
+            }
+        }
+
         public List<string> DMTBridges = new List<string>();
+        private object IntelLocker = new object();
+
 
         public void SendCharLocation(LocalCharacter c)
         {
@@ -2232,14 +2272,8 @@ namespace SMT.EVEData
                                             }
                                         }
                                     }
-
-                                    IntelDataList.Insert(0, id);
-                                    //TODO Mqtt publish raw intel here
+                                    CheckIntel(true, id);
                                     SendIntel(changedFile, id);
-                                    if (IntelAddedEvent != null)
-                                    {
-                                        IntelAddedEvent(id.Systems);
-                                    }
                                 }
                             }), DispatcherPriority.Normal, null);
                         }
