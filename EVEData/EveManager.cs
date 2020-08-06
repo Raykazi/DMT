@@ -1290,6 +1290,7 @@ namespace SMT.EVEData
 
                 foreach (JumpBridge j in loadList)
                 {
+                    j.JBC = JBColors[JBRandomer.Next(0,JBColors.Count)];
                     JumpBridges.Add(j);
                 }
             }
@@ -1297,6 +1298,30 @@ namespace SMT.EVEData
             {
             }
         }
+        Random JBRandomer = new Random();
+        private List<Brush> JBColors = new List<Brush>
+        {
+            new SolidColorBrush(Color.FromArgb(255,230, 25, 75)),
+            new SolidColorBrush(Color.FromArgb(255,60, 180, 75)),
+            new SolidColorBrush(Color.FromArgb(255,255, 225, 25)),
+            new SolidColorBrush(Color.FromArgb(255,0, 130, 200)),
+            new SolidColorBrush(Color.FromArgb(255,245, 130, 48)),
+            new SolidColorBrush(Color.FromArgb(255,145, 30, 180)),
+            new SolidColorBrush(Color.FromArgb(255,70, 240, 240)),
+            new SolidColorBrush(Color.FromArgb(255,240, 50, 230)),
+            new SolidColorBrush(Color.FromArgb(255,210, 245, 60)),
+            new SolidColorBrush(Color.FromArgb(255,250, 190, 212)),
+            new SolidColorBrush(Color.FromArgb(255,0, 128, 128)),
+            new SolidColorBrush(Color.FromArgb(255,220, 190, 255)),
+            new SolidColorBrush(Color.FromArgb(255,170, 110, 40)),
+            new SolidColorBrush(Color.FromArgb(255,255, 250, 200)),
+            new SolidColorBrush(Color.FromArgb(255,128, 0, 0)),
+            new SolidColorBrush(Color.FromArgb(255,170, 255, 195)),
+            new SolidColorBrush(Color.FromArgb(255,128, 128, 0)),
+            new SolidColorBrush(Color.FromArgb(255,255, 215, 180)),
+            new SolidColorBrush(Color.FromArgb(255,0, 0, 128)),
+            new SolidColorBrush(Color.FromArgb(255,128, 128, 128)),
+        };
 
 
         /// <summary>
@@ -1651,6 +1676,7 @@ namespace SMT.EVEData
             {
                 JumpBridge njb = new JumpBridge(from, to);
                 njb.FromID = stationID;
+                njb.JBC = JBColors[JBRandomer.Next(0, JBColors.Count)];
                 JumpBridges.Add(njb);
             }
         }
