@@ -109,16 +109,10 @@ namespace SMT
         };
         private List<Point> SystemIcon_Ansiplex = new List<Point>
         {
-            new Point(2,10),
-            new Point(4,8),
-            new Point(4,10),
-            new Point(16,10),
-            new Point(16,8),
-            new Point(18,10),
-            new Point(16,12),
-            new Point(16,10),
-            new Point(4,10),
-            new Point(4,12),
+            new Point(8,8),
+            new Point(12,8),
+            new Point(12,12),
+            new Point(8,12),
         };
 
         // Timer to Re-draw the map
@@ -2105,11 +2099,13 @@ namespace SMT
                 {
                     sysText.Foreground = SysInRegionTextBrush;
                 }
-                Thickness border = new Thickness(0.0);
+                Thickness border = new Thickness(0.0); 
 
                 sysText.Padding = border;
                 sysText.Margin = border;
                 sysText.IsHitTestVisible = false;
+                sysText.FontWeight = FontWeights.UltraBold;//T H I C K AF
+                //sysText.FontSize += 1;
 
                 Canvas.SetLeft(sysText, system.LayoutX + SYSTEM_TEXT_X_OFFSET);
                 Canvas.SetTop(sysText, system.LayoutY + SYSTEM_TEXT_Y_OFFSET);
@@ -2386,7 +2382,7 @@ namespace SMT
             if (ShowJumpBridges && EM.JumpBridges != null)
             {
                 foreach (JumpBridge jb in EM.JumpBridges)
-                {
+                {                    
                     if (Region.IsSystemOnMap(jb.From) || Region.IsSystemOnMap(jb.To))
                     {
                         MapSystem from;
@@ -2401,6 +2397,8 @@ namespace SMT
                         {
                             from = Region.MapSystems[jb.From];
                             to = EM.GetEveSystem(jb.To);
+
+
                             Polygon jbFrom = new Polygon();
                             foreach (Point p in SystemIcon_Ansiplex)
                             {
@@ -2408,7 +2406,7 @@ namespace SMT
                             }
                             jbFrom.Stroke = SysOutlineBrush;
                             jbFrom.StrokeLineJoin = PenLineJoin.Round;
-                            jbFrom.Fill = FriendlyJumpBridgeBrush;
+                            jbFrom.Fill = jb.JBC;
                             Canvas.SetLeft(jbFrom, from.LayoutX - SYSTEM_SHAPE_OFFSET);
                             Canvas.SetTop(jbFrom, from.LayoutY - SYSTEM_SHAPE_OFFSET);
                             Canvas.SetZIndex(jbFrom, SYSTEM_Z_INDEX + 5);
@@ -2436,7 +2434,7 @@ namespace SMT
                             }
                             else
                             {
-                                jbOutofSystemBlob.Stroke = FriendlyJumpBridgeBrush;
+                                jbOutofSystemBlob.Stroke = jb.JBC;
                                 jbOutofRegionText.Foreground = FriendlyJumpBridgeBrush;
                             }
                             jbOutofSystemBlob.Fill = jbOutofSystemBlob.Stroke;
@@ -2453,6 +2451,8 @@ namespace SMT
                         {
                             EVEData.MapSystem toSys = Region.MapSystems[jb.To];
                             endPoint = new Point(toSys.LayoutX, toSys.LayoutY);
+
+
                             Polygon jbTo = new Polygon();
                             foreach (Point p in SystemIcon_Ansiplex)
                             {
@@ -2460,7 +2460,7 @@ namespace SMT
                             }
                             jbTo.Stroke = SysOutlineBrush;
                             jbTo.StrokeLineJoin = PenLineJoin.Round;
-                            jbTo.Fill = FriendlyJumpBridgeBrush;
+                            jbTo.Fill = jb.JBC;
                             Canvas.SetLeft(jbTo, toSys.LayoutX - SYSTEM_SHAPE_OFFSET);
                             Canvas.SetTop(jbTo, toSys.LayoutY - SYSTEM_SHAPE_OFFSET);
                             Canvas.SetZIndex(jbTo, SYSTEM_Z_INDEX + 5);
@@ -2499,7 +2499,7 @@ namespace SMT
                         {
                             dashes.Add(1.0);
                             dashes.Add(1.0);
-                            path.Stroke = FriendlyJumpBridgeBrush;
+                            path.Stroke = jb.JBC;
 
                         }
                         else
@@ -2532,7 +2532,7 @@ namespace SMT
                         }
 
                         // path.BeginStoryboard(sb);
-
+                        //Affects the order maybe????
                         Canvas.SetZIndex(path, 19);
 
                         MainCanvas.Children.Add(path);

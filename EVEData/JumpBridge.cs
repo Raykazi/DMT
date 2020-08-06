@@ -4,6 +4,9 @@
 
 using System.ComponentModel;
 using System.Xml.Serialization;
+using System.Windows.Media;
+using System;
+using System.Collections.Generic;
 
 namespace SMT.EVEData
 {
@@ -75,6 +78,9 @@ namespace SMT.EVEData
         {
             return $"{From} <==> {To}";
         }
+
+        [XmlIgnore]
+        public Brush JBC { get; set; }
 
 
         protected void OnPropertyChanged(string name)
