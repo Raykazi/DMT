@@ -17,20 +17,22 @@ namespace SMT.EVEData
         ///  Initializes a new instance of the <see cref="IntelData" /> class
         /// </summary>
         /// <param name="intelText">the raw line of text from the log file</param>
-        public IntelData(string intelText, string intelChannel)
+        public IntelData(string intelText, string intelChannel, bool fromDMT = false)
         {
             RawIntelString = intelText;
             // text will be in the format ﻿[ 2017.05.01 18:24:28 ] Charname > blah, blah blah
             int start = intelText.IndexOf('>') + 1;
+            int end = intelText.IndexOf(']');
+            IntelTime = DateTime.Parse(intelText.Substring(1, end - 1));
             IntelString = intelText.Substring(start);
-            IntelTime = DateTime.Now;
+
             Systems = new List<string>();
             ClearNotification = false;
-            IntelChannel = intelChannel.Insert(0,"(");
+            IntelChannel = intelChannel.Insert(0, "(");
             IntelChannel = IntelChannel.Insert(IntelChannel.Length, ")");
             if (Environment.UserName.ToLower() == "live" || Environment.UserName.ToLower() == "colli")
             {
-                IntelChannel = "(PAY ME)";
+                IntelChannel = "(PAY ME YOU AUSTISTS)";
             }
         }
         public string IntelChannel { get; set; }
