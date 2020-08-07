@@ -109,7 +109,7 @@ namespace SMT
 
         private int m_UpcomingSovMinutes;
 
-        private int m_WarningRange = 5;
+        private int m_WarningRange = 4;
 
         private int m_FleetMaxMembersPerSystem = 5;
 
@@ -855,7 +855,7 @@ namespace SMT
         {
             DefaultRegion = "Impass";
             ShowSystemPopup = true;
-            MaxIntelSeconds = 120;
+            MaxIntelSeconds = 200;
             UpcomingSovMinutes = 30;
             AlwaysOnTop = false;
             ShowToolBox = true;
@@ -869,13 +869,15 @@ namespace SMT
             UseESIForCharacterPositions = true;
             ShowCharacterNamesOnMap = true;
             ShowIhubVunerabilities = true;
+            PlaySoundOnlyInDangerZone = true;
+            PlayIntelSoundOnUnknown = false;
 
             ShowJoveObservatories = true;
 
             UniverseMaxZoomDisplaySystems = 1.3f;
             UniverseMaxZoomDisplaySystemsText = 2.0f;
 
-            WarningRange = 5;
+            WarningRange = 4;
             SubscribeToAllIntel = false;
         }
 
