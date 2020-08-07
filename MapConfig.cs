@@ -69,7 +69,7 @@ namespace SMT
 
         private bool m_ShowCoalition;
 
-        private bool m_ShowDangerZone = false;
+        private bool m_ShowDangerZone = true;
 
         private bool m_ShowIhubVunerabilities;
 
