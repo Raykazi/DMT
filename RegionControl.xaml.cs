@@ -1697,7 +1697,7 @@ namespace SMT
                     {
                         MapSystem sys = Region.MapSystems[sysStr];
 
-                        double radiusScale = (DateTime.Now - id.IntelTime).TotalSeconds / (double)MapConf.MaxIntelSeconds;
+                        double radiusScale = (DateTime.Now.ToUniversalTime() - id.IntelTime).TotalSeconds / (double)MapConf.MaxIntelSeconds;
 
                         if (radiusScale < 0.0 || radiusScale >= 1.0)
                         {
