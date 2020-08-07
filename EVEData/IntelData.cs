@@ -30,10 +30,6 @@ namespace SMT.EVEData
             ClearNotification = false;
             IntelChannel = intelChannel.Insert(0, "(");
             IntelChannel = IntelChannel.Insert(IntelChannel.Length, ")");
-            if (Environment.UserName.ToLower() == "live" || Environment.UserName.ToLower() == "colli")
-            {
-                IntelChannel = "(PAY ME YOU AUSTISTS)";
-            }
         }
         public string IntelChannel { get; set; }
         public bool ClearNotification { get; set; }
