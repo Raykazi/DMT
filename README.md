@@ -1,4 +1,4 @@
-# SMT
-Slazanger's Eve Map Tool
+# DMT
+Daquan's Eve Map Tool
 
-See the Wiki for more info
+We don't have a wiki
