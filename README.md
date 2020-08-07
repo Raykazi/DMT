@@ -1,6 +1,6 @@
-# SMT
-Slazanger's Eve Map Tool
+# DMT
+Daquan's Eve Map Tool
 
-More info here : https://forums.eveonline.com/t/smt-eve-map-tool/3845/
+We don't have a wiki
 
-Discord :  https://discord.gg/QSuJjNn
+Discord :  https://discord.gg/F4EgAq7
