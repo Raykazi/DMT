@@ -912,7 +912,7 @@ namespace SMT
                 }
             }
 
-            double warningCircleSize = 40;
+            double warningCircleSize = 30;
             double warningCircleSizeOffset = warningCircleSize / 2;
 
             foreach (string s in WarningZoneHighlights)
@@ -922,11 +922,11 @@ namespace SMT
                     MapSystem mss = Region.MapSystems[s];
                     Shape WarninghighlightSystemCircle = new Ellipse() { Height = warningCircleSize, Width = warningCircleSize };
                     WarninghighlightSystemCircle.Stroke = new SolidColorBrush(Colors.IndianRed);
-                    WarninghighlightSystemCircle.StrokeThickness = 3;
+                    WarninghighlightSystemCircle.StrokeThickness = 2;
 
                     Canvas.SetLeft(WarninghighlightSystemCircle, mss.LayoutX - warningCircleSizeOffset);
                     Canvas.SetTop(WarninghighlightSystemCircle, mss.LayoutY - warningCircleSizeOffset);
-                    Canvas.SetZIndex(WarninghighlightSystemCircle, 24);
+                    Canvas.SetZIndex(WarninghighlightSystemCircle, 19);
                     MainCanvas.Children.Add(WarninghighlightSystemCircle);
                     DynamicMapElements.Add(WarninghighlightSystemCircle);
                 }
