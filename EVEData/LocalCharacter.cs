@@ -1,4 +1,5 @@
-﻿using ESI.NET.Enumerations;
+﻿using DMT.Helper.Models;
+using ESI.NET.Enumerations;
 using ESI.NET.Models.SSO;
 using System;
 using System.Collections.Generic;
@@ -674,7 +675,7 @@ namespace SMT.EVEData
                         FleetInfo.FleetID = 0;
 
                         Application.Current.Dispatcher.Invoke((Action)(() =>
-                        { 
+                        {
                             FleetInfo.Members.Clear();
                         }), DispatcherPriority.Normal);
 
@@ -768,6 +769,16 @@ namespace SMT.EVEData
                 }
             }
             catch { }
+        }
+
+        internal static bool Find(Models.DMTCharacter c, BindingList<LocalCharacter> localCharacters)
+        {
+            for (int i = 0; i < localCharacters.Count; i++)
+            {
+                if (localCharacters[i].Name == c.Name)
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>

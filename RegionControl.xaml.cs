@@ -693,8 +693,13 @@ namespace SMT
                 }
                 NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(0, c.Name));
             }
+            DMTCharacter result = null;
             foreach (DMTCharacter c in EM.DMTCharacters)
             {
+                if(LocalCharacter.Find(c, EM.LocalCharacters))
+                {
+                    result = c;
+                }
                 if (!Region.IsSystemOnMap(c.Location))
                 {
                     continue;
@@ -705,6 +710,11 @@ namespace SMT
                     NameTrackingLocationMap[c.Location] = new List<KeyValuePair<int, string>>();
                 }
                 NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(1, c.Name));
+            }
+            if (result != null)
+            {
+                EM.DMTCharacters.Remove(result);
+                NameTrackingLocationMap[result.Location].Remove(new KeyValuePair<int, string>(1, result.Name));
             }
 
             if (ActiveCharacter != null && MapConf.FleetShowOnMap)
@@ -2099,7 +2109,7 @@ namespace SMT
                 {
                     sysText.Foreground = SysInRegionTextBrush;
                 }
-                Thickness border = new Thickness(0.0); 
+                Thickness border = new Thickness(0.0);
 
                 sysText.Padding = border;
                 sysText.Margin = border;
@@ -2382,7 +2392,7 @@ namespace SMT
             if (ShowJumpBridges && EM.JumpBridges != null)
             {
                 foreach (JumpBridge jb in EM.JumpBridges)
-                {                    
+                {
                     if (Region.IsSystemOnMap(jb.From) || Region.IsSystemOnMap(jb.To))
                     {
                         MapSystem from;

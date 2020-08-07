@@ -2030,7 +2030,7 @@ namespace SMT.EVEData
                .WithTopic($"location/{c.Name}")
                .WithPayload(payload)
                .WithExactlyOnceQoS()
-               //.WithRetainFlag(true)
+               .WithRetainFlag(true)
                .Build();
             mqttClient.PublishAsync(message);
         }
