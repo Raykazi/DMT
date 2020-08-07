@@ -29,7 +29,7 @@
                                     ToolTipService.InitialShowDelay="0">
                                 <Border.ToolTip>
                                     <StackPanel Orientation="Vertical">
-                                        <TextBlock><Run FontWeight="Bold">CTRL + Mouse wheel:</Run>  Zoom In / Out</TextBlock>
+                                        <TextBlock><Run FontWeight="Bold">Mouse wheel:</Run>  Zoom In / Out</TextBlock>
                                         <TextBlock><Run FontWeight="Bold">ALT + Select:</Run> Zoom to selection</TextBlock>
                                         <TextBlock><Run FontWeight="Bold">LMC + Mouse Click :</Run> Move</TextBlock>
                                     </StackPanel>
