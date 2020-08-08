@@ -755,7 +755,21 @@ namespace SMT
                 m_ShowCharacterNamesOnMap = value;
                 OnPropertyChanged("ShowCharacterNamesOnMap");
             }
-        
+
+        }
+        public bool m_ShowDMTCharactersOnMap { get; private set; } 
+        public bool ShowDMTCharactersOnMap
+        {
+            get
+            {
+                return m_ShowDMTCharactersOnMap;
+            }
+            set
+            {
+                m_ShowDMTCharactersOnMap = value;
+                OnPropertyChanged("ShowDMTCharactersOnMap");
+            }
+
         }
 
 
@@ -795,6 +809,7 @@ namespace SMT
                 OnPropertyChanged("DisableRoutePathAnimation");
             }
         }
+
 
         public void SetDefaultColours()
         {
@@ -868,6 +883,7 @@ namespace SMT
             SOVBasedITCU = true;
             UseESIForCharacterPositions = true;
             ShowCharacterNamesOnMap = true;
+            ShowDMTCharactersOnMap = true;
             ShowIhubVunerabilities = true;
             PlaySoundOnlyInDangerZone = true;
             PlayIntelSoundOnUnknown = false;

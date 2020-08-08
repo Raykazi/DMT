@@ -529,7 +529,9 @@ namespace SMT
                     EVEManager.SubscribeIntel("", true);
                 }
             }
-
+            if(e.PropertyName == "ShowDMTCharactersOnMap")
+            {
+            }
             if (e.PropertyName == "WarningRange")
             {
                 foreach (EVEData.LocalCharacter lc in EVEManager.LocalCharacters)

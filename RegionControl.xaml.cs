@@ -696,25 +696,30 @@ namespace SMT
             DMTCharacter result = null;
             foreach (DMTCharacter c in EM.DMTCharacters)
             {
-                if(LocalCharacter.Find(c, EM.LocalCharacters))
+                //Still need this checked
+                if (LocalCharacter.Find(c, EM.LocalCharacters))
                 {
                     result = c;
                 }
-                if (!Region.IsSystemOnMap(c.Location))
+                if (MapConf.ShowDMTCharactersOnMap)
                 {
-                    continue;
-                }
+                    if (!Region.IsSystemOnMap(c.Location))
+                    {
+                        continue;
+                    }
 
-                if (!NameTrackingLocationMap.ContainsKey(c.Location))
-                {
-                    NameTrackingLocationMap[c.Location] = new List<KeyValuePair<int, string>>();
+                    if (!NameTrackingLocationMap.ContainsKey(c.Location))
+                    {
+                        NameTrackingLocationMap[c.Location] = new List<KeyValuePair<int, string>>();
+                    }
+                    NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(1, c.Name));
                 }
-                NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(1, c.Name));
             }
             if (result != null)
             {
                 EM.DMTCharacters.Remove(result);
-                NameTrackingLocationMap[result.Location].Remove(new KeyValuePair<int, string>(1, result.Name));
+                if (NameTrackingLocationMap.ContainsKey(result.Location))
+                    NameTrackingLocationMap[result.Location].Remove(new KeyValuePair<int, string>(1, result.Name));
             }
 
             if (ActiveCharacter != null && MapConf.FleetShowOnMap)
