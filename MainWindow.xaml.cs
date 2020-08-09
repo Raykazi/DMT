@@ -9,6 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -56,7 +57,9 @@ namespace SMT
 
 
             InitializeComponent();
-            Loaded += MainWindow_Loaded;
+            DispatcherTimer timer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(2) };
+            Loaded += Timer_Tick;
+            timer.Tick += Timer_Tick;
             DependencyPropertyDescriptor dpd = DependencyPropertyDescriptor.FromProperty(TextBlock.TextProperty, typeof(TextBlock));
 
             Title = "DMT (Gimpy Edition : " + DMT_VERSION + ")";
@@ -247,7 +250,18 @@ namespace SMT
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            AutoUpdater.Synchronous = true;
+            //AutoUpdater.ShowSkipButton = false;
+            //AutoUpdater.ShowRemindLaterButton = false;            
+            AutoUpdater.Mandatory = true;
+            AutoUpdater.UpdateMode = Mode.Forced;
             AutoUpdater.Start("https://auth.windrammers.com/dmt/Update.xml");
+
         }
 
         private void EVEManager_JbSyncedEvent()
