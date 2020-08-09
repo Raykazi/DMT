@@ -1,3 +1,4 @@
+using AutoUpdaterDotNET;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using SMT.EVEData;
@@ -28,7 +29,7 @@ namespace SMT
     {
         public static MainWindow AppWindow;
 
-        public const string SMT_VERSION = "DMT_000";
+        public const string DMT_VERSION = "DMT_000";
 
 
         private LogonWindow logonBrowserWindow;
@@ -55,14 +56,15 @@ namespace SMT
 
 
             InitializeComponent();
+            Loaded += MainWindow_Loaded;
             DependencyPropertyDescriptor dpd = DependencyPropertyDescriptor.FromProperty(TextBlock.TextProperty, typeof(TextBlock));
 
-            Title = "DMT (Gimpy Edition : " + SMT_VERSION + ")";
+            Title = "DMT (Gimpy Edition : " + DMT_VERSION + ")";
 
             CheckGitHubVersion();
 
             // Load the Dock Manager Layout file
-            string dockManagerLayoutName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\" + SMT_VERSION + "\\Layout.dat";
+            string dockManagerLayoutName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\" + DMT_VERSION + "\\Layout.dat";
             if (File.Exists(dockManagerLayoutName))
             {
                 try
@@ -83,7 +85,7 @@ namespace SMT
             UniverseLayoutDoc = FindDocWithContentID(dockManager.Layout, "FullUniverseViewID");
 
             // load any custom map settings off disk
-            string mapConfigFileName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\" + SMT_VERSION + "\\MapConfig.dat";
+            string mapConfigFileName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\" + DMT_VERSION + "\\MapConfig.dat";
 
             if (File.Exists(mapConfigFileName))
             {
@@ -125,7 +127,7 @@ namespace SMT
 
             // Create the main EVE manager
 
-            EVEManager = new EVEData.EveManager(SMT_VERSION, dmtConfig);
+            EVEManager = new EVEData.EveManager(DMT_VERSION, dmtConfig);
             EVEData.EveManager.Instance = EVEManager;
 
             EVEManager.UseESIForCharacterPositions = MapConf.UseESIForCharacterPositions;
@@ -241,6 +243,11 @@ namespace SMT
             }
             EVEManager.MqttInit();
 
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            AutoUpdater.Start("https://auth.windrammers.com/dmt/Update.xml");
         }
 
         private void EVEManager_JbSyncedEvent()
@@ -384,7 +391,7 @@ namespace SMT
         {
             // save off the dockmanager layout
 
-            string dockManagerLayoutName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\" + SMT_VERSION + "\\Layout.dat";
+            string dockManagerLayoutName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\" + DMT_VERSION + "\\Layout.dat";
             try
             {
                 AvalonDock.Layout.Serialization.XmlLayoutSerializer ls = new AvalonDock.Layout.Serialization.XmlLayoutSerializer(dockManager);
@@ -403,7 +410,7 @@ namespace SMT
                 MapConf.UseESIForCharacterPositions = EVEManager.UseESIForCharacterPositions;
 
                 // Save the Map Colours
-                string mapConfigFileName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\" + SMT_VERSION + "\\MapConfig.dat";
+                string mapConfigFileName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\" + DMT_VERSION + "\\MapConfig.dat";
 
                 // now serialise the class to disk
                 XmlSerializer xms = new XmlSerializer(typeof(MapConfig));
@@ -712,7 +719,7 @@ namespace SMT
 
                         if (releaseInfo != null)
                         {
-                            if (releaseInfo.TagName != SMT_VERSION)
+                            if (releaseInfo.TagName != DMT_VERSION)
                             {
                                 Application.Current.Dispatcher.Invoke(() =>
                                 {
