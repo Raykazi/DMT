@@ -79,13 +79,13 @@ namespace SMT.EVEData
             dmtConfig = config;
 
             // ensure we have the cache folder setup
-            DataCacheFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\SMTCache";
+            DataCacheFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\DMTCache";
             if (!Directory.Exists(DataCacheFolder))
             {
                 Directory.CreateDirectory(DataCacheFolder);
             }
 
-            string SaveDataRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT";
+            string SaveDataRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\DMT";
             if (!Directory.Exists(SaveDataRoot))
             {
                 Directory.CreateDirectory(SaveDataRoot);
@@ -1739,7 +1739,7 @@ namespace SMT.EVEData
                 ClientId = EveAppConfig.ClientID,
                 SecretKey = EveAppConfig.SecretKey,
                 CallbackUrl = EveAppConfig.CallbackURL,
-                UserAgent = "SMT-map-app"
+                UserAgent = "DMT-map-app"
             });
 
             ESIClient = new EsiClient(config);
