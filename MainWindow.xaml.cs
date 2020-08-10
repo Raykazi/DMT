@@ -114,6 +114,7 @@ namespace SMT
                 MapConf = new MapConfig();
                 MapConf.SetDefaultColours();
             }
+            MapConf.PropertyChanged += MapConf_PropertyChanged;
 
             string dmtConfigFileName = "DMTConfig.json";
             if (File.Exists(dmtConfigFileName))
@@ -134,6 +135,7 @@ namespace SMT
 
             EVEManager = new EVEData.EveManager(DMT_VERSION, dmtConfig);
             EVEData.EveManager.Instance = EVEManager;
+            EVEManager.SubscribeAllIntelChannels = MapConf.SubscribeToAllIntel;
 
             EVEManager.UseESIForCharacterPositions = MapConf.UseESIForCharacterPositions;
 
@@ -221,8 +223,7 @@ namespace SMT
             RouteSystemDropDownAC.ItemsSource = globalSystemList;
 
             ColoursPropertyGrid.SelectedObject = MapConf.ActiveColourScheme;
-            ColoursPropertyGrid.PropertyValueChanged += ColoursPropertyGrid_PropertyValueChanged; ;
-            MapConf.PropertyChanged += MapConf_PropertyChanged;
+            ColoursPropertyGrid.PropertyValueChanged += ColoursPropertyGrid_PropertyValueChanged;
 
             Closed += MainWindow_Closed;
 
@@ -252,7 +253,6 @@ namespace SMT
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-
         }
 
         private void Timer_Tick(object sender, EventArgs e)

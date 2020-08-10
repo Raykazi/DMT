@@ -1971,6 +1971,7 @@ namespace SMT.EVEData
 
         private void CheckIntel(bool v, IntelData newIdl)
         {
+            if (Application.Current == null) return;
             Application.Current.Dispatcher.Invoke((Action)(() =>
             {
                 lock (IntelLocker)

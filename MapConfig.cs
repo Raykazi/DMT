@@ -119,7 +119,8 @@ namespace SMT
 
         private bool m_FleetShowShipType = false;
 
-        private bool m_SubscribeAllIntell = false;
+        private bool m_SubscribeAllIntell;
+        private bool m_ShowDMTCharactersOnMap = true;
 
         public MapConfig()
         {
@@ -757,7 +758,6 @@ namespace SMT
             }
 
         }
-        public bool m_ShowDMTCharactersOnMap { get; private set; } 
         public bool ShowDMTCharactersOnMap
         {
             get
@@ -894,7 +894,7 @@ namespace SMT
             UniverseMaxZoomDisplaySystemsText = 2.0f;
 
             WarningRange = 4;
-            SubscribeToAllIntel = false;
+            SubscribeToAllIntel = true;
         }
 
         protected void OnPropertyChanged(string name)
