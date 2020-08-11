@@ -96,7 +96,7 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0">
-                            <GroupBox Header="General" Margin="4" Height="200">
+                            <GroupBox Header="General" Margin="4" Height="150">
                                 <StackPanel>
 
                                     <CheckBox IsChecked="{Binding Path=PlayIntelSound}" Margin="0,2">Warning Sound</CheckBox>
@@ -115,9 +115,16 @@
 
                                 </StackPanel>
                             </GroupBox>
-                            <GroupBox Header="DMT" Height="155">
-                                <CheckBox IsChecked="{Binding SubscribeToAllIntel}" Margin="0,2,8,114" Content="Subscribe To All Intel Channels"/>
-
+                            <GroupBox Header="Intel Sources" Margin="4" Height="200">
+                                <StackPanel>
+                                    <CheckBox IsChecked="{Binding Path=ShowDangerZone}" Margin="0,2">Check corp chat</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=PlaySoundOnlyInDangerZone}" Margin="0,2">Check alliance chat</CheckBox>
+                                    <CheckBox IsChecked="{Binding SubscribeToAllIntel}" Margin="0,2,">Subscribe to all intel channels</CheckBox>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2">
+                                        <Label Content="Channels"></Label>
+                                    </StackPanel>
+                                    <TextBox Height="75" Text="DMT.Test"></TextBox>
+                                </StackPanel>
                             </GroupBox>
 
                         </StackPanel>
