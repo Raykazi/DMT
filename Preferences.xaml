@@ -23,10 +23,11 @@
                                     <CheckBox IsChecked="{Binding Path=AlwaysOnTop}" Margin="0,3" Content="Always on top"/>
                                     <CheckBox IsChecked="{Binding Path=SyncActiveCharacterBasedOnActiveEVEClient}" Margin="0,3">Auto sync character to active window</CheckBox>
                                     <CheckBox x:Name="syncESIPositionChk" Margin="0,3" Checked="syncESIPositionChk_Checked" Unchecked="syncESIPositionChk_Checked">Use ESI for character positions</CheckBox>
-                                    <Grid VerticalAlignment="Top" Height="Auto">
+                                    <Grid VerticalAlignment="Top" Height="Auto" Margin="0,5,0,0">
                                         <Grid.Resources>
                                             <Style TargetType="{x:Type TextBox}">
-                                                <Setter Property="Margin" Value="0,0,0,4" />
+                                                <Setter Property="Margin" Value="0,0,0,5" />
+                                                <Setter Property="Foreground" Value="White" />
                                             </Style>
                                         </Grid.Resources>
                                         <Grid.RowDefinitions>

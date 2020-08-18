@@ -119,7 +119,7 @@ namespace SMT
 
         private bool m_FleetShowShipType = false;
 
-        private bool m_SubscribeAllIntell;
+        private bool m_SubscribeAllIntell = false;
         private bool m_ShowDMTCharactersOnMap = true;
         private bool m_DisableJumpBridgesPathAnimation;
         private bool m_DisableRoutePathAnimation;

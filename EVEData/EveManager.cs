@@ -60,7 +60,7 @@ namespace SMT.EVEData
 
         private bool WatcherThreadShouldTerminate = false;
 
-        public bool SubscribeAllIntelChannels = false;
+        public bool SubscribeAllIntelChannels;
         public bool SubscribeToCorp { get; set; }
         public bool SubscribeToAlliance { get; set; }
 
@@ -1462,7 +1462,9 @@ namespace SMT.EVEData
             {
                 string channel = c.Trim();
                 if (channel.Length > 1 && !IntelFilters.Contains(channel))
+                {
                     IntelFilters.Add(channel);
+                }
             }
         }
         /// <summary>
@@ -1831,8 +1833,9 @@ namespace SMT.EVEData
                 ServerInfo.MqttStatusColor = Colors.Green;
             }
             await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "location/#" });
-            //await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "info/jbs" });
+            await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "info/jbs" });
             await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "info/dmt_stats" });
+            await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "chat/#" });
             MqttIntelInit();
         }
         private bool retryAllowed = false;
@@ -1942,21 +1945,16 @@ namespace SMT.EVEData
                     }
                     else
                     {
-                        foreach (LocalCharacter lc in LocalCharacters)
+                        if (LocalCharacters.Any(lc => dmtc.Name == lc.Name))
                         {
-                            if (dmtc.Name == lc.Name)
-                            {
-                                return;
-                            }
+                            return;
                         }
                         bool found = false;
                         for (int i = 0; i < DMTCharacters.Count; i++)
                         {
-                            if (DMTCharacters[i].Name == dmtc.Name)
-                            {
-                                DMTCharacters[i] = dmtc;
-                                found = true;
-                            }
+                            if (DMTCharacters[i].Name != dmtc.Name) continue;
+                            DMTCharacters[i] = dmtc;
+                            found = true;
                         }
                         if (!found)
                         {

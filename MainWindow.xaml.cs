@@ -124,8 +124,8 @@ namespace SMT
             // Create the main EVE manager
             EVEManager = new EVEData.EveManager(DMT_VERSION, dmtConfig);
             EVEData.EveManager.Instance = EVEManager;
+            EVEManager.SubscribeAllIntelChannels = MapConf.SubscribeToAllIntel;
             EVEManager.MqttInit();
-            //EVEManager.SubscribeAllIntelChannels = MapConf.SubscribeToAllIntel;
 
             EVEManager.UseESIForCharacterPositions = MapConf.UseESIForCharacterPositions;
 
@@ -543,6 +543,7 @@ namespace SMT
                 }
                 else
                 {
+                    EVEManager.SubscribeAllIntelChannels = true;
                     EVEManager.SubscribeIntel("", true);
                 }
             }
@@ -684,6 +685,7 @@ namespace SMT
             {
                 if (MapConf.IntelChannels != null)
                     EVEManager.SetupIntelFiles(MapConf.IntelChannels);
+                EVEManager.MqttIntelInit();
             }
             else
             {
@@ -701,8 +703,10 @@ namespace SMT
                     if (MapConf.IntelChannels != null)
                         EVEManager.SetupIntelFiles(MapConf.IntelChannels);
                     EVEManager.MqttConnect(MapConf.Url, MapConf.Token);
+                    EVEManager.MqttIntelInit();
                 }
             }
+
         }
 
         private void ForceESIUpdate_MenuItem_Click(object sender, RoutedEventArgs e)
