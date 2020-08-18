@@ -48,6 +48,7 @@ namespace SMT.EVEData
         private bool routeNeedsUpdate = false;
 
         public DateTime LastUpdate { get; set; }
+        public bool IsOnline { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Character" /> class
@@ -94,6 +95,7 @@ namespace SMT.EVEData
 
             KnownStructures = new SerializableDictionary<string, ObservableCollection<Structure>>();
             BroadcastLocation = true;
+            IsOnline = true;
         }
 
         /// <summary>
@@ -108,6 +110,7 @@ namespace SMT.EVEData
             Name = name;
             LocalChatFile = lcf;
             Location = location;
+            IsOnline = true;
             EveManager.Instance.SendCharLocation(this);
         }
 
@@ -444,8 +447,9 @@ namespace SMT.EVEData
                     RefreshAccessToken().Wait();
                     UpdateInfoFromESI().Wait();
                 }
+                UpdateOnlineStatus().Wait();
 
-                if(EveManager.Instance.UseESIForCharacterPositions)
+                if (EveManager.Instance.UseESIForCharacterPositions)
                 {
                     UpdatePositionFromESI().Wait();
                 }
@@ -910,7 +914,29 @@ namespace SMT.EVEData
             }
             catch { }
         }
+        /// <summary>
+        /// Update the characters logged on status from ESI
+        /// </summary>
+        private async Task UpdateOnlineStatus()
+        {
+            if (ID == 0 || !ESILinked || ESIAuthData == null)
+            {
+                return;
+            }
 
+            try
+            {
+                ESI.NET.EsiClient esiClient = EveManager.Instance.ESIClient;
+                esiClient.SetCharacterData(ESIAuthData);
+                ESI.NET.EsiResponse<ESI.NET.Models.Location.Activity> esr = await esiClient.Location.Online();
+
+                if (ESIHelpers.ValidateESICall<ESI.NET.Models.Location.Activity>(esr))
+                {
+                    IsOnline = esr.Data.Online;
+                }
+            }
+            catch { }
+        }
         private void UpdateWarningSystems()
         {
             if (!string.IsNullOrEmpty(Location) && WarningSystemRange > 0)
