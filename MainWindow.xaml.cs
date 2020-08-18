@@ -5,6 +5,7 @@ using SMT.EVEData;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -42,6 +43,7 @@ namespace SMT
         private MediaPlayer mediaPlayer;
 
         private DMTConfig dmtConfig;
+        private bool _firstRun = false;
         /// <summary>
         /// Main Window
         /// </summary>
@@ -54,19 +56,19 @@ namespace SMT
             Uri woopUri = new Uri(AppDomain.CurrentDomain.BaseDirectory + @"\Sounds\woop.mp3");
             mediaPlayer.Open(woopUri);
             DMT_VERSION = typeof(MainWindow).Assembly.GetName().Version.ToString();
-            
+
 
 
 
             InitializeComponent();
             DispatcherTimer timer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(2) };
-            Loaded += Timer_Tick;
+            Loaded += MainWindow_Loaded;
             timer.Tick += Timer_Tick;
             DependencyPropertyDescriptor dpd = DependencyPropertyDescriptor.FromProperty(TextBlock.TextProperty, typeof(TextBlock));
 
             Title = "DMT (Gimpy Edition : " + DMT_VERSION + ")";
 
-            CheckGitHubVersion();
+            //CheckGitHubVersion();
 
             // Load the Dock Manager Layout file
             string dockManagerLayoutName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\DMT\\" + DMT_VERSION + "\\Layout.dat";
@@ -115,27 +117,15 @@ namespace SMT
                 MapConf.SetDefaultColours();
             }
             MapConf.PropertyChanged += MapConf_PropertyChanged;
-
-            string dmtConfigFileName = "DMTConfig.json";
-            if (File.Exists(dmtConfigFileName))
+            if (MapConf.Url == null || MapConf.Token == null)
             {
-                var json = File.ReadAllText(dmtConfigFileName);
-                dmtConfig = DMTConfig.LoadSettings(json); //Didnt feel like adding another json reference to this file.
+                _firstRun = true;
             }
-            else
-            {
-                DMTConfig dmtConfig = new DMTConfig() { DMTToken = "Change Me", DMTUrl = "change.me.please" };
-                DMTConfig.SaveSettings(dmtConfigFileName, dmtConfig);
-                MessageBox.Show($"Please edit {dmtConfigFileName} with your DMT Server Url & DMT Token.", "First Time Setup");
-                Environment.Exit(0);
-            }
-            
-
             // Create the main EVE manager
-
             EVEManager = new EVEData.EveManager(DMT_VERSION, dmtConfig);
             EVEData.EveManager.Instance = EVEManager;
-            EVEManager.SubscribeAllIntelChannels = MapConf.SubscribeToAllIntel;
+            EVEManager.MqttInit();
+            //EVEManager.SubscribeAllIntelChannels = MapConf.SubscribeToAllIntel;
 
             EVEManager.UseESIForCharacterPositions = MapConf.UseESIForCharacterPositions;
 
@@ -151,8 +141,13 @@ namespace SMT
                 EVEManager.LoadFromDisk();
             }
 
+            if (MapConf.IntelChannels != null)
+            {
+                EVEManager.SetupIntelFiles(MapConf.IntelChannels);
+            }
             EVEManager.SetupIntelWatcher();
             RawIntelBox.ItemsSource = EVEManager.IntelDataList;
+            RawChatBox.ItemsSource = EVEManager.ChatDataList;
 
             // load jump bridge data
             EVEManager.LoadJumpBridgeData();
@@ -247,23 +242,30 @@ namespace SMT
                 lc.WarningSystemRange = MapConf.WarningRange;
                 lc.Location = "";
             }
-            EVEManager.MqttInit();
+
 
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            if (!_firstRun)
+                EVEManager.MqttConnect(MapConf.Url, MapConf.Token);
+            else
+            {
+                EVEManager.ServerInfo.MqttStatusColor = Colors.Red;
+                EVEManager.ServerInfo.MqttStatus = "Waiting on MQTT info";
+                Preferences_MenuItem_Click(null, null);
+            }
+
+            Timer_Tick(null, null);
         }
 
         private void Timer_Tick(object sender, EventArgs e)
         {
             AutoUpdater.Synchronous = true;
-            //AutoUpdater.ShowSkipButton = false;
-            //AutoUpdater.ShowRemindLaterButton = false;            
             AutoUpdater.Mandatory = true;
             AutoUpdater.UpdateMode = Mode.Forced;
             AutoUpdater.Start("https://auth.windrammers.com/dmt/Update.xml");
-
         }
 
         private void EVEManager_JbSyncedEvent()
@@ -313,32 +315,24 @@ namespace SMT
 
         private void BroadcastOnCheck(object sender, RoutedEventArgs e)
         {
-            var selected = (LocalCharacter)CharactersList.SelectedItem;
-            if (EVEManager.LocalCharacters.Contains(selected))
+            LocalCharacter selected = (LocalCharacter)CharactersList.SelectedItem;
+            if (!EVEManager.LocalCharacters.Contains(selected)) return;
+            foreach (LocalCharacter c in EVEManager.LocalCharacters)
             {
-                foreach (var c in EVEManager.LocalCharacters)
-                {
-                    if (c.Name == selected.Name)
-                    {
-                        c.BroadcastLocation = true;
-                        EVEManager.SendCharLocation(c);
-                    }
-                }
+                if (c.Name != selected.Name) continue;
+                c.BroadcastLocation = true;
+                EVEManager.SendCharLocation(c);
             }
         }
         private void BroadcastOnUnCheck(object sender, RoutedEventArgs e)
         {
-            var selected = (LocalCharacter)CharactersList.SelectedItem;
-            if (EVEManager.LocalCharacters.Contains(selected))
+            LocalCharacter selected = (LocalCharacter)CharactersList.SelectedItem;
+            if (!EVEManager.LocalCharacters.Contains(selected)) return;
+            foreach (LocalCharacter c in EVEManager.LocalCharacters)
             {
-                foreach (var c in EVEManager.LocalCharacters)
-                {
-                    if (c.Name == selected.Name)
-                    {
-                        c.BroadcastLocation = false;
-                        EVEManager.SendCharLocation(c);
-                    }
-                }
+                if (c.Name != selected.Name) continue;
+                c.BroadcastLocation = false;
+                EVEManager.SendCharLocation(c);
             }
         }
         private void ActiveSovCampaigns_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -552,7 +546,15 @@ namespace SMT
                     EVEManager.SubscribeIntel("", true);
                 }
             }
-            if(e.PropertyName == "ShowDMTCharactersOnMap")
+            if (e.PropertyName == "SubscribeToCorp")
+            {
+                EVEManager.SubscribeToCorp = MapConf.SubscribeToCorp;
+            }
+            if (e.PropertyName == "SubscribeToAlliance")
+            {
+                EVEManager.SubscribeToAlliance = MapConf.SubscribeToAlliance;
+            }
+            if (e.PropertyName == "ShowDMTCharactersOnMap")
             {
             }
             if (e.PropertyName == "WarningRange")
@@ -670,14 +672,37 @@ namespace SMT
             preferencesWindow.Owner = this;
             preferencesWindow.DataContext = MapConf;
             preferencesWindow.MapConf = MapConf;
-            preferencesWindow.ShowDialog();
             preferencesWindow.Closed += PreferencesWindow_Closed;
+            preferencesWindow.ShowDialog();
         }
 
         private void PreferencesWindow_Closed(object sender, EventArgs e)
         {
             RegionUC.ReDrawMap(true);
             UniverseUC.ReDrawMap(true, true, false);
+            if (!_firstRun)
+            {
+                if (MapConf.IntelChannels != null)
+                    EVEManager.SetupIntelFiles(MapConf.IntelChannels);
+            }
+            else
+            {
+                if (MapConf.Token == null || MapConf.Url == null)
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        MessageBox.Show("Please enter your DMT info.");
+                        Preferences_MenuItem_Click(null, null);
+                    }, DispatcherPriority.ApplicationIdle);
+                }
+                else
+                {
+                    _firstRun = false;
+                    if (MapConf.IntelChannels != null)
+                        EVEManager.SetupIntelFiles(MapConf.IntelChannels);
+                    EVEManager.MqttConnect(MapConf.Url, MapConf.Token);
+                }
+            }
         }
 
         private void ForceESIUpdate_MenuItem_Click(object sender, RoutedEventArgs e)
@@ -904,6 +929,15 @@ namespace SMT
                     continue;
                 }
 
+                if (s.StartsWith("https://") || s.StartsWith("http://"))
+                {
+                    string url = s.Substring(0, s.IndexOf(" ", StringComparison.Ordinal));
+                    if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                    {
+                        Process.Start(url);
+                    }
+                }
+
                 foreach (EVEData.System sys in EVEManager.Systems)
                 {
                     if (s.IndexOf(sys.Name, StringComparison.OrdinalIgnoreCase) == 0)
@@ -971,6 +1005,13 @@ namespace SMT
             Application.Current.Dispatcher.Invoke((Action)(() =>
             {
                 EVEManager.IntelDataList.Clear();
+            }), DispatcherPriority.ApplicationIdle);
+        }
+        private void ClearChatBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke((Action)(() =>
+            {
+                EVEManager.ChatDataList.Clear();
             }), DispatcherPriority.ApplicationIdle);
         }
 
@@ -1121,7 +1162,7 @@ namespace SMT
 
                         foreach (char cc in chars)
                         {
-                            string search = cc+ basesearch;
+                            string search = cc + basesearch;
                             List<EVEData.JumpBridge> jbl = await c.FindJumpGates(search);
 
                             foreach (EVEData.JumpBridge jb in jbl)
@@ -1480,6 +1521,11 @@ namespace SMT
         private void SyncDMTBtn_Click(object sender, RoutedEventArgs e)
         {
             EVEManager_JbSyncedEvent();
+        }
+
+        private void RawChatBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+
         }
     }
 
