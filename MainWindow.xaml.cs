@@ -248,6 +248,8 @@ namespace SMT
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            if (File.Exists("DMTConfig.json"))
+                File.Delete("DMTConfig.json");
             if (!_firstRun)
                 EVEManager.MqttConnect(MapConf.Url, MapConf.Token);
             else

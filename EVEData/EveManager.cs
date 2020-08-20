@@ -1905,11 +1905,13 @@ namespace SMT.EVEData
             if (!SubscribeAllIntelChannels)
             {
                 if (IntelFilters != null)
+                {
                     foreach (string channel in IntelFilters)
                     {
                         SubscribeIntel("intel/" + channel, false);
                     }
-                SetStatus($"Subscribed to {IntelFilters.Count} intel channels.");
+                    SetStatus($"Subscribed to {IntelFilters.Count} intel channels.");
+                }
             }
             else
             {
