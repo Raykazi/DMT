@@ -60,7 +60,9 @@ namespace SMT.EVEData
 
         private bool WatcherThreadShouldTerminate = false;
 
-        public bool SubscribeAllIntelChannels = false;
+        public bool SubscribeAllIntelChannels;
+        public bool SubscribeToCorp { get; set; }
+        public bool SubscribeToAlliance { get; set; }
 
         // Create a new MQTT client.
         private MqttFactory factory = new MqttFactory();
@@ -208,6 +210,10 @@ namespace SMT.EVEData
         /// Gets or sets the Intel List
         /// </summary>
         public BindingList<IntelData> IntelDataList { get; set; }
+        /// <summary>
+        /// Gets or sets the Chat List
+        /// </summary>
+        public BindingList<IntelData> ChatDataList { get; set; }
 
         /// <summary>
         /// Gets or sets the current list of Jump Bridges
@@ -1290,7 +1296,7 @@ namespace SMT.EVEData
 
                 foreach (JumpBridge j in loadList)
                 {
-                    j.JBC = JBColors[JBRandomer.Next(0,JBColors.Count)];
+                    j.JBC = JBColors[JBRandomer.Next(0, JBColors.Count)];
                     JumpBridges.Add(j);
                 }
             }
@@ -1445,29 +1451,29 @@ namespace SMT.EVEData
             Utils.SerializeToDisk(JumpBridges, SaveDataVersionFolder + @"\JumpBridges.dat");
         }
 
+        public void SetupIntelFiles(string intelChannels)
+        {
+            IntelFilters = new List<string>();
+            string[] channels = intelChannels.Split(
+                new[] { "\r\n", "\r", "\n" },
+                StringSplitOptions.None
+            );
+            foreach (string c in channels)
+            {
+                string channel = c.Trim();
+                if (channel.Length > 1 && !IntelFilters.Contains(channel))
+                {
+                    IntelFilters.Add(channel);
+                }
+            }
+        }
         /// <summary>
         /// Setup the intel watcher;  Loads the intel channel filter list and creates the file system watchers
         /// </summary>
         public void SetupIntelWatcher()
         {
-            IntelFilters = new List<string>();
             IntelDataList = new BindingList<IntelData>();
-            string intelFileFilter = AppDomain.CurrentDomain.BaseDirectory + @"\IntelChannels.txt";
-
-            if (File.Exists(intelFileFilter))
-            {
-                StreamReader file = new StreamReader(intelFileFilter);
-                string line;
-                while ((line = file.ReadLine()) != null)
-                {
-                    line.Trim();
-                    if (line != string.Empty)
-                    {
-                        IntelFilters.Add(line);
-                    }
-                }
-            }
-
+            ChatDataList = new BindingList<IntelData>();
             IntelClearFilters = new List<string>();
             string intelClearFileFilter = AppDomain.CurrentDomain.BaseDirectory + @"\IntelClearFilters.txt";
 
@@ -1530,14 +1536,15 @@ namespace SMT.EVEData
                     foreach (FileInfo file in files)
                     {
                         bool readFile = false;
-                        foreach (string intelFilterStr in IntelFilters)
-                        {
-                            if (file.Name.IndexOf(intelFilterStr, StringComparison.OrdinalIgnoreCase) >= 0)
+                        if (IntelFilters != null)
+                            foreach (string intelFilterStr in IntelFilters)
                             {
-                                readFile = true;
-                                break;
+                                if (file.Name.IndexOf(intelFilterStr, StringComparison.OrdinalIgnoreCase) >= 0)
+                                {
+                                    readFile = true;
+                                    break;
+                                }
                             }
-                        }
 
                         // local files
                         if (file.Name.Contains("Local_"))
@@ -1779,22 +1786,26 @@ namespace SMT.EVEData
             StartBackgroundThread();
             DMTCharacters.CollectionChanged += DMTCharacters_CollectionChanged;
         }
-        public async void MqttInit()
+
+        public void MqttInit()
+        {
+            mqttClient = factory.CreateManagedMqttClient();
+        }
+        public async void MqttConnect(string url, string token)
         {
             IntelDataList.ListChanged += IntelDataList_ListChanged;
-            mqttClient = factory.CreateManagedMqttClient();
 #if DEBUG
             mqttOptions = new MqttClientOptionsBuilder()
                 //.WithTcpServer("127.0.0.1", 1738)
-                .WithTcpServer(dmtConfig.DMTUrl, 1738)
+                .WithTcpServer(url, 1738)
                 .WithClientId($"{Environment.MachineName}\\{Environment.UserName}")
-                .WithCredentials(dmtConfig.DMTToken, VersionStr)
+                .WithCredentials(token, VersionStr)
                 .Build();
 #else
             mqttOptions = new MqttClientOptionsBuilder()
-                .WithTcpServer(dmtConfig.DMTUrl, 1738)
+                .WithTcpServer(url, 1738)
                 .WithClientId($"{Environment.MachineName}\\{Environment.UserName}")
-                .WithCredentials(dmtConfig.DMTToken, VersionStr)
+                .WithCredentials(token, VersionStr)
                 .Build();
 #endif
             var managedOptions = new ManagedMqttClientOptionsBuilder()
@@ -1805,7 +1816,7 @@ namespace SMT.EVEData
 
             if (ServerInfo != null)
             {
-                ServerInfo.MqttStatus = "Connecting";
+                SetStatus("Connecting");
                 ServerInfo.MqttStatusColor = Colors.Orange;
             }
             mqttClient.ConnectingFailedHandler = new ConnectingFailedHandlerDelegate(OnMqttFailed);
@@ -1819,34 +1830,36 @@ namespace SMT.EVEData
         {
             if (ServerInfo != null)
             {
-                ServerInfo.MqttStatus = "Connected";
+                SetStatus("Connected");
                 ServerInfo.MqttStatusColor = Colors.Green;
             }
             await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "location/#" });
             await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "info/jbs" });
             await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "info/dmt_stats" });
+            await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "chat/#" });
             MqttIntelInit();
         }
-
+        private bool retryAllowed = false;
         private int mqttConnects = 0;
         private void OnMqttDisconnect(MqttClientDisconnectedEventArgs arg)
         {
             if (mqttConnects >= 5 && mqttClient.IsStarted)
             {
                 mqttClient.StopAsync();
-                ServerInfo.MqttStatus = "Server might be offline. Ray????";
+                SetStatus("Server might be offline. Ray????");
                 ServerInfo.MqttStatusColor = Colors.Red;
+                retryAllowed = true;
             }
             else
             {
                 if (arg.ClientWasConnected)
                 {
-                    ServerInfo.MqttStatus = "Reconnecting";
+                    SetStatus("Reconnecting");
                     ServerInfo.MqttStatusColor = Colors.Orange;
                 }
                 else
                 {
-                    ServerInfo.MqttStatus = $"Connection Attempt #{mqttConnects + 1}";
+                    SetStatus($"Connection Attempt #{mqttConnects + 1}");
                     ServerInfo.MqttStatusColor = Colors.Orange;
 
                 }
@@ -1859,14 +1872,12 @@ namespace SMT.EVEData
             Exception ex = obj.Exception;
             if (ex.Message.Contains("ClientIdentifierNotValid") || ex.Message.Contains("NotAuthorized"))
             {
-                ServerInfo.MqttStatus = "DMT Auth Token invalid. Please check DMTToken in DMTConfig.json";
                 ServerInfo.MqttStatusColor = Colors.Red;
-                MessageBox.Show("DMT Auth Token invalid. Please check DMTToken in DMTConfig.json", "Error");
+                MessageBox.Show("DMT Token invalid.", "Error");
                 mqttClient.StopAsync();
             }
             if (ex.Message.Contains("ServerUnavailable"))
             {
-                ServerInfo.MqttStatus = "Download the latest version.";
                 ServerInfo.MqttStatusColor = Colors.Red;
                 mqttClient.StopAsync();
                 MessageBox.Show("New Update. Go download please.");
@@ -1875,7 +1886,6 @@ namespace SMT.EVEData
             if (ex.Message.Contains("BadUserNameOrPassword"))
             {
                 mqttClient.StopAsync();
-                ServerInfo.MqttStatus = "Banned";
                 ServerInfo.MqttStatusColor = Colors.Red;
                 MessageBox.Show("Your banned kid. Uninstall DMT. Alt+F4ing.....", "B A N N E D !");
                 Application.Current.Dispatcher.Invoke((Action)(() =>
@@ -1885,13 +1895,22 @@ namespace SMT.EVEData
             }
         }
 
+        public void SetStatus(string status)
+        {
+            ServerInfo.MqttStatus = status;
+        }
+
         public void MqttIntelInit()
         {
             if (!SubscribeAllIntelChannels)
             {
-                foreach (var channel in IntelFilters)
+                if (IntelFilters != null)
                 {
-                    SubscribeIntel("intel/" + channel, false);
+                    foreach (string channel in IntelFilters)
+                    {
+                        SubscribeIntel("intel/" + channel, false);
+                    }
+                    SetStatus($"Subscribed to {IntelFilters.Count} intel channels.");
                 }
             }
             else
@@ -1932,21 +1951,16 @@ namespace SMT.EVEData
                     }
                     else
                     {
-                        foreach (LocalCharacter lc in LocalCharacters)
+                        if (LocalCharacters.Any(lc => dmtc.Name == lc.Name))
                         {
-                            if (dmtc.Name == lc.Name)
-                            {
-                                return;
-                            }
+                            return;
                         }
                         bool found = false;
                         for (int i = 0; i < DMTCharacters.Count; i++)
                         {
-                            if (DMTCharacters[i].Name == dmtc.Name)
-                            {
-                                DMTCharacters[i] = dmtc;
-                                found = true;
-                            }
+                            if (DMTCharacters[i].Name != dmtc.Name) continue;
+                            DMTCharacters[i] = dmtc;
+                            found = true;
                         }
                         if (!found)
                         {
@@ -1955,9 +1969,22 @@ namespace SMT.EVEData
                     }
                     break;
                 case "intel":
-                    var intel = JsonConvert.DeserializeObject<DMTIntel>(payload);
-                    var newIdl = new IntelData(intel.RawIntel, intel.Channel);
-                    CheckIntel(false, newIdl);
+                    DMTIntel intel = JsonConvert.DeserializeObject<DMTIntel>(payload);
+                    IntelData newIdl = new IntelData(intel.RawIntel, intel.Channel);
+                    switch (newIdl.IntelChannel)
+                    {
+                        case "(Corp)":
+                            if (SubscribeToCorp)
+                                CheckChat(false, newIdl);
+                            break;
+                        case "(Alliance)":
+                            if (SubscribeToAlliance)
+                                CheckChat(false, newIdl);
+                            break;
+                        default:
+                            CheckIntel(false, newIdl);
+                            break;
+                    }
                     break;
                 case "info":
                     if (subtopic == "jbs")
@@ -1978,19 +2005,8 @@ namespace SMT.EVEData
                 {
                     try
                     {
-                        bool found2 = false;
-                        foreach (var idl in IntelDataList)
-                        {
-                            if (idl.IntelString == newIdl.IntelString)
-                            {
-                                found2 = true;
-                                return;
-                            }
-                        }
-                        if (!found2)
-                        {
+                        if (!IntelDataList.ToDictionary(x => x.RawIntelString, x => x).ContainsKey(newIdl.RawIntelString))
                             IntelDataList.Insert(0, newIdl);
-                        }
                     }
                     finally
                     {
@@ -1999,13 +2015,32 @@ namespace SMT.EVEData
             }), DispatcherPriority.Normal, null);
             IntelAddedEvent?.Invoke(newIdl.Systems);
         }
+        private void CheckChat(bool v, IntelData newIdl)
+        {
+            if (Application.Current == null) return;
+            Application.Current.Dispatcher.Invoke((Action)(() =>
+            {
+                lock (IntelLocker)
+                {
+                    try
+                    {
+                        if (!ChatDataList.ToDictionary(x => x.RawIntelString, x => x).ContainsKey(newIdl.RawIntelString))
+                            ChatDataList.Insert(0, newIdl);
+                    }
+                    finally
+                    {
+                    }
+                }
+            }), DispatcherPriority.Normal, null);
+
+        }
 
         private void IntelDataList_ListChanged(object sender, ListChangedEventArgs e)
         {
             if (e.ListChangedType == ListChangedType.ItemAdded)
             {
                 var newID = IntelDataList[e.NewIndex];
-                
+
                 for (int i = 0; i < IntelDataList.Count; i++)
                 {
                     if (IntelDataList[i].IntelString == newID.IntelString && i != e.NewIndex)
@@ -2036,7 +2071,7 @@ namespace SMT.EVEData
             mqttClient.PublishAsync(message);
         }
 
-        private void SendIntel(string changedFile, IntelData id)
+        private void SendIntel(string changedFile, IntelData id, bool IsChat = false)
         {
             if (!mqttClient.IsConnected)
                 return;
@@ -2045,12 +2080,25 @@ namespace SMT.EVEData
             string intelChannel = changedFile.Substring(startPos, (endPos - startPos));
             DMTIntel intel = new DMTIntel() { Channel = intelChannel, Intel = id.IntelString, RawIntel = id.RawIntelString, Systems = id.Systems, Time = id.IntelTime };
             string payload = JsonConvert.SerializeObject(intel);
-            var message = new MqttApplicationMessageBuilder()
-                .WithTopic($"intel/{intel.Channel}")
-                .WithPayload(payload)
-                .WithExactlyOnceQoS()
-                .WithRetainFlag()
-                .Build();
+            MqttApplicationMessage message;
+            if (IsChat)
+            {
+                message = new MqttApplicationMessageBuilder()
+                    .WithTopic($"chat/{intel.Channel}")
+                    .WithPayload(payload)
+                    .WithExactlyOnceQoS()
+                    .WithRetainFlag()
+                    .Build();
+            }
+            else
+            {
+                message = new MqttApplicationMessageBuilder()
+                    .WithTopic($"intel/{intel.Channel}")
+                    .WithPayload(payload)
+                    .WithExactlyOnceQoS()
+                    .WithRetainFlag()
+                    .Build();
+            }
             mqttClient.PublishAsync(message);
         }
         public async void SubscribeIntel(string channel = "", bool all = false)
@@ -2103,14 +2151,15 @@ namespace SMT.EVEData
             bool processFile = false;
             bool localChat = false;
 
-            foreach (string intelFilterStr in IntelFilters)
-            {
-                if (changedFile.IndexOf(intelFilterStr, StringComparison.OrdinalIgnoreCase) >= 0)
+            if (IntelFilters != null)
+                foreach (string intelFilterStr in IntelFilters)
                 {
-                    processFile = true;
-                    break;
+                    if (changedFile.IndexOf(intelFilterStr, StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        processFile = true;
+                        break;
+                    }
                 }
-            }
 
             if (changedFile.Contains("Local_"))
             {
@@ -2213,15 +2262,12 @@ namespace SMT.EVEData
                         {
                             line = line.Substring(line.IndexOf("["));
                         }
-
                         if (line == "")
                         {
                             line = file.ReadLine();
                             continue;
                         }
-
                         fileReadFrom++;
-
                         if (localChat)
                         {
                             if (line.StartsWith("[") && line.Contains("EVE System > Channel changed to Local"))
@@ -2247,10 +2293,8 @@ namespace SMT.EVEData
                             {
                                 // check if it is in the intel list already (ie if you have multiple clients running)
                                 bool addToIntel = true;
-
                                 int start = line.IndexOf('>') + 1;
                                 string newIntelString = line.Substring(start);
-
                                 if (newIntelString != null)
                                 {
                                     foreach (IntelData idl in IntelDataList)
@@ -2266,12 +2310,10 @@ namespace SMT.EVEData
                                 {
                                     addToIntel = false;
                                 }
-
                                 if (line.Contains("Channel MOTD:"))
                                 {
                                     addToIntel = false;
                                 }
-
                                 if (addToIntel)
                                 {
                                     IntelData id = new IntelData(line, idlName);
@@ -2299,8 +2341,16 @@ namespace SMT.EVEData
                                             }
                                         }
                                     }
-                                    CheckIntel(true, id);
-                                    SendIntel(changedFile, id);
+                                    if (id.IntelChannel == "(Corp)" || id.IntelChannel == "(Alliance)")
+                                    {
+                                        CheckChat(true, id);
+                                        SendIntel(changedFile, id, true);
+                                    }
+                                    else
+                                    {
+                                        CheckIntel(true, id);
+                                        SendIntel(changedFile, id);
+                                    }
                                 }
                             }), DispatcherPriority.Normal, null);
                         }

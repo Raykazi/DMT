@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:SMT"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="Preferences" Height="455" Width="600">
+        Title="Preferences" Height="455" Width="600" ResizeMode="NoResize">
     <Grid Background="{DynamicResource ButtonBorder}">
         <DockPanel>
             <TabControl x:Name="tabControl" DockPanel.Dock="Top" >
@@ -23,6 +23,28 @@
                                     <CheckBox IsChecked="{Binding Path=AlwaysOnTop}" Margin="0,3" Content="Always on top"/>
                                     <CheckBox IsChecked="{Binding Path=SyncActiveCharacterBasedOnActiveEVEClient}" Margin="0,3">Auto sync character to active window</CheckBox>
                                     <CheckBox x:Name="syncESIPositionChk" Margin="0,3" Checked="syncESIPositionChk_Checked" Unchecked="syncESIPositionChk_Checked">Use ESI for character positions</CheckBox>
+                                    <Grid VerticalAlignment="Top" Height="Auto" Margin="0,5,0,0">
+                                        <Grid.Resources>
+                                            <Style TargetType="{x:Type TextBox}">
+                                                <Setter Property="Margin" Value="0,0,0,5" />
+                                                <Setter Property="Foreground" Value="White" />
+                                            </Style>
+                                        </Grid.Resources>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition></RowDefinition>
+                                            <RowDefinition></RowDefinition>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="65"></ColumnDefinition>
+                                            <ColumnDefinition Width="175"></ColumnDefinition>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="DMT URL:"></TextBlock>
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="DMT Token:"/>
+
+                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Url}" Foreground="White"></TextBox>
+                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Token}" Foreground="White"></TextBox>
+                                    </Grid>
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>
@@ -96,7 +118,7 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0">
-                            <GroupBox Header="General" Margin="4" Height="200">
+                            <GroupBox Header="General" Margin="4" Height="150">
                                 <StackPanel>
 
                                     <CheckBox IsChecked="{Binding Path=PlayIntelSound}" Margin="0,2">Warning Sound</CheckBox>
@@ -115,9 +137,16 @@
 
                                 </StackPanel>
                             </GroupBox>
-                            <GroupBox Header="DMT" Height="155">
-                                <CheckBox IsChecked="{Binding SubscribeToAllIntel}" Margin="0,2,8,114" Content="Subscribe To All Intel Channels"/>
-
+                            <GroupBox Header="Intel Sources" Margin="4" Height="190">
+                                <StackPanel>
+                                    <CheckBox IsChecked="{Binding SubscribeToCorp}" Margin="0,2" Content="Check Corp chat"/>
+                                    <CheckBox IsChecked="{Binding SubscribeToAlliance}" Margin="0,2" Content="Check Alliance chat"/>
+                                    <CheckBox IsChecked="{Binding SubscribeToAllIntel}" Margin="0,2" Content="Subscribe to all remote intel channels"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2">
+                                        <Label Content="Channels"></Label>
+                                    </StackPanel>
+                                    <TextBox Height="75" AcceptsReturn="True" Text="{Binding IntelChannels}" />
+                                </StackPanel>
                             </GroupBox>
 
                         </StackPanel>

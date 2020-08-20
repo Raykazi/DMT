@@ -379,7 +379,6 @@
                                                 <DataGridTextColumn Header="Defenders" Binding="{Binding Path=DefendingAllianceName, Mode=OneTime, UpdateSourceTrigger=PropertyChanged}" Width="*" />
                                             </DataGrid.Columns>
                                         </DataGrid>
-
                                     </StackPanel>
                                 </ScrollViewer>
                             </xcadl:LayoutAnchorable>
@@ -428,6 +427,16 @@
                                             </DataGrid>
                                         </StackPanel>
                                     </ScrollViewer>
+                                </Grid>
+                            </xcadl:LayoutAnchorable>
+                            <xcadl:LayoutAnchorable x:Name="ChatLayoutAnchorable"  Title="Chat" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="ChatContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="25" />
+                                    </Grid.RowDefinitions>
+                                    <ListView x:Name="RawChatBox" Margin="0,2" MouseDoubleClick="RawChatBox_MouseDoubleClick" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.Row="0" ItemTemplate="{StaticResource intelDataDataTemplate}" />
+                                    <Button Content="Clear Chat" Grid.Row="1" x:Name="ClearChatBtn" Click="ClearChatBtn_Click" />
                                 </Grid>
                             </xcadl:LayoutAnchorable>
                             <xcadl:LayoutAnchorable x:Name="IntelLayoutAnchorable"  Title="Intel" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="IntelContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">

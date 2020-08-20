@@ -695,6 +695,7 @@ namespace SMT
                 NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(0, c.Name));
             }
             DMTCharacter result = null;
+
             foreach (DMTCharacter c in EM.DMTCharacters)
             {
                 //Still need this checked
