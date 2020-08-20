@@ -253,7 +253,7 @@ namespace SMT
             else
             {
                 EVEManager.ServerInfo.MqttStatusColor = Colors.Red;
-                EVEManager.ServerInfo.MqttStatus = "Waiting on MQTT info";
+                EVEManager.SetStatus("Waiting on MQTT info");
                 Preferences_MenuItem_Click(null, null);
             }
 
