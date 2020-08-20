@@ -68,17 +68,15 @@ namespace SMT.EVEData
         private MqttFactory factory = new MqttFactory();
         private static IManagedMqttClient mqttClient;
         private IMqttClientOptions mqttOptions;
-        private DMTConfig dmtConfig;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EveManager" /> class
         /// </summary>
-        public EveManager(string version, DMTConfig config)
+        public EveManager(string version)
         {
 
             LocalCharacters = new BindingList<LocalCharacter>();
             VersionStr = version;
-            dmtConfig = config;
 
             // ensure we have the cache folder setup
             DataCacheFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\DMTCache";

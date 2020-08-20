@@ -42,7 +42,6 @@ namespace SMT
 
         private MediaPlayer mediaPlayer;
 
-        private DMTConfig dmtConfig;
         private bool _firstRun = false;
         /// <summary>
         /// Main Window
@@ -122,7 +121,7 @@ namespace SMT
                 _firstRun = true;
             }
             // Create the main EVE manager
-            EVEManager = new EVEData.EveManager(DMT_VERSION, dmtConfig);
+            EVEManager = new EVEData.EveManager(DMT_VERSION);
             EVEData.EveManager.Instance = EVEManager;
             EVEManager.SubscribeAllIntelChannels = MapConf.SubscribeToAllIntel;
             EVEManager.MqttInit();
