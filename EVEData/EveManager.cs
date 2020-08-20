@@ -1472,22 +1472,8 @@ namespace SMT.EVEData
         {
             IntelDataList = new BindingList<IntelData>();
             ChatDataList = new BindingList<IntelData>();
-            IntelClearFilters = new List<string>();
-            string intelClearFileFilter = AppDomain.CurrentDomain.BaseDirectory + @"\IntelClearFilters.txt";
+            IntelClearFilters = new List<string> { "Clear", "Clr", "Despike" };
 
-            if (File.Exists(intelClearFileFilter))
-            {
-                StreamReader file = new StreamReader(intelClearFileFilter);
-                string line;
-                while ((line = file.ReadLine()) != null)
-                {
-                    line.Trim();
-                    if (line != string.Empty)
-                    {
-                        IntelClearFilters.Add(line);
-                    }
-                }
-            }
 
             intelFileReadPos = new Dictionary<string, int>();
 
