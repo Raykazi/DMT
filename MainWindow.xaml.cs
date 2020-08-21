@@ -222,7 +222,6 @@ namespace SMT
             Closed += MainWindow_Closed;
 
             EVEManager.IntelAddedEvent += OnIntelAdded;
-            EVEManager.JbSyncedEvent += EVEManager_JbSyncedEvent;
 
 
             uiRefreshTimer = new DispatcherTimer();

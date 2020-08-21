@@ -135,8 +135,6 @@ namespace SMT.EVEData
         /// </summary>
         public event IntelAddedEventHandler IntelAddedEvent;
 
-        public delegate void JBSyncedEventHandler();
-        public event JBSyncedEventHandler JbSyncedEvent;
 
         public enum JumpShip
         {
@@ -1974,7 +1972,6 @@ namespace SMT.EVEData
                     if (subtopic == "jbs")
                     {
                         DMTBridges = JsonConvert.DeserializeObject<List<string>>(payload);
-                        if (JbSyncedEvent != null) JbSyncedEvent();
                     }
                     break;
             }
