@@ -135,7 +135,7 @@
 
                     </Grid>
                 </TabItem>
-                <TabItem Header="SOV">
+                <TabItem Header="Sov">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="50*" />
