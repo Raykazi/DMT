@@ -71,16 +71,16 @@
                         <StackPanel Grid.Column="0">
                             <GroupBox Header="Region" Margin="4" Height="355">
                                 <StackPanel>
-                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowActiveIncursions}" Content="Show Active Incursions"/>
-                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowCynoBeacons}" Content="Show Cyno Beacons"/>
-                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowJoveObservatories}" Content="Show Jove Observatories"/>
-                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowToolBox}" Content="Show Toolbox"/>
-                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowTrueSec}" Content="Show TrueSec"/>
-                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowSystemPopup}" Content="Show System Popups"/>
-                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowZKillData}" Content="Show ZKill Data"/>
-                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowNegativeRattingDelta}" Content="Show Negative Ratting Delta"/>
-                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowRattingDataAsDelta}" Content="Show Ratting Data as Delta"/>
-                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowSimpleSecurityView}" Content="Show Simple Security View (Just HS/LS/null)"/>
+                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowActiveIncursions}" Content="Show active incursions"/>
+                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowCynoBeacons}" Content="Show cyno beacons"/>
+                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowJoveObservatories}" Content="Show Jove observatories"/>
+                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowToolBox}" Content="Show toolbox"/>
+                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowTrueSec}" Content="Show true security"/>
+                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowSystemPopup}" Content="Show system popups"/>
+                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowZKillData}" Content="Show zKill data"/>
+                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowNegativeRattingDelta}" Content="Show negative ratting delta"/>
+                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowRattingDataAsDelta}" Content="Show ratting data as delta"/>
+                                    <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowSimpleSecurityView}" Content="Show simple security view (HS/LS/NS)"/>
 
 
                                 </StackPanel>
@@ -93,12 +93,12 @@
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,0">
                                         <xctk:DoubleUpDown Value="{Binding Path=UniverseMaxZoomDisplaySystems}" Text="" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Increment="0.1" Maximum="5" Minimum="0.1" FormatString="F1" Background="Transparent"  Foreground="White"/>
-                                        <Label Content="Systems Max Zoom"/>
+                                        <Label Content="Systems max zoom"/>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0" >
                                         <xctk:DoubleUpDown Value="{Binding Path=UniverseMaxZoomDisplaySystemsText}" Text="" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Increment="0.1" Maximum="5" Minimum="0.1" FormatString="F1" Background="Transparent"  Foreground="White"/>
-                                        <Label Content="Text Max Zoom"/>
+                                        <Label Content="Text max zoom"/>
                                     </StackPanel>
 
                                 </StackPanel>
@@ -121,26 +121,26 @@
                             <GroupBox Header="General" Margin="4" Height="150">
                                 <StackPanel>
 
-                                    <CheckBox IsChecked="{Binding Path=PlayIntelSound}" Margin="0,2">Warning Sound</CheckBox>
-                                    <CheckBox IsChecked="{Binding Path=PlayIntelSoundOnUnknown}" Margin="0,2">Warning on Unknown</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=PlayIntelSound}" Margin="0,2">Warning sound</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=PlayIntelSoundOnUnknown}" Margin="0,2">Warning on unknown</CheckBox>
 
 
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <xctk:IntegerUpDown Value="{Binding Path=IntelTextSize}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="70" Minimum="8" Maximum="20" Background="Transparent"  Foreground="White" />
-                                        <Label Content="Intel Text Size"/>
+                                        <Label Content="Intel text size"/>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <xctk:IntegerUpDown Value="{Binding Path=MaxIntelSeconds}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="70" Minimum="30" Maximum="1200" Background="Transparent"  Foreground="White"/>
-                                        <Label Content="Intel Max Time (s)"/>
+                                        <Label Content="Intel TTL (s)"/>
                                     </StackPanel>
 
                                 </StackPanel>
                             </GroupBox>
                             <GroupBox Header="Intel Sources" Margin="4" Height="190">
                                 <StackPanel>
-                                    <CheckBox IsChecked="{Binding SubscribeToCorp}" Margin="0,2" Content="Check Corp chat"/>
-                                    <CheckBox IsChecked="{Binding SubscribeToAlliance}" Margin="0,2" Content="Check Alliance chat"/>
+                                    <CheckBox IsChecked="{Binding SubscribeToCorp}" Margin="0,2" Content="Check corp chat"/>
+                                    <CheckBox IsChecked="{Binding SubscribeToAlliance}" Margin="0,2" Content="Check alliance chat"/>
                                     <CheckBox IsChecked="{Binding SubscribeToAllIntel}" Margin="0,2" Content="Subscribe to all remote intel channels"/>
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <Label Content="Channels"></Label>
@@ -152,14 +152,14 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="1">
-                            <GroupBox Header="DangerZone" Margin="4" Height="355">
+                            <GroupBox Header="Danger Zone" Margin="4" Height="355">
                                 <StackPanel>
 
-                                    <CheckBox IsChecked="{Binding Path=ShowDangerZone}" Margin="0,2">Show Dangerzone</CheckBox>
-                                    <CheckBox IsChecked="{Binding Path=PlaySoundOnlyInDangerZone}" Margin="0,2">Limit Sound to Dangerzone</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=ShowDangerZone}" Margin="0,2">Show danger zone</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=PlaySoundOnlyInDangerZone}" Margin="0,2">Limit sound to danger zone</CheckBox>
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <xctk:IntegerUpDown Value="{Binding Path=WarningRange}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="50" Minimum="1" MaxLength="5" Background="Transparent"  Foreground="White"/>
-                                        <Label Content="DangerZone Size"/>
+                                        <Label Content="Danger zone size"/>
                                     </StackPanel>
                                 </StackPanel>
                             </GroupBox>
@@ -178,16 +178,16 @@
                         <StackPanel Grid.Column="0">
                             <GroupBox Header="General" Margin="4" Height="355">
                                 <StackPanel>
-                                    <CheckBox IsChecked="{Binding Path=ShowCoalition}" Margin="0,2">Show SOV as Coalitions</CheckBox>
-                                    <CheckBox IsChecked="{Binding Path=SOVShowConflicts}" Margin="0,2">Highlight SOV conflict areas</CheckBox>
-                                    <CheckBox IsChecked="{Binding Path=SOVBasedITCU}" Margin="0,2">Show SOV based on TCU</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=ShowCoalition}" Margin="0,2">Show sov as coalitions</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=SOVShowConflicts}" Margin="0,2">Highlight sov conflict areas</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=SOVBasedITCU}" Margin="0,2">Show sov based on TCU</CheckBox>
 
-                                    <CheckBox IsChecked="{Binding Path=ShowIhubVunerabilities}" Margin="0,2">Show IHub Timer</CheckBox>
-                                    <CheckBox IsChecked="{Binding Path=ShowTCUVunerabilities}" Margin="0,2">Show TCU Timer</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=ShowIhubVunerabilities}" Margin="0,2">Show IHUB timer</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=ShowTCUVunerabilities}" Margin="0,2">Show TCU timer</CheckBox>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <xctk:IntegerUpDown Value="{Binding Path=UpcomingSovMinutes}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="70" Minimum="5" Maximum="360" Background="Transparent"  Foreground="White" />
-                                        <Label Content="Upcoming Period (Mins)"/>
+                                        <Label Content="Upcoming period (m)"/>
                                     </StackPanel>
                                 </StackPanel>
                             </GroupBox>
@@ -204,12 +204,12 @@
                         <StackPanel Grid.Column="0">
                             <GroupBox Header="General" Margin="4" Height="355">
                                 <StackPanel>
-                                    <CheckBox IsChecked="{Binding Path=FleetShowOnMap}" Margin="0,2">Show Fleet Members</CheckBox>
-                                    <CheckBox IsChecked="{Binding Path=FleetShowShipType}" Margin="0,2">Show Fleet Member Ship Type</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=FleetShowOnMap}" Margin="0,2">Show fleet members</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=FleetShowShipType}" Margin="0,2">Show Fleet member ship type</CheckBox>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <xctk:IntegerUpDown Value="{Binding Path=FleetMaxMembersPerSystem}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="70" Minimum="1" Maximum="30" Background="Transparent"  Foreground="White" />
-                                        <Label Content="Max Fleet Members Display"/>
+                                        <Label Content="Max fleet members to display"/>
                                     </StackPanel>
                                 </StackPanel>
                             </GroupBox>
