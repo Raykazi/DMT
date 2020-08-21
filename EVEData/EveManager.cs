@@ -1815,7 +1815,7 @@ namespace SMT.EVEData
             if (ServerInfo != null)
             {
                 SetStatus("Connected");
-                ServerInfo.MqttStatusColor = Colors.Green;
+                ServerInfo.MqttStatusColor = Colors.LightGreen;
             }
             await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "location/#" });
             await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "info/jbs" });
