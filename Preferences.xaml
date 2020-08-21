@@ -56,7 +56,7 @@
                                     <CheckBox IsChecked="{Binding Path=DisableRoutePathAnimation}" Margin="0,3">Disable route path animation</CheckBox>
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <xctk:IntegerUpDown Value="{Binding Path=MaxIntelLines}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="20" MaxLength="9999" Background="Transparent"  Foreground="White"/>
-                                        <Label Content="Max intel lines"/>
+                                        <Label Content="Intel max lines"/>
                                     </StackPanel>
                                 </StackPanel>
                             </GroupBox>
@@ -96,12 +96,12 @@
                             <GroupBox Header="Universe" Margin="4" Height="355">
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,0">
-                                        <xctk:DoubleUpDown Value="{Binding Path=UniverseMaxZoomDisplaySystems}" Text="" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Increment="0.1" Maximum="5" Minimum="0.1" FormatString="F1" Background="Transparent"  Foreground="White"/>
+                                        <xctk:DoubleUpDown Value="{Binding Path=UniverseMaxZoomDisplaySystems}" Text="" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Increment="0.1" Maximum="5" Minimum="0.1" FormatString="F1" Background="Transparent"  Foreground="White" />
                                         <Label Content="Systems max zoom"/>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0" >
-                                        <xctk:DoubleUpDown Value="{Binding Path=UniverseMaxZoomDisplaySystemsText}" Text="" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Increment="0.1" Maximum="5" Minimum="0.1" FormatString="F1" Background="Transparent"  Foreground="White"/>
+                                        <xctk:DoubleUpDown Value="{Binding Path=UniverseMaxZoomDisplaySystemsText}" Text="" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Increment="0.1" Maximum="5" Minimum="0.1" FormatString="F1" Background="Transparent"  Foreground="White" />
                                         <Label Content="Text max zoom"/>
                                     </StackPanel>
 
@@ -122,7 +122,7 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0">
-                            <GroupBox Header="General" Margin="4" Height="110">
+                            <GroupBox Header="General" Margin="4" Height="115">
                                 <StackPanel>
 
                                     <CheckBox IsChecked="{Binding Path=PlayIntelSound}" Margin="0,2">Warning sound</CheckBox>
@@ -141,7 +141,7 @@
 
                                 </StackPanel>
                             </GroupBox>
-                            <GroupBox Header="Intel Sources" Margin="4" Height="220">
+                            <GroupBox Header="Intel Sources" Margin="4" Height="215">
                                 <StackPanel>
                                     <CheckBox IsChecked="{Binding SubscribeToCorp}" Margin="0,2" Content="Check corp chat"/>
                                     <CheckBox IsChecked="{Binding SubscribeToAlliance}" Margin="0,2" Content="Check alliance chat"/>
@@ -156,7 +156,7 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="1">
-                            <GroupBox Header="Danger Zone" Margin="4" Height="355">
+                            <GroupBox Header="Danger Zone" Margin="4" Height="90">
                                 <StackPanel>
 
                                     <CheckBox IsChecked="{Binding Path=ShowDangerZone}" Margin="0,2">Show danger zone</CheckBox>
@@ -165,6 +165,15 @@
                                         <xctk:IntegerUpDown Value="{Binding Path=WarningRange}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="50" Minimum="1" MaxLength="5" Background="Transparent"  Foreground="White"/>
                                         <Label Content="Danger zone size"/>
                                     </StackPanel>
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Header="Intel Filters" Margin="4" Height="215">
+                                <StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,2">
+                                        <Label Content="Clear indicators"></Label>
+                                    </StackPanel>
+                                    <TextBox Height="50" AcceptsReturn="True" Text="{Binding ClearFilters}" VerticalScrollBarVisibility="Auto"/>
                                 </StackPanel>
                             </GroupBox>
 

@@ -191,9 +191,11 @@
                                                 </DataGridCheckBoxColumn>
                                             </DataGrid.Columns>
                                         </DataGrid>
-                                        <CheckBox Content="Show Characters On Map" IsChecked="{Binding MapConf.ShowCharacterNamesOnMap}" Margin="3"/>
-                                        <CheckBox Content="Show Corp Characters On Map" IsChecked="{Binding MapConf.ShowDMTCharactersOnMap}" Margin="3"/>
-                                        <Button x:Name="btn_AddCharacter" Click="btn_AddCharacter_Click" Content="Add Character" />
+                                        <StackPanel>
+                                            <CheckBox Content="Show characters on map" IsChecked="{Binding MapConf.ShowCharacterNamesOnMap}" Margin="3"/>
+                                            <CheckBox Content="Show corp characters on map" IsChecked="{Binding MapConf.ShowDMTCharactersOnMap}" Margin="3"/>
+                                            <Button x:Name="btn_AddCharacter" Click="btn_AddCharacter_Click" Content="Add Character" Margin="3"/>
+                                        </StackPanel>
                                     </StackPanel>
                                 </ScrollViewer>
                             </xcadl:LayoutAnchorable>
