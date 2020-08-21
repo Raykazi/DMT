@@ -47,11 +47,11 @@
                 </MenuItem>
 
                 <MenuItem Header="View">
-                    <MenuItem x:Name="miFullScreenToggle" Header="FullScreen" IsCheckable="True" IsChecked="False" Click="FullScreenToggle_MenuItem_Click"/>
+                    <MenuItem x:Name="miFullScreenToggle" Header="Full Screen" IsCheckable="True" IsChecked="False" Click="FullScreenToggle_MenuItem_Click"/>
                 </MenuItem>
             </Menu>
 
-            <Label Margin="30,0,0,0" Padding="7">Active Character :</Label>
+            <Label Margin="30,0,0,0" Padding="7">Active Character:</Label>
             <ComboBox x:Name="CurrentActiveCharacterCombo" Width="180"  IsReadOnly="True" SelectionChanged="CurrentActiveCharacterCombo_Selected"  Height="18"/>
 
         </StackPanel>

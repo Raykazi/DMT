@@ -54,6 +54,10 @@
                                 <StackPanel>
                                     <CheckBox IsChecked="{Binding Path=DisableJumpBridgesPathAnimation}" Margin="0,3">Disable jump bridges path animation</CheckBox>
                                     <CheckBox IsChecked="{Binding Path=DisableRoutePathAnimation}" Margin="0,3">Disable route path animation</CheckBox>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2">
+                                        <xctk:IntegerUpDown Value="{Binding Path=MaxIntelLines}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="50" Minimum="20" MaxLength="9999" Background="Transparent"  Foreground="White"/>
+                                        <Label Content="Max intel lines"/>
+                                    </StackPanel>
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>
@@ -118,7 +122,7 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0">
-                            <GroupBox Header="General" Margin="4" Height="150">
+                            <GroupBox Header="General" Margin="4" Height="110">
                                 <StackPanel>
 
                                     <CheckBox IsChecked="{Binding Path=PlayIntelSound}" Margin="0,2">Warning sound</CheckBox>
@@ -137,7 +141,7 @@
 
                                 </StackPanel>
                             </GroupBox>
-                            <GroupBox Header="Intel Sources" Margin="4" Height="190">
+                            <GroupBox Header="Intel Sources" Margin="4" Height="220">
                                 <StackPanel>
                                     <CheckBox IsChecked="{Binding SubscribeToCorp}" Margin="0,2" Content="Check corp chat"/>
                                     <CheckBox IsChecked="{Binding SubscribeToAlliance}" Margin="0,2" Content="Check alliance chat"/>
@@ -145,7 +149,7 @@
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <Label Content="Channels"></Label>
                                     </StackPanel>
-                                    <TextBox Height="75" AcceptsReturn="True" Text="{Binding IntelChannels}" />
+                                    <TextBox Height="100" AcceptsReturn="True" Text="{Binding IntelChannels}" VerticalScrollBarVisibility="Auto"/>
                                 </StackPanel>
                             </GroupBox>
 
