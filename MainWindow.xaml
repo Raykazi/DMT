@@ -108,12 +108,12 @@
                             <xcadl:LayoutAnchorable Title="Anoms" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="AnomsContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
                                 <Grid x:Name="MainAnomGrid"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="60" />
+                                        <RowDefinition Height="26" />
                                         <RowDefinition Height="*" />
+                                        <RowDefinition Height="26" />
                                         <RowDefinition Height="26" />
                                     </Grid.RowDefinitions>
                                     <StackPanel Grid.Row="0">
-                                        <Button x:Name="btnClearAnomList" Content="Clear" Click="btnClearAnomList_Click" />
                                         <Label Content="{Binding ANOMManager.ActiveSystem.SystemName}" FontSize="18" FontWeight="Bold" />
                                     </StackPanel>
 
@@ -141,7 +141,10 @@
                                         </DataGrid.Columns>
                                     </DataGrid>
                                     <StackPanel Grid.Row="2">
-                                        <Button x:Name="btnUpdateAnomList" Content="Update from Clipboard" Click="btnUpdateAnomList_Click" />
+                                        <Button x:Name="btnClearAnomList" Content="Clear" Click="btnClearAnomList_Click" Margin="2"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="3">
+                                        <Button x:Name="btnUpdateAnomList" Content="Update from Clipboard" Click="btnUpdateAnomList_Click" Margin="2" />
                                     </StackPanel>
                                 </Grid>
                             </xcadl:LayoutAnchorable>
@@ -198,22 +201,22 @@
                             <xcadl:LayoutAnchorable Title="Jump Bridges" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="JumpBridgesContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
                                 <Grid x:Name="JumpBridgeGrid">
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="30" />
                                         <RowDefinition Height="25" />
                                         <RowDefinition Height="25" />
                                         <RowDefinition Height="25" />
                                         <RowDefinition Height="25" />
-                                        <RowDefinition Height="30" />
-                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
                                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="2">
-                                        <Label Content="Gate SearchFilter : " />
+                                        <Label Content="Gate Search Filter:" />
                                         <TextBox x:Name="GateSearchFilter" Text=" » " Width="167" />
                                     </StackPanel>
                                     <Button x:Name="ImportJumpGatesBtn" Content="Find Gates" Click="ImportJumpGatesBtn_Click" Margin="2" Grid.Row="1" />
                                     <Button x:Name="ClearJumpGatesBtn" Content="Clear Gates" Click="ClearJumpGatesBtn_Click" Margin="2" Grid.Row="2" />
-                                    <Button x:Name="ImportPasteJumpGatesBtn" Content="Import from Clipboard" Click="ImportPasteJumpGatesBtn_Click" Margin="2" Grid.Row="3" />
+                                    <Button x:Name="ImportPasteJumpGatesBtn" Content="Import From Clipboard" Click="ImportPasteJumpGatesBtn_Click" Margin="2" Grid.Row="3" />
                                     <Button x:Name="SyncDMTBtn" Content="Sync From DMT" Click="SyncDMTBtn_Click" Margin="2" Grid.Row="4" />
                                     <Button x:Name="ExportJumpGatesBtn" Content="Export Jump Bridges" Click="ExportJumpGatesBtn_Click"  Margin="2" Grid.Row="5" />
 
@@ -405,7 +408,7 @@
                                 <Grid>
                                     <ScrollViewer Background="{DynamicResource ButtonBackground}">
                                         <StackPanel CanVerticallyScroll="True" ScrollViewer.CanContentScroll="True">
-                                            <CheckBox Content="Selected Region Only" x:Name="ZKBFeedFilterViewChk" IsChecked="True" Checked="ZKBFeedFilterViewChk_Checked" Unchecked="ZKBFeedFilterViewChk_Checked" Margin="4" />
+                                            <CheckBox Content="Selected region only" x:Name="ZKBFeedFilterViewChk" IsChecked="True" Checked="ZKBFeedFilterViewChk_Checked" Unchecked="ZKBFeedFilterViewChk_Checked" Margin="4" />
                                             <DataGrid x:Name="ZKBFeed" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" CanUserAddRows="False" MouseDoubleClick="ZKBFeed_MouseDoubleClick_1" HeadersVisibility="Column" SelectionUnit="FullRow" GridLinesVisibility="None"  MinHeight="200">
                                                 <DataGrid.Columns>
                                                     <DataGridTextColumn Header="System" Binding="{Binding SystemName}" Width="30*" IsReadOnly="True" CanUserReorder="False" CanUserSort="False" />

@@ -1871,7 +1871,7 @@ namespace SMT.EVEData
             {
                 mqttClient.StopAsync();
                 ServerInfo.MqttStatusColor = Colors.Red;
-                MessageBox.Show("Your banned kid. Uninstall DMT. Alt+F4ing.....", "B A N N E D !");
+                MessageBox.Show("You're banned kid. Uninstall DMT. Alt+F4ing...", "B A N N E D !");
                 Application.Current.Dispatcher.Invoke((Action)(() =>
                 {
                     Environment.Exit(0);
