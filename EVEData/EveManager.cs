@@ -1462,6 +1462,8 @@ namespace SMT.EVEData
                     IntelFilters.Add(channel);
                 }
             }
+            IntelFilters.Add("Corp");
+            IntelFilters.Add("Alliance");
         }
         /// <summary>
         /// Setup the intel watcher;  Loads the intel channel filter list and creates the file system watchers
