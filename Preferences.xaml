@@ -55,7 +55,7 @@
                                     <CheckBox IsChecked="{Binding Path=DisableJumpBridgesPathAnimation}" Margin="0,3">Disable jump bridges path animation</CheckBox>
                                     <CheckBox IsChecked="{Binding Path=DisableRoutePathAnimation}" Margin="0,3">Disable route path animation</CheckBox>
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <xctk:IntegerUpDown Value="{Binding Path=MaxIntelLines}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="50" Minimum="20" MaxLength="9999" Background="Transparent"  Foreground="White"/>
+                                        <xctk:IntegerUpDown Value="{Binding Path=MaxIntelLines}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="20" MaxLength="9999" Background="Transparent"  Foreground="White"/>
                                         <Label Content="Max intel lines"/>
                                     </StackPanel>
                                 </StackPanel>
