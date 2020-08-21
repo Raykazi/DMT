@@ -936,7 +936,14 @@ namespace SMT
 
                 if (s.StartsWith("https://") || s.StartsWith("http://"))
                 {
-                    string url = s.Substring(0, s.IndexOf(" ", StringComparison.Ordinal));
+                    //Check if niggas said something after url
+                    int end = s.IndexOf(" ", StringComparison.Ordinal);
+                    string url;
+                    if (end == -1)
+                        url = s.Substring(0);
+                    else
+                        url = s.Substring(0, end);
+
                     if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
                     {
                         Process.Start(url);
@@ -1530,7 +1537,50 @@ namespace SMT
 
         private void RawChatBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            if (RawChatBox.SelectedItem == null)
+            {
+                return;
+            }
 
+            EVEData.IntelData chat = RawChatBox.SelectedItem as EVEData.IntelData;
+
+            foreach (string s in chat.IntelString.Split(' '))
+            {
+                if (s == "")
+                {
+                    continue;
+                }
+
+                if (s.StartsWith("https://") || s.StartsWith("http://"))
+                {
+                    //Check if niggas said something after url
+                    int end = s.IndexOf(" ", StringComparison.Ordinal);
+                    string url;
+                    if (end == -1)
+                        url = s.Substring(0);
+                    else
+                        url = s.Substring(0, end);
+
+                    if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                    {
+                        Process.Start(url);
+                    }
+                }
+
+                foreach (EVEData.System sys in EVEManager.Systems)
+                {
+                    if (s.IndexOf(sys.Name, StringComparison.OrdinalIgnoreCase) == 0)
+                    {
+                        if (RegionUC.Region.Name != sys.Region)
+                        {
+                            RegionUC.SelectRegion(sys.Region);
+                        }
+
+                        RegionUC.SelectSystem(s, true);
+                        return;
+                    }
+                }
+            }
         }
     }
 
