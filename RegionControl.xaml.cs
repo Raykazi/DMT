@@ -137,7 +137,6 @@ namespace SMT
         {
             InitializeComponent();
             DataContext = this;
-
             activeJumpSpheres = new Dictionary<string, EveManager.JumpShip>();
         }
 
@@ -688,21 +687,29 @@ namespace SMT
                     continue;
                 }
 
+                if (EM.DMTCharacters.Count > 0)
+                {
+                    DMTCharacter pilot = EM.DMTCharacters.First(x => x.Name == c.Name);
+                    if (pilot != null)
+                    {
+                        EM.DMTCharacters.Remove(pilot);
+                        if (NameTrackingLocationMap.ContainsKey(pilot.Location))
+                            NameTrackingLocationMap[pilot.Location].Remove(new KeyValuePair<int, string>(1, pilot.Name));
+                    }
+                }
+
                 if (!NameTrackingLocationMap.ContainsKey(c.Location))
                 {
                     NameTrackingLocationMap[c.Location] = new List<KeyValuePair<int, string>>();
                 }
-                NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(0, c.Name));
+                if (c.IsOnline && MapConf.ShowOnlinePlayers)
+                    NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(0, c.Name));
+                else if (!MapConf.ShowOnlinePlayers)
+                    NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(0, c.Name));
             }
-            DMTCharacter result = null;
 
             foreach (DMTCharacter c in EM.DMTCharacters)
             {
-                //Still need this checked
-                if (LocalCharacter.Find(c, EM.LocalCharacters))
-                {
-                    result = c;
-                }
                 if (MapConf.ShowDMTCharactersOnMap)
                 {
                     if (!Region.IsSystemOnMap(c.Location))
@@ -714,14 +721,11 @@ namespace SMT
                     {
                         NameTrackingLocationMap[c.Location] = new List<KeyValuePair<int, string>>();
                     }
-                    NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(1, c.Name));
+                    if (c.IsOnline && MapConf.ShowOnlinePlayers)
+                        NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(1, c.Name));
+                    else if (!MapConf.ShowOnlinePlayers)
+                        NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(1, c.Name));
                 }
-            }
-            if (result != null)
-            {
-                EM.DMTCharacters.Remove(result);
-                if (NameTrackingLocationMap.ContainsKey(result.Location))
-                    NameTrackingLocationMap[result.Location].Remove(new KeyValuePair<int, string>(1, result.Name));
             }
 
             if (ActiveCharacter != null && MapConf.FleetShowOnMap)
@@ -3268,6 +3272,12 @@ namespace SMT
         {
             public MapSystem from { get; set; }
             public MapSystem to { get; set; }
+        }
+
+        private void ShowOnline_Checked(object sender, RoutedEventArgs e)
+        {
+            if (ShowOnlineChk.IsChecked != null) 
+                MapConf.ShowOnlinePlayers = (bool)ShowOnlineChk.IsChecked;
         }
     }
 }

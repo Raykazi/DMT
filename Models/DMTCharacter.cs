@@ -31,6 +31,7 @@ namespace SMT.Models
         public DateTime LastUpdated { get; set; }
         public bool Active { get; set; }
         public bool BroadcastLocation { get; set; }
+        public bool IsOnline { get; set; }
     }
 
     public class EsiAuthData

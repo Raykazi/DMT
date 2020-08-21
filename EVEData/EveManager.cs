@@ -1778,8 +1778,8 @@ namespace SMT.EVEData
             IntelDataList.ListChanged += IntelDataList_ListChanged;
 #if DEBUG
             mqttOptions = new MqttClientOptionsBuilder()
-                //.WithTcpServer("127.0.0.1", 1738)
-                .WithTcpServer(url, 1738)
+                .WithTcpServer("127.0.0.1", 1738)
+                //.WithTcpServer(url, 1738)
                 .WithClientId($"{Environment.MachineName}\\{Environment.UserName}")
                 .WithCredentials(token, VersionStr)
                 .Build();
