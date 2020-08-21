@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using System.Xml.Serialization;
+using Newtonsoft.Json;
 
 namespace SMT.EVEData
 {
@@ -19,9 +20,11 @@ namespace SMT.EVEData
     public class LocalCharacter : Character, INotifyPropertyChanged
     {
         [XmlIgnore]
+        [JsonIgnore]
         public object ActiveRouteLock;
 
         [XmlIgnore]
+        [JsonIgnore]
         public SemaphoreSlim UpdateLock;
 
         public static readonly string SaveVersion = "02";
@@ -126,25 +129,30 @@ namespace SMT.EVEData
         /// Gets or sets the character structure dictionary
         /// </summary>
         [XmlIgnore]
+        [JsonIgnore]
         public Dictionary<string, List<StructureIDs.StructureIdData>> DockableStructures { get; set; }
 
         /// <summary>
         /// Gets or sets the ESI access token
         /// </summary>
         [XmlIgnore]
+        [JsonIgnore]
         public string ESIAccessToken { get; set; }
 
         /// <summary>
         /// Gets or sets the ESI access token expiry time
         /// </summary>
+        [JsonIgnore]
         public DateTime ESIAccessTokenExpiry { get; set; }
 
         /// <summary>
         /// Gets or sets the ESI auth code
         /// </summary>
+        [JsonIgnore]
         public string ESIAuthCode { get; set; }
 
         [XmlIgnore]
+        [JsonIgnore]
         public AuthorizedCharacterData ESIAuthData { get; set; }
 
         /// <summary>
@@ -155,6 +163,7 @@ namespace SMT.EVEData
         /// <summary>
         /// Gets or sets the ESI refresh Token
         /// </summary>
+        [JsonIgnore]
         public string ESIRefreshToken { get; set; }
 
         /// <summary>
@@ -223,6 +232,7 @@ namespace SMT.EVEData
         /// Gets or sets the character standings dictionary
         /// </summary>
         [XmlIgnore]
+        [JsonIgnore]
         public Dictionary<long, float> Standings { get; set; }
 
         public bool UseAnsiblexGates
@@ -245,6 +255,7 @@ namespace SMT.EVEData
             }
         }
 
+        [JsonIgnore]
         public bool DeepSearchEnabled { get; set; }
 
         public int WarningSystemRange { get; set; }
@@ -773,16 +784,6 @@ namespace SMT.EVEData
                 }
             }
             catch { }
-        }
-
-        internal static bool Find(Models.DMTCharacter c, BindingList<LocalCharacter> localCharacters)
-        {
-            for (int i = 0; i < localCharacters.Count; i++)
-            {
-                if (localCharacters[i].Name == c.Name)
-                    return true;
-            }
-            return false;
         }
 
         /// <summary>

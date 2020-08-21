@@ -105,6 +105,7 @@ namespace SMT
         private bool m_SyncActiveCharacterBasedOnActiveEVEClient;
         private string DMTToken;
         private string DMTUrl;
+        private bool m_ShowOnlinePlayers { get; set; }
 
         public MapConfig()
         {
@@ -272,6 +273,13 @@ namespace SMT
         {
             get => DMTToken;
             set => DMTToken = value;
+        }
+        [Category("DMT")]
+        [DisplayName("Show Online Players")]
+        public bool ShowOnlinePlayers
+        {
+            get => m_ShowOnlinePlayers;
+            set => m_ShowOnlinePlayers = value;
         }
 
         [Category("Incursions")]
@@ -819,7 +827,6 @@ namespace SMT
             UniverseMaxZoomDisplaySystemsText = 2.0f;
 
             WarningRange = 4;
-            SubscribeToAllIntel = true;
         }
 
         protected void OnPropertyChanged(string name)
