@@ -65,7 +65,7 @@ namespace SMT
             timer.Tick += Timer_Tick;
             DependencyPropertyDescriptor dpd = DependencyPropertyDescriptor.FromProperty(TextBlock.TextProperty, typeof(TextBlock));
 
-            Title = "DMT (Gimpy Edition : " + DMT_VERSION + ")";
+            Title = "DMT (RIP Horizon's Gila : " + DMT_VERSION + ")";
 
             //CheckGitHubVersion();
 
@@ -266,7 +266,7 @@ namespace SMT
             AutoUpdater.Synchronous = true;
             AutoUpdater.Mandatory = true;
             AutoUpdater.UpdateMode = Mode.Forced;
-            AutoUpdater.Start("https://auth.windrammers.com/dmt/Update.xml");
+            AutoUpdater.Start("https://dmt.windrammers.com/updates/update.xml");
         }
 
         private void EVEManager_JbSyncedEvent()

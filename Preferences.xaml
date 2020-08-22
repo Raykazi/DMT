@@ -167,7 +167,7 @@
                                     </StackPanel>
                                 </StackPanel>
                             </GroupBox>
-                            <GroupBox Header="Intel Filters" Margin="4" Height="215">
+                            <GroupBox Header="Intel Filters" Margin="4" Height="215" Visibility="Hidden">
                                 <StackPanel>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
