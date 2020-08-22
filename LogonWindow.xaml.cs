@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
@@ -23,6 +23,7 @@ namespace SMT
         {
             // create the http Server
             listener = new HttpListener();
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             string challengeCode = Utils.RandomString(32);
             string esiLogonURL = EVEData.EveManager.Instance.GetESILogonURL(challengeCode);
             System.Diagnostics.Process.Start(esiLogonURL);
@@ -42,7 +43,7 @@ namespace SMT
                 // Obtain a response object.
                 HttpListenerResponse response = context.Response;
                 // Construct a response.
-                string responseString = "<HTML><BODY>SMT Character Added, please close</BODY></HTML>";
+                string responseString = "<HTML><BODY>DMT Character Added, please close</BODY></HTML>";
                 byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
                 // Get a response stream and write the response to it.
                 response.ContentLength64 = buffer.Length;

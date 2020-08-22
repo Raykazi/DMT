@@ -1,20 +1,18 @@
-﻿<Window
+<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:SMT"
-        xmlns:localEveData="clr-namespace:SMT.EVEData"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:dotNetKitControls="clr-namespace:DotNetKit.Windows.Controls;assembly=DotNetKit.Wpf.AutoCompleteComboBox"
         xmlns:xcad="clr-namespace:AvalonDock;assembly=AvalonDock"
         xmlns:xcadl="clr-namespace:AvalonDock.Layout;assembly=AvalonDock"
         xmlns:xcadt="clr-namespace:AvalonDock.Themes;assembly=AvalonDock.Themes.Expression"
-        xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
-        xmlns:Themes="clr-namespace:Xceed.Wpf.Toolkit.Themes;assembly=DotNetProjects.Wpf.Extended.Toolkit" xmlns:Themes1="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" x:Class="SMT.MainWindow"
+        x:Class="SMT.MainWindow"
         mc:Ignorable="d"
-        Title="SMT" Height="850" Width="1124" Icon="smt_bomb_icon.ico" ResizeMode="CanResizeWithGrip">
+        Title="SMT" Height="850" Width="1124" Icon="dmt_daquan_icon.ico" ResizeMode="CanResizeWithGrip">
 
     <Window.Resources>
 
@@ -29,7 +27,8 @@
 
         <DataTemplate x:Key="intelDataDataTemplate">
             <DockPanel>
-                <TextBlock Text="{Binding IntelTime, FallbackValue=TIME, StringFormat=HH:mm}" Foreground="Yellow" Padding="0,0,5,0" TextBlock.FontSize="{Binding MapConf.IntelTextSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
+                <TextBlock Text="{Binding IntelChannel, FallbackValue=''}" Foreground="Cyan" Padding="0,0,5,0" TextBlock.FontSize="{Binding MapConf.IntelTextSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
+                <TextBlock Text="{Binding IntelTime, FallbackValue=TIME, StringFormat=HH:mm:ss}" Foreground="Yellow" Padding="0,0,5,0" TextBlock.FontSize="{Binding MapConf.IntelTextSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
                 <TextBlock Text="{Binding IntelString, FallbackValue=Intel Data}" Foreground="White" TextWrapping="WrapWithOverflow" TextBlock.FontSize="{Binding MapConf.IntelTextSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}" />
             </DockPanel>
         </DataTemplate>
@@ -48,11 +47,11 @@
                 </MenuItem>
 
                 <MenuItem Header="View">
-                    <MenuItem x:Name="miFullScreenToggle" Header="FullScreen" IsCheckable="True" IsChecked="False" Click="FullScreenToggle_MenuItem_Click"/>
+                    <MenuItem x:Name="miFullScreenToggle" Header="Full Screen" IsCheckable="True" IsChecked="False" Click="FullScreenToggle_MenuItem_Click"/>
                 </MenuItem>
             </Menu>
 
-            <Label Margin="30,0,0,0" Padding="7">Active Character :</Label>
+            <Label Margin="30,0,0,0" Padding="7">Active Character:</Label>
             <ComboBox x:Name="CurrentActiveCharacterCombo" Width="180"  IsReadOnly="True" SelectionChanged="CurrentActiveCharacterCombo_Selected"  Height="18"/>
 
         </StackPanel>
@@ -86,6 +85,14 @@
             <StatusBarItem>
                 <TextBlock Text="Players" />
             </StatusBarItem>
+            <Separator />
+            <StatusBarItem>
+                <Ellipse x:Name="mqttStatusColor" Fill="Orange" Width="15" Height="15" />
+            </StatusBarItem>
+            <StatusBarItem x:Name="MqttStatusBarItem">
+                <TextBlock x:Name="mqttStatus" Text="{Binding MqttStatus}" Foreground="White" />
+
+            </StatusBarItem>
         </StatusBar>
         <xcad:DockingManager x:Name="dockManager">
             <xcad:DockingManager.Theme>
@@ -101,12 +108,12 @@
                             <xcadl:LayoutAnchorable Title="Anoms" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="AnomsContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
                                 <Grid x:Name="MainAnomGrid"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="60" />
+                                        <RowDefinition Height="26" />
                                         <RowDefinition Height="*" />
+                                        <RowDefinition Height="26" />
                                         <RowDefinition Height="26" />
                                     </Grid.RowDefinitions>
                                     <StackPanel Grid.Row="0">
-                                        <Button x:Name="btnClearAnomList" Content="Clear" Click="btnClearAnomList_Click" />
                                         <Label Content="{Binding ANOMManager.ActiveSystem.SystemName}" FontSize="18" FontWeight="Bold" />
                                     </StackPanel>
 
@@ -134,7 +141,10 @@
                                         </DataGrid.Columns>
                                     </DataGrid>
                                     <StackPanel Grid.Row="2">
-                                        <Button x:Name="btnUpdateAnomList" Content="Update from Clipboard" Click="btnUpdateAnomList_Click" />
+                                        <Button x:Name="btnClearAnomList" Content="Clear" Click="btnClearAnomList_Click" Margin="2"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="3">
+                                        <Button x:Name="btnUpdateAnomList" Content="Update from Clipboard" Click="btnUpdateAnomList_Click" Margin="2" />
                                     </StackPanel>
                                 </Grid>
                             </xcadl:LayoutAnchorable>
@@ -158,7 +168,7 @@
                             <xcadl:LayoutAnchorable Title="Characters" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="CharactersContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
                                 <ScrollViewer Background="{DynamicResource ButtonBackground}">
                                     <StackPanel>
-                                        <DataGrid  x:Name="CharactersList" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" MouseDoubleClick="CharactersList_MouseDoubleClick" HeadersVisibility="Column" SelectionUnit="FullRow" GridLinesVisibility="None" IsSynchronizedWithCurrentItem="False">
+                                        <DataGrid  x:Name="CharactersList" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" CanUserAddRows="False" MouseDoubleClick="CharactersList_MouseDoubleClick" HeadersVisibility="Column" SelectionUnit="FullRow" GridLinesVisibility="None" IsSynchronizedWithCurrentItem="False">
 
                                             <DataGrid.ContextMenu>
                                                 <ContextMenu>
@@ -168,13 +178,24 @@
 
 
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserReorder="False" Width="*" />
-                                                <DataGridTextColumn Header="Location" Binding="{Binding Location}" CanUserReorder="False" Width="*" />
-                                                <DataGridTextColumn Header="Region" Binding="{Binding Region}" CanUserReorder="False" Width="*" />
+                                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
+                                                <DataGridTextColumn Header="Location" Binding="{Binding Location}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
+                                                <DataGridTextColumn Header="Region" Binding="{Binding Region}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
+                                                <DataGridCheckBoxColumn Header="Broadcast"  Binding="{Binding Path=BroadcastLocation}"  CanUserReorder="False" Width="*" IsReadOnly="False">
+                                                    <DataGridCheckBoxColumn.CellStyle>
+                                                        <Style>
+                                                            <EventSetter Event="CheckBox.Checked" Handler="BroadcastOnCheck"/>
+                                                            <EventSetter Event="CheckBox.Unchecked" Handler="BroadcastOnUnCheck"/>
+                                                        </Style>
+                                                    </DataGridCheckBoxColumn.CellStyle>
+                                                </DataGridCheckBoxColumn>
                                             </DataGrid.Columns>
                                         </DataGrid>
-                                        <CheckBox Content="Show Characters On Map" IsChecked="{Binding MapConf.ShowCharacterNamesOnMap}" Margin="3"/>
-                                        <Button x:Name="btn_AddCharacter" Click="btn_AddCharacter_Click" Content="Add Character" />
+                                        <StackPanel>
+                                            <CheckBox Content="Show characters on map" IsChecked="{Binding MapConf.ShowCharacterNamesOnMap}" Margin="3"/>
+                                            <CheckBox Content="Show corp characters on map" IsChecked="{Binding MapConf.ShowDMTCharactersOnMap}" Margin="3"/>
+                                            <Button x:Name="btn_AddCharacter" Click="btn_AddCharacter_Click" Content="Add Character" Margin="3"/>
+                                        </StackPanel>
                                     </StackPanel>
                                 </ScrollViewer>
                             </xcadl:LayoutAnchorable>
@@ -182,25 +203,27 @@
                             <xcadl:LayoutAnchorable Title="Jump Bridges" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="JumpBridgesContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
                                 <Grid x:Name="JumpBridgeGrid">
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="30" />
                                         <RowDefinition Height="25" />
                                         <RowDefinition Height="25" />
                                         <RowDefinition Height="25" />
                                         <RowDefinition Height="25" />
-                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
                                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="2">
-                                        <Label Content="Gate SearchFilter : " />
+                                        <Label Content="Gate Search Filter:" />
                                         <TextBox x:Name="GateSearchFilter" Text=" » " Width="167" />
                                     </StackPanel>
                                     <Button x:Name="ImportJumpGatesBtn" Content="Find Gates" Click="ImportJumpGatesBtn_Click" Margin="2" Grid.Row="1" />
                                     <Button x:Name="ClearJumpGatesBtn" Content="Clear Gates" Click="ClearJumpGatesBtn_Click" Margin="2" Grid.Row="2" />
-                                    <Button x:Name="ImportPasteJumpGatesBtn" Content="Import from Clipboard" Click="ImportPasteJumpGatesBtn_Click" Margin="2" Grid.Row="3" />
-                                    <Button x:Name="ExportJumpGatesBtn" Content="Export Jump Bridges" Click="ExportJumpGatesBtn_Click"  Margin="2" Grid.Row="4" />
+                                    <Button x:Name="ImportPasteJumpGatesBtn" Content="Import From Clipboard" Click="ImportPasteJumpGatesBtn_Click" Margin="2" Grid.Row="3" />
+                                    <Button x:Name="SyncDMTBtn" Content="Sync From DMT" Click="SyncDMTBtn_Click" Margin="2" Grid.Row="4" />
+                                    <Button x:Name="ExportJumpGatesBtn" Content="Export Jump Bridges" Click="ExportJumpGatesBtn_Click"  Margin="2" Grid.Row="5" />
 
-                                    <Label Content="Ansiblex Gates" Margin="2" Grid.Row="5" />
-                                    <DataGrid x:Name="JumpBridgeList" Margin="2" Grid.Row="6" AutoGenerateColumns="False" AreRowDetailsFrozen="True" IsReadOnly="True" SelectionUnit="FullRow" SelectedItem="{Binding SelectedItemProperty, Mode=TwoWay}">
+                                    <Label Content="Ansiblex Gates" Margin="2" Grid.Row="6" />
+                                    <DataGrid x:Name="JumpBridgeList" Margin="2" Grid.Row="7" AutoGenerateColumns="False" AreRowDetailsFrozen="True" IsReadOnly="True" SelectionUnit="FullRow" SelectedItem="{Binding SelectedItemProperty, Mode=TwoWay}">
 
                                         <DataGrid.CellStyle>
                                             <Style TargetType="{x:Type DataGridCell}">
@@ -361,7 +384,6 @@
                                                 <DataGridTextColumn Header="Defenders" Binding="{Binding Path=DefendingAllianceName, Mode=OneTime, UpdateSourceTrigger=PropertyChanged}" Width="*" />
                                             </DataGrid.Columns>
                                         </DataGrid>
-
                                     </StackPanel>
                                 </ScrollViewer>
                             </xcadl:LayoutAnchorable>
@@ -388,7 +410,7 @@
                                 <Grid>
                                     <ScrollViewer Background="{DynamicResource ButtonBackground}">
                                         <StackPanel CanVerticallyScroll="True" ScrollViewer.CanContentScroll="True">
-                                            <CheckBox Content="Selected Region Only" x:Name="ZKBFeedFilterViewChk" IsChecked="True" Checked="ZKBFeedFilterViewChk_Checked" Unchecked="ZKBFeedFilterViewChk_Checked" Margin="4" />
+                                            <CheckBox Content="Selected region only" x:Name="ZKBFeedFilterViewChk" IsChecked="True" Checked="ZKBFeedFilterViewChk_Checked" Unchecked="ZKBFeedFilterViewChk_Checked" Margin="4" />
                                             <DataGrid x:Name="ZKBFeed" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" CanUserAddRows="False" MouseDoubleClick="ZKBFeed_MouseDoubleClick_1" HeadersVisibility="Column" SelectionUnit="FullRow" GridLinesVisibility="None"  MinHeight="200">
                                                 <DataGrid.Columns>
                                                     <DataGridTextColumn Header="System" Binding="{Binding SystemName}" Width="30*" IsReadOnly="True" CanUserReorder="False" CanUserSort="False" />
@@ -410,6 +432,16 @@
                                             </DataGrid>
                                         </StackPanel>
                                     </ScrollViewer>
+                                </Grid>
+                            </xcadl:LayoutAnchorable>
+                            <xcadl:LayoutAnchorable x:Name="ChatLayoutAnchorable"  Title="Chat" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="ChatContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="25" />
+                                    </Grid.RowDefinitions>
+                                    <ListView x:Name="RawChatBox" Margin="0,2" MouseDoubleClick="RawChatBox_MouseDoubleClick" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.Row="0" ItemTemplate="{StaticResource intelDataDataTemplate}" />
+                                    <Button Content="Clear Chat" Grid.Row="1" x:Name="ClearChatBtn" Click="ClearChatBtn_Click" />
                                 </Grid>
                             </xcadl:LayoutAnchorable>
                             <xcadl:LayoutAnchorable x:Name="IntelLayoutAnchorable"  Title="Intel" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="IntelContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">

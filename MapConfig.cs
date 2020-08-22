@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Windows.Media;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
@@ -42,7 +45,7 @@ namespace SMT
 
         private bool m_ShowCoalition;
 
-        private bool m_ShowDangerZone = false;
+        private bool m_ShowDangerZone = true;
 
         private bool m_ShowIhubVunerabilities;
 
@@ -82,7 +85,7 @@ namespace SMT
 
         private int m_UpcomingSovMinutes;
 
-        private int m_WarningRange = 5;
+        private int m_WarningRange = 4;
 
         private int m_FleetMaxMembersPerSystem = 5;
 
@@ -92,6 +95,17 @@ namespace SMT
 
         private bool m_FleetShowShipType = false;
 
+        private bool m_SubscribeAllIntell = false;
+        private bool m_ShowDMTCharactersOnMap = true;
+        private bool m_DisableJumpBridgesPathAnimation;
+        private bool m_DisableRoutePathAnimation;
+        private bool m_SubscribeToAllaince;
+        private bool m_SubscribeToCorp;
+        private string m_IntelChannels;
+        private bool m_SyncActiveCharacterBasedOnActiveEVEClient;
+        private string DMTToken;
+        private string DMTUrl;
+        private bool m_ShowOnlinePlayers { get; set; }
 
         public MapConfig()
         {
@@ -104,10 +118,7 @@ namespace SMT
         [DisplayName("Always on top")]
         public bool AlwaysOnTop
         {
-            get
-            {
-                return m_AlwaysOnTop;
-            }
+            get => m_AlwaysOnTop;
             set
             {
                 m_AlwaysOnTop = value;
@@ -122,10 +133,7 @@ namespace SMT
         [Browsable(false)]
         public string DefaultRegion
         {
-            get
-            {
-                return m_DefaultRegion;
-            }
+            get => m_DefaultRegion;
             set
             {
                 m_DefaultRegion = value;
@@ -137,10 +145,7 @@ namespace SMT
         [DisplayName("Text Size")]
         public double IntelTextSize
         {
-            get
-            {
-                return m_IntelTextSize;
-            }
+            get => m_IntelTextSize;
             set
             {
                 if (value > 20)
@@ -169,10 +174,7 @@ namespace SMT
         [DisplayName("Jump Range as Outline")]
         public bool JumpRangeInAsOutline
         {
-            get
-            {
-                return m_JumpRangeInAsOutline;
-            }
+            get => m_JumpRangeInAsOutline;
             set
             {
                 m_JumpRangeInAsOutline = value;
@@ -188,10 +190,7 @@ namespace SMT
         [DisplayName("Max Intel Time (s)")]
         public int MaxIntelSeconds
         {
-            get
-            {
-                return m_MaxIntelSeconds;
-            }
+            get => m_MaxIntelSeconds;
             set
             {
                 // clamp to 30s miniumum
@@ -218,6 +217,71 @@ namespace SMT
         [DisplayName("Limit Sound to Dangerzone")]
         public bool PlaySoundOnlyInDangerZone { get; set; }
 
+        [Category("Intel")]
+        [DisplayName("Subscribe To All Intel Channels")]
+        public bool SubscribeToAllIntel
+        {
+            get => m_SubscribeAllIntell;
+            set
+            {
+                m_SubscribeAllIntell = value;
+                OnPropertyChanged("SubscribeToAllIntel");
+
+            }
+        }
+
+        [Category("Intel")]
+        [DisplayName("Subscribe To Corp")]
+        public bool SubscribeToCorp
+        {
+            get => m_SubscribeToCorp;
+            set
+            {
+                m_SubscribeToCorp = value;
+                OnPropertyChanged("SubscribeToCorp");
+            }
+        }
+
+        [Category("Intel")]
+        [DisplayName("Subscribe To Alliance")]
+        public bool SubscribeToAlliance
+        {
+            get => m_SubscribeToAllaince;
+            set
+            {
+                m_SubscribeToAllaince = value;
+                OnPropertyChanged("SubscribeToAlliance");
+            }
+        }
+        [Category("Intel")]
+        [DisplayName("Intel Channels")]
+        public string IntelChannels
+        {
+            get => m_IntelChannels;
+            set => m_IntelChannels = value;
+        }
+        [Category("DMT")]
+        [DisplayName("DMT URL")]
+        public string Url
+        {
+            get => DMTUrl;
+            set => DMTUrl = value;
+        }
+        [Category("DMT")]
+        [DisplayName("DMT Token")]
+        public string Token
+        {
+            get => DMTToken;
+            set => DMTToken = value;
+        }
+        [Category("DMT")]
+        [DisplayName("Show Online Players")]
+        public bool ShowOnlinePlayers
+        {
+            get => m_ShowOnlinePlayers;
+            set => m_ShowOnlinePlayers = value;
+        }
+
         [Category("Incursions")]
         [DisplayName("Show Active Incursions")]
         public bool ShowActiveIncursions { get; set; }
@@ -227,10 +291,7 @@ namespace SMT
         [DisplayName("Show Coalition")]
         public bool ShowCoalition
         {
-            get
-            {
-                return m_ShowCoalition;
-            }
+            get => m_ShowCoalition;
 
             set
             {
@@ -247,10 +308,7 @@ namespace SMT
         [DisplayName("Show DangerZone")]
         public bool ShowDangerZone
         {
-            get
-            {
-                return m_ShowDangerZone;
-            }
+            get => m_ShowDangerZone;
             set
             {
                 m_ShowDangerZone = value;
@@ -262,10 +320,7 @@ namespace SMT
         [DisplayName("Show IHUB Timers")]
         public bool ShowIhubVunerabilities
         {
-            get
-            {
-                return m_ShowIhubVunerabilities;
-            }
+            get => m_ShowIhubVunerabilities;
 
             set
             {
@@ -281,10 +336,7 @@ namespace SMT
         [DisplayName("Show Observatories")]
         public bool ShowJoveObservatories
         {
-            get
-            {
-                return m_ShowJoveObservatories;
-            }
+            get => m_ShowJoveObservatories;
             set
             {
                 m_ShowJoveObservatories = value;
@@ -296,10 +348,7 @@ namespace SMT
         [DisplayName("Show Negative Ratting Delta")]
         public bool ShowNegativeRattingDelta
         {
-            get
-            {
-                return m_ShowNegativeRattingDelta;
-            }
+            get => m_ShowNegativeRattingDelta;
             set
             {
                 m_ShowNegativeRattingDelta = value;
@@ -311,10 +360,7 @@ namespace SMT
         [DisplayName("Show Ratting Data as Delta")]
         public bool ShowRattingDataAsDelta
         {
-            get
-            {
-                return m_ShowRattingDataAsDelta;
-            }
+            get => m_ShowRattingDataAsDelta;
             set
             {
                 m_ShowRattingDataAsDelta = value;
@@ -326,10 +372,7 @@ namespace SMT
         [DisplayName("Simple Security View")]
         public bool ShowSimpleSecurityView
         {
-            get
-            {
-                return m_ShowSimpleSecurityView;
-            }
+            get => m_ShowSimpleSecurityView;
             set
             {
                 m_ShowSimpleSecurityView = value;
@@ -342,10 +385,7 @@ namespace SMT
         [DisplayName("Show RegionStandings")]
         public bool ShowRegionStandings
         {
-            get
-            {
-                return m_ShowRegionStandings;
-            }
+            get => m_ShowRegionStandings;
 
             set
             {
@@ -370,10 +410,7 @@ namespace SMT
         [DisplayName("Show TCU Timers")]
         public bool ShowTCUVunerabilities
         {
-            get
-            {
-                return m_ShowTCUVunerabilities;
-            }
+            get => m_ShowTCUVunerabilities;
 
             set
             {
@@ -390,10 +427,7 @@ namespace SMT
         [DisplayName("Show Toolbox")]
         public bool ShowToolBox
         {
-            get
-            {
-                return m_ShowToolBox;
-            }
+            get => m_ShowToolBox;
             set
             {
                 m_ShowToolBox = value;
@@ -405,10 +439,7 @@ namespace SMT
         [DisplayName("Show TrueSec")]
         public bool ShowTrueSec
         {
-            get
-            {
-                return m_ShowTrueSec;
-            }
+            get => m_ShowTrueSec;
             set
             {
                 m_ShowTrueSec = value;
@@ -421,10 +452,7 @@ namespace SMT
         [DisplayName("Show Ship kill Stats")]
         public bool ShowUniverseKills
         {
-            get
-            {
-                return m_ShowUniverseKills;
-            }
+            get => m_ShowUniverseKills;
 
             set
             {
@@ -446,10 +474,7 @@ namespace SMT
         [DisplayName("Show Pod kill Stats")]
         public bool ShowUniversePods
         {
-            get
-            {
-                return m_ShowUniversePods;
-            }
+            get => m_ShowUniversePods;
 
             set
             {
@@ -470,10 +495,7 @@ namespace SMT
         [DisplayName("Show Ratting Stats")]
         public bool ShowUniverseRats
         {
-            get
-            {
-                return m_ShowUniverseRats;
-            }
+            get => m_ShowUniverseRats;
 
             set
             {
@@ -493,10 +515,7 @@ namespace SMT
         [DisplayName("Show ZKillData")]
         public bool ShowZKillData
         {
-            get
-            {
-                return m_ShowZKillData;
-            }
+            get => m_ShowZKillData;
             set
             {
                 m_ShowZKillData = value;
@@ -508,10 +527,7 @@ namespace SMT
         [DisplayName("Show Sov Based on TCU")]
         public bool SOVBasedITCU
         {
-            get
-            {
-                return m_SOVBasedonTCU;
-            }
+            get => m_SOVBasedonTCU;
             set
             {
                 m_SOVBasedonTCU = value;
@@ -523,10 +539,7 @@ namespace SMT
         [DisplayName("Show Sov Conflicts")]
         public bool SOVShowConflicts
         {
-            get
-            {
-                return m_SOVShowConflicts;
-            }
+            get => m_SOVShowConflicts;
             set
             {
                 m_SOVShowConflicts = value;
@@ -539,10 +552,7 @@ namespace SMT
         [DisplayName("Universe Data Scale")]
         public double UniverseDataScale
         {
-            get
-            {
-                return m_UniverseDataScale;
-            }
+            get => m_UniverseDataScale;
 
             set
             {
@@ -561,10 +571,7 @@ namespace SMT
         [DisplayName("Systems Max Zoom")]
         public float UniverseMaxZoomDisplaySystems
         {
-            get
-            {
-                return m_UniverseMaxZoomDisplaySystems;
-            }
+            get => m_UniverseMaxZoomDisplaySystems;
 
             set
             {
@@ -577,10 +584,7 @@ namespace SMT
         [DisplayName("Systems Text Max Zoom")]
         public float UniverseMaxZoomDisplaySystemsText
         {
-            get
-            {
-                return m_UniverseMaxZoomDisplaySystemsText;
-            }
+            get => m_UniverseMaxZoomDisplaySystemsText;
 
             set
             {
@@ -593,10 +597,7 @@ namespace SMT
         [DisplayName("Upcoming Period (Mins)")]
         public int UpcomingSovMinutes
         {
-            get
-            {
-                return m_UpcomingSovMinutes;
-            }
+            get => m_UpcomingSovMinutes;
 
             set
             {
@@ -614,10 +615,7 @@ namespace SMT
         [DisplayName("Warning Range")]
         public int WarningRange
         {
-            get
-            {
-                return m_WarningRange;
-            }
+            get => m_WarningRange;
             set
             {
                 // clamp to 1 miniumum
@@ -647,10 +645,7 @@ namespace SMT
         [DisplayName("Show On Map")]
         public bool FleetShowOnMap
         {
-            get
-            {
-                return m_FleetShowOnMap;
-            }
+            get => m_FleetShowOnMap;
             set
             {
                 m_FleetShowOnMap = value;
@@ -662,10 +657,7 @@ namespace SMT
         [DisplayName("Show Ship Type")]
         public bool FleetShowShipType
         {
-            get
-            {
-                return m_FleetShowShipType;
-            }
+            get => m_FleetShowShipType;
             set
             {
                 m_FleetShowShipType = value;
@@ -677,10 +669,7 @@ namespace SMT
         [DisplayName("Max Fleet Per System")]
         public int FleetMaxMembersPerSystem
         {
-            get
-            {
-                return m_FleetMaxMembersPerSystem;
-            }
+            get => m_FleetMaxMembersPerSystem;
             set
             {
                 // clamp to 1 miniumum
@@ -705,35 +694,34 @@ namespace SMT
 
         public bool ShowCharacterNamesOnMap 
         { 
-            get
-            {
-                return m_ShowCharacterNamesOnMap;
-            }
+            get => m_ShowCharacterNamesOnMap;
             set
             {
                 m_ShowCharacterNamesOnMap = value;
                 OnPropertyChanged("ShowCharacterNamesOnMap");
             }
-        
+
         }
+        public bool ShowDMTCharactersOnMap
+        {
+            get => m_ShowDMTCharactersOnMap;
+            set
+            {
+                m_ShowDMTCharactersOnMap = value;
+                OnPropertyChanged("ShowDMTCharactersOnMap");
+            }
 
-
-        private bool m_SyncActiveCharacterBasedOnActiveEVEClient;
+        }
+        
         public bool SyncActiveCharacterBasedOnActiveEVEClient
         {
-            get
-            {
-                return m_SyncActiveCharacterBasedOnActiveEVEClient;
-            }
+            get => m_SyncActiveCharacterBasedOnActiveEVEClient;
             set
             {
                 m_SyncActiveCharacterBasedOnActiveEVEClient = value;
                 OnPropertyChanged("SyncActiveCharacterBasedOnActiveEVEClient");
             }
         }
-
-        private bool m_DisableJumpBridgesPathAnimation;
-        private bool m_DisableRoutePathAnimation;
 
         public bool DisableJumpBridgesPathAnimation
         {
@@ -755,13 +743,14 @@ namespace SMT
             }
         }
 
+
         public void SetDefaultColours()
         {
             MapColours defaultColours = new MapColours
             {
                 Name = "Default",
                 UserEditable = false,
-                FriendlyJumpBridgeColour = Color.FromRgb(102, 205, 170),
+                FriendlyJumpBridgeColour = Colors.Gray,
                 DisabledJumpBridgeColour = Color.FromRgb(205, 55, 50),
                 SystemOutlineColour = Color.FromRgb(0, 0, 0),
                 InRegionSystemColour = Color.FromRgb(255, 239, 213),
@@ -812,9 +801,9 @@ namespace SMT
 
         public void SetDefaults()
         {
-            DefaultRegion = "Molden Heath";
+            DefaultRegion = "Impass";
             ShowSystemPopup = true;
-            MaxIntelSeconds = 120;
+            MaxIntelSeconds = 200;
             UpcomingSovMinutes = 30;
             AlwaysOnTop = false;
             ShowToolBox = true;
@@ -827,14 +816,17 @@ namespace SMT
             SOVBasedITCU = true;
             UseESIForCharacterPositions = true;
             ShowCharacterNamesOnMap = true;
+            ShowDMTCharactersOnMap = true;
             ShowIhubVunerabilities = true;
+            PlaySoundOnlyInDangerZone = true;
+            PlayIntelSoundOnUnknown = false;
 
             ShowJoveObservatories = true;
 
             UniverseMaxZoomDisplaySystems = 1.3f;
             UniverseMaxZoomDisplaySystemsText = 2.0f;
 
-            WarningRange = 5;
+            WarningRange = 4;
         }
 
         protected void OnPropertyChanged(string name)
