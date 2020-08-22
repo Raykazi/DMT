@@ -62,7 +62,7 @@
         <StackPanel Margin="4,2,1,2"  Orientation="Horizontal" HorizontalAlignment="Left">
             <ComboBox x:Name="RegionSelectCB"  Width="120" Margin="5,0" FontSize="12" SelectionChanged="RegionSelectCB_SelectionChanged" />
             <ComboBox x:Name="SystemDropDownAC" IsEditable="True" Text="System"  Width="100" FontSize="12" Margin="5,0" SelectionChanged="SystemDropDownAC_SelectionChanged"/>
-            <Label Content="Search :" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <Label Content="Search:" HorizontalAlignment="Center" VerticalAlignment="Center" />
             <dotNetKitControls:AutoCompleteComboBox x:Name="GlobalSystemDropDownAC" Width="200" FontSize="12" Margin="5,0" SelectionChanged="GlobalSystemDropDownAC_SelectionChanged" Foreground="Black" TextSearch.TextPath="Name">
                 <dotNetKitControls:AutoCompleteComboBox.ItemsPanel>
                     <ItemsPanelTemplate>
