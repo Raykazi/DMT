@@ -141,7 +141,7 @@
 
                                 </StackPanel>
                             </GroupBox>
-                            <GroupBox Header="Intel Sources" Margin="4" Height="215">
+                            <GroupBox Header="Intel Sources" Margin="4" Height="240">
                                 <StackPanel>
                                     <CheckBox IsChecked="{Binding SubscribeToCorp}" Margin="0,2" Content="Check corp chat"/>
                                     <CheckBox IsChecked="{Binding SubscribeToAlliance}" Margin="0,2" Content="Check alliance chat"/>

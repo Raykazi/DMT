@@ -820,6 +820,7 @@ namespace SMT
             ShowIhubVunerabilities = true;
             PlaySoundOnlyInDangerZone = true;
             PlayIntelSoundOnUnknown = false;
+            PlayIntelSound = true;
 
             ShowJoveObservatories = true;
 
