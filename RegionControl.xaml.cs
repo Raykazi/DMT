@@ -3270,10 +3270,10 @@ namespace SMT
             public MapSystem to { get; set; }
         }
 
-        private void ShowOnline_Checked(object sender, RoutedEventArgs e)
-        {
-            if (ShowOnlineChk.IsChecked != null) 
-                MapConf.ShowOnlinePlayers = (bool)ShowOnlineChk.IsChecked;
-        }
+        //private void ShowOnline_Checked(object sender, RoutedEventArgs e)
+        //{
+        //    if (ShowOnlineChk.IsChecked != null) 
+        //        MapConf.ShowOnlinePlayers = (bool)ShowOnlineChk.IsChecked;
+        //}
     }
 }

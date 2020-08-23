@@ -165,7 +165,7 @@ namespace SMT
             EVEManager.ActiveSovCampaigns.CollectionChanged += ActiveSovCampaigns_CollectionChanged;
 
             RegionUC.MapConf = MapConf;
-            RegionUC.ShowOnlineChk.DataContext = MapConf;
+            //RegionUC.ShowOnlineChk.DataContext = MapConf;
             RegionUC.Init();
             RegionUC.SelectRegion(MapConf.DefaultRegion);
 

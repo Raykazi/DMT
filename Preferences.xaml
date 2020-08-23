@@ -55,7 +55,7 @@
                                     <CheckBox IsChecked="{Binding Path=DisableJumpBridgesPathAnimation}" Margin="0,3">Disable jump bridges path animation</CheckBox>
                                     <CheckBox IsChecked="{Binding Path=DisableRoutePathAnimation}" Margin="0,3">Disable route path animation</CheckBox>
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <xctk:IntegerUpDown Value="{Binding Path=MaxIntelLines}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="20" MaxLength="9999" Background="Transparent"  Foreground="White"/>
+                                        <xctk:IntegerUpDown Value="{Binding Path=MaxIntelLines}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="20" MaxLength="9999" Background="Transparent"  Foreground="White" IsEnabled="False"/>
                                         <Label Content="Intel max lines"/>
                                     </StackPanel>
                                 </StackPanel>
@@ -130,53 +130,43 @@
 
 
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <xctk:IntegerUpDown Value="{Binding Path=IntelTextSize}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="70" Minimum="8" Maximum="20" Background="Transparent"  Foreground="White" />
+                                        <xctk:IntegerUpDown Value="{Binding Path=IntelTextSize}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="8" Maximum="20" Background="Transparent"  Foreground="White" />
                                         <Label Content="Intel text size"/>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <xctk:IntegerUpDown Value="{Binding Path=MaxIntelSeconds}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="70" Minimum="30" Maximum="1200" Background="Transparent"  Foreground="White"/>
+                                        <xctk:IntegerUpDown Value="{Binding Path=MaxIntelSeconds}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="30" Maximum="1200" Background="Transparent"  Foreground="White"/>
                                         <Label Content="Intel TTL (s)"/>
                                     </StackPanel>
 
                                 </StackPanel>
                             </GroupBox>
-                            <GroupBox Header="Intel Sources" Margin="4" Height="240">
+                            <GroupBox Header="Intel Sources" Margin="4" Height="230">
                                 <StackPanel>
-                                    <CheckBox IsChecked="{Binding SubscribeToCorp}" Margin="0,2" Content="Check corp chat"/>
-                                    <CheckBox IsChecked="{Binding SubscribeToAlliance}" Margin="0,2" Content="Check alliance chat"/>
+                                    <CheckBox IsChecked="{Binding SubscribeToCorp}" Margin="0,2" Content="Show corp chat"/>
+                                    <CheckBox IsChecked="{Binding SubscribeToAlliance}" Margin="0,2" Content="Show alliance chat"/>
                                     <CheckBox IsChecked="{Binding SubscribeToAllIntel}" Margin="0,2" Content="Subscribe to all remote intel channels"/>
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <Label Content="Channels"></Label>
                                     </StackPanel>
-                                    <TextBox Height="100" AcceptsReturn="True" Text="{Binding IntelChannels}" VerticalScrollBarVisibility="Auto"/>
+                                    <TextBox Height="100" AcceptsReturn="True" Text="{Binding IntelChannels}" VerticalScrollBarVisibility="Visible"/>
                                 </StackPanel>
                             </GroupBox>
 
                         </StackPanel>
 
                         <StackPanel Grid.Column="1">
-                            <GroupBox Header="Danger Zone" Margin="4" Height="90">
+                            <GroupBox Header="Danger Zone" Margin="4" Height="355">
                                 <StackPanel>
 
                                     <CheckBox IsChecked="{Binding Path=ShowDangerZone}" Margin="0,2">Show danger zone</CheckBox>
                                     <CheckBox IsChecked="{Binding Path=PlaySoundOnlyInDangerZone}" Margin="0,2">Limit sound to danger zone</CheckBox>
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <xctk:IntegerUpDown Value="{Binding Path=WarningRange}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="50" Minimum="1" MaxLength="5" Background="Transparent"  Foreground="White"/>
+                                        <xctk:IntegerUpDown Value="{Binding Path=WarningRange}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="1" MaxLength="5" Background="Transparent"  Foreground="White"/>
                                         <Label Content="Danger zone size"/>
                                     </StackPanel>
                                 </StackPanel>
                             </GroupBox>
-                            <GroupBox Header="Intel Filters" Margin="4" Height="215" Visibility="Hidden">
-                                <StackPanel>
-
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <Label Content="Clear indicators"></Label>
-                                    </StackPanel>
-                                    <TextBox Height="50" AcceptsReturn="True" Text="{Binding ClearFilters}" VerticalScrollBarVisibility="Auto"/>
-                                </StackPanel>
-                            </GroupBox>
-
                         </StackPanel>
 
                     </Grid>
@@ -199,7 +189,7 @@
                                     <CheckBox IsChecked="{Binding Path=ShowTCUVunerabilities}" Margin="0,2">Show TCU timer</CheckBox>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <xctk:IntegerUpDown Value="{Binding Path=UpcomingSovMinutes}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="70" Minimum="5" Maximum="360" Background="Transparent"  Foreground="White" />
+                                        <xctk:IntegerUpDown Value="{Binding Path=UpcomingSovMinutes}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="5" Maximum="360" Background="Transparent"  Foreground="White" />
                                         <Label Content="Upcoming period (m)"/>
                                     </StackPanel>
                                 </StackPanel>
@@ -221,7 +211,7 @@
                                     <CheckBox IsChecked="{Binding Path=FleetShowShipType}" Margin="0,2">Show fleet member ship type</CheckBox>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <xctk:IntegerUpDown Value="{Binding Path=FleetMaxMembersPerSystem}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="70" Minimum="1" Maximum="30" Background="Transparent"  Foreground="White" />
+                                        <xctk:IntegerUpDown Value="{Binding Path=FleetMaxMembersPerSystem}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="1" Maximum="30" Background="Transparent"  Foreground="White" />
                                         <Label Content="Max fleet members to display"/>
                                     </StackPanel>
                                 </StackPanel>
