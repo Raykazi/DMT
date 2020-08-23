@@ -203,6 +203,34 @@
                                 </ScrollViewer>
                             </xcadl:LayoutAnchorable>
 
+                            <xcadl:LayoutAnchorable Title="Corp Characters" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="CharactersContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
+                                <ScrollViewer Background="{DynamicResource ButtonBackground}">
+                                    <StackPanel>
+                                        <DataGrid  x:Name="CorpCharactersList" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" CanUserAddRows="False" MouseDoubleClick="CharactersList_MouseDoubleClick" HeadersVisibility="Column" SelectionUnit="FullRow" GridLinesVisibility="None" IsSynchronizedWithCurrentItem="False">
+
+                                            <DataGrid.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="Delete" Click="CharactersListMenuItemDelete_Click"/>
+                                                </ContextMenu>
+                                            </DataGrid.ContextMenu>
+
+
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
+                                                <DataGridTextColumn Header="Location" Binding="{Binding Location}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
+                                                <DataGridTextColumn Header="Region" Binding="{Binding Region}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                        <StackPanel>
+                                            <CheckBox Content="Show corp characters on map" IsChecked="{Binding MapConf.ShowDMTCharactersOnMap}" Margin="3"/>
+                                            <CheckBox Content="Show online characters only" IsChecked="{Binding ShowOnlinePlayers}" Margin="3"/>
+                                            <!-- <CheckBox x:Name="ShowOnlineChk" Margin="5,-1,5,0" Content="Show online characters" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="{Binding ShowOnlinePlayers}" Checked="ShowOnline_Checked" Unchecked="ShowOnline_Checked"/>
+                                            this doesn't work because of missing stuff ¯\_(ツ)_/¯ so i replacd it with something that compiles but doesn't have any functionality -->
+                                        </StackPanel>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </xcadl:LayoutAnchorable>
+
                             <xcadl:LayoutAnchorable Title="Jump Bridges" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="JumpBridgesContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
                                 <Grid x:Name="JumpBridgeGrid">
                                     <Grid.RowDefinitions>
