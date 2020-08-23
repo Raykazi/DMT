@@ -193,10 +193,6 @@
                                         </DataGrid>
                                         <StackPanel>
                                             <CheckBox Content="Show characters on map" IsChecked="{Binding MapConf.ShowCharacterNamesOnMap}" Margin="3"/>
-                                            <CheckBox Content="Show corp characters on map" IsChecked="{Binding MapConf.ShowDMTCharactersOnMap}" Margin="3"/>
-                                            <CheckBox Content="Show online characters" IsChecked="{Binding ShowOnlinePlayers}" Margin="3"/>
-                                            <!-- <CheckBox x:Name="ShowOnlineChk" Margin="5,-1,5,0" Content="Show online characters" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="{Binding ShowOnlinePlayers}" Checked="ShowOnline_Checked" Unchecked="ShowOnline_Checked"/>
-                                            this doesn't work because of missing stuff ¯\_(ツ)_/¯ so i replacd it with something that compiles but doesn't have any functionality -->
                                             <Button x:Name="btn_AddCharacter" Click="btn_AddCharacter_Click" Content="Add Character" Margin="3"/>
                                         </StackPanel>
                                     </StackPanel>
