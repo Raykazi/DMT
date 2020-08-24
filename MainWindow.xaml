@@ -287,7 +287,7 @@
                                                 <StackPanel>
                                                     <StackPanel Orientation="Horizontal">
                                                         <Label Content="Mode" />
-                                                        <ComboBox ItemsSource="{Binding Source={StaticResource navigationEnumData}}" SelectedItem="{Binding ActiveCharacter.NavigationMode, ElementName=RegionRC}" Margin="2" Width="150" />
+                                                    <ComboBox ItemsSource="{Binding Source={StaticResource navigationEnumData}}" SelectedItem="{Binding ActiveCharacter.NavigationMode, ElementName=RegionRC}" Margin="2" Width="150" Background="{DynamicResource ButtonBackground}"/>
                                                     </StackPanel>
 
                                                     <CheckBox Content="Use Ansiblex Gates" IsChecked="{Binding ActiveCharacter.UseAnsiblexGates, ElementName=RegionRC}" Margin="2"/>
@@ -295,7 +295,7 @@
                                             <!-- GroupBox> -->
                                             <!-- Header="WayPoints"> -->
                                                 <StackPanel>
-                                                    <ListBox ItemsSource="{Binding ActiveCharacter.Waypoints, ElementName=RegionUC}" MinHeight="50" Margin="2" />
+                                                    <ListBox ItemsSource="{Binding ActiveCharacter.Waypoints, ElementName=RegionUC}" MinHeight="50" Margin="2" Background="{DynamicResource ButtonBackground}"/>
                                                     <StackPanel Orientation="Horizontal" Margin="2">
                                                         <dotNetKitControls:AutoCompleteComboBox x:Name="RouteSystemDropDownAC" FontSize="12" Width="156" />
                                                         <Button x:Name="AddWaypointsBtn" Click="AddWaypointsBtn_Click"  Content="Add WayPoint" Margin="2" />
@@ -308,7 +308,7 @@
 
                                             <!-- <GroupBox Header="Route">-->
                                                 <StackPanel>
-                                                    <ListBox ItemsSource="{Binding ActiveCharacter.ActiveRoute, ElementName=RegionUC}" MinHeight="50" />
+                                                <ListBox ItemsSource="{Binding ActiveCharacter.ActiveRoute, ElementName=RegionUC}" MinHeight="50" Background="{DynamicResource ButtonBackground}"/>
 
                                                     <StackPanel Orientation="Horizontal" Margin="2">
                                                         <Label Content="Total number of jumps:" />

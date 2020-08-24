@@ -224,6 +224,7 @@
 
             </TabControl>
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,2">
+                <Button Content="Exit" Margin="3,0" Width="55" Click="Prefs_Exit_Click" ToolTip="Close DMT."/>
                 <Button Content="Default" Margin="3,0" Width="55" Click="Prefs_Default_Click" ToolTip="Reset preferences to their default state."/>
                 <Button Content="OK" Margin="3,0" Width="55" Click="Prefs_OK_Click" ToolTip="Apply and save preferences."/>
             </StackPanel>
