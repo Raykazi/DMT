@@ -20,9 +20,9 @@
                         <StackPanel Grid.Column="0">
                             <GroupBox Header="General" Margin="4" Height="355">
                                 <StackPanel>
-                                    <CheckBox IsChecked="{Binding Path=AlwaysOnTop}" Margin="0,3" Content="Always on top"/>
-                                    <CheckBox IsChecked="{Binding Path=SyncActiveCharacterBasedOnActiveEVEClient}" Margin="0,3">Auto sync character to active window</CheckBox>
-                                    <CheckBox x:Name="syncESIPositionChk" Margin="0,3" Checked="syncESIPositionChk_Checked" Unchecked="syncESIPositionChk_Checked">Use ESI for character positions</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=AlwaysOnTop}" Margin="0,3" Content="Always on top" ToolTip="Always display DMT above other windows."/>
+                                    <CheckBox IsChecked="{Binding Path=SyncActiveCharacterBasedOnActiveEVEClient}" Margin="0,3" Content="Auto sync character to active window" ToolTip="Always display the active characters current region."/>
+                                    <CheckBox x:Name="syncESIPositionChk" Margin="0,3" Checked="syncESIPositionChk_Checked" Unchecked="syncESIPositionChk_Checked" Content="Use ESI for character positions" ToolTip="ESI decides where your character is, not your local files."/>
                                     <Grid VerticalAlignment="Top" Height="Auto" Margin="0,5,0,0">
                                         <Grid.Resources>
                                             <Style TargetType="{x:Type TextBox}">
@@ -39,11 +39,11 @@
                                             <ColumnDefinition Width="175"></ColumnDefinition>
                                         </Grid.ColumnDefinitions>
 
-                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="DMT Token"/>
-                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="DMT URL"></TextBlock>
-                                        
-                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Token}" Foreground="White"></TextBox>
-                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Url}" Foreground="White"></TextBox>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="DMT Token" ToolTip="Enter your DMT Token provided by the corp."/>
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="DMT URL" ToolTip="Enter your DMT URL provided by the corp."/>
+
+                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Token}" Foreground="White" ToolTip="Enter your DMT Token provided by the corp."/>
+                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Url}" Foreground="White" ToolTip="Enter your DMT URL provided by the corp."/>
                                     </Grid>
                                 </StackPanel>
                             </GroupBox>
@@ -52,11 +52,11 @@
                         <StackPanel Grid.Column="1">
                             <GroupBox Header="Performance" Margin="4" Height="355">
                                 <StackPanel>
-                                    <CheckBox IsChecked="{Binding Path=DisableJumpBridgesPathAnimation}" Margin="0,3">Disable jump bridges path animation</CheckBox>
-                                    <CheckBox IsChecked="{Binding Path=DisableRoutePathAnimation}" Margin="0,3">Disable route path animation</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=DisableJumpBridgesPathAnimation}" Margin="0,3" Content="Disable jump bridges path animation" ToolTip="Turn off jump bridge animations."/>
+                                    <CheckBox IsChecked="{Binding Path=DisableRoutePathAnimation}" Margin="0,3" Content="Disable route path animation" ToolTip="Turn off route path animations."/>
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <xctk:IntegerUpDown Value="{Binding Path=MaxIntelLines}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="20" MaxLength="9999" Background="Transparent"  Foreground="White" IsEnabled="False"/>
-                                        <Label Content="Intel max lines"/>
+                                        <xctk:IntegerUpDown Value="{Binding Path=MaxIntelLines}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="20" MaxLength="9999" Background="Transparent"  Foreground="White" IsEnabled="False" ToolTip="Truncates intel after a set number of lines, helps prevent lag over longer periods."/>
+                                        <Label Content="Intel max lines" ToolTip="Truncates intel after a set number of lines, helps prevent lag over longer periods."/>
                                     </StackPanel>
                                 </StackPanel>
                             </GroupBox>
@@ -125,31 +125,31 @@
                             <GroupBox Header="General" Margin="4" Height="115">
                                 <StackPanel>
 
-                                    <CheckBox IsChecked="{Binding Path=PlayIntelSound}" Margin="0,2">Warning sound</CheckBox>
-                                    <CheckBox IsChecked="{Binding Path=PlayIntelSoundOnUnknown}" Margin="0,2">Warning on unknown</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=PlayIntelSound}" Margin="0,2" Content="Warning sound" ToolTip="Play a sound when intel is reported."/>
+                                    <CheckBox IsChecked="{Binding Path=PlayIntelSoundOnUnknown}" Margin="0,2" Content="Warning on unknown" ToolTip="Play a sound when intel is reported, but cannot be attributed to a system."/>
 
 
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <xctk:IntegerUpDown Value="{Binding Path=IntelTextSize}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="8" Maximum="20" Background="Transparent"  Foreground="White" />
-                                        <Label Content="Intel text size"/>
+                                        <xctk:IntegerUpDown Value="{Binding Path=IntelTextSize}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="8" Maximum="20" Background="Transparent"  Foreground="White" ToolTip="Change the size of the text in the intel channel."/>
+                                        <Label Content="Intel text size" ToolTip="Change the size of the text in the intel channel."/>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <xctk:IntegerUpDown Value="{Binding Path=MaxIntelSeconds}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="30" Maximum="1200" Background="Transparent"  Foreground="White"/>
-                                        <Label Content="Intel TTL (s)"/>
+                                        <xctk:IntegerUpDown Value="{Binding Path=MaxIntelSeconds}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="30" Maximum="1200" Background="Transparent"  Foreground="White" ToolTip="Change the amount of time the red warning marker will be displayed around a system."/>
+                                        <Label Content="Intel TTL (s)" ToolTip="Change the amount of time the red warning marker will be displayed around a system."/>
                                     </StackPanel>
 
                                 </StackPanel>
                             </GroupBox>
                             <GroupBox Header="Intel Sources" Margin="4" Height="230">
                                 <StackPanel>
-                                    <CheckBox IsChecked="{Binding SubscribeToCorp}" Margin="0,2" Content="Show corp chat"/>
-                                    <CheckBox IsChecked="{Binding SubscribeToAlliance}" Margin="0,2" Content="Show alliance chat"/>
-                                    <CheckBox IsChecked="{Binding SubscribeToAllIntel}" Margin="0,2" Content="Subscribe to all remote intel channels"/>
+                                    <CheckBox IsChecked="{Binding SubscribeToCorp}" Margin="0,2" Content="Show corp chat" ToolTip="Include corp chat in the Chat panel."/>
+                                    <CheckBox IsChecked="{Binding SubscribeToAlliance}" Margin="0,2" Content="Show alliance chat" ToolTip="Include alliance chat in the Chat panel."/>
+                                    <CheckBox IsChecked="{Binding SubscribeToAllIntel}" Margin="0,2" Content="Subscribe to all remote intel channels" ToolTip="Recieve intel even if you are not currently in-game or part of the intel channel."/>
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <Label Content="Channels"></Label>
                                     </StackPanel>
-                                    <TextBox Height="100" AcceptsReturn="True" Text="{Binding IntelChannels}" VerticalScrollBarVisibility="Visible"/>
+                                    <TextBox Height="100" AcceptsReturn="True" Text="{Binding IntelChannels}" VerticalScrollBarVisibility="Visible" ToolTip="Type the name of the channels to monitor in this text box. One channel per line."/>
                                 </StackPanel>
                             </GroupBox>
 
@@ -159,11 +159,11 @@
                             <GroupBox Header="Danger Zone" Margin="4" Height="355">
                                 <StackPanel>
 
-                                    <CheckBox IsChecked="{Binding Path=ShowDangerZone}" Margin="0,2">Show danger zone</CheckBox>
-                                    <CheckBox IsChecked="{Binding Path=PlaySoundOnlyInDangerZone}" Margin="0,2">Limit sound to danger zone</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=ShowDangerZone}" Margin="0,2" Content="Show danger zone" ToolTip="Show the danger zone red system outlines on the map."/>
+                                    <CheckBox IsChecked="{Binding Path=PlaySoundOnlyInDangerZone}" Margin="0,2" Content="Limit sound to danger zone" ToolTip="Only play a sound when intel is reported in a system within the danger zone range."/> 
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <xctk:IntegerUpDown Value="{Binding Path=WarningRange}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="1" MaxLength="5" Background="Transparent"  Foreground="White"/>
-                                        <Label Content="Danger zone size"/>
+                                        <xctk:IntegerUpDown Value="{Binding Path=WarningRange}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="1" MaxLength="5" Background="Transparent"  Foreground="White" ToolTip="Change the size of the danger zone."/>
+                                        <Label Content="Danger zone size" ToolTip="Change the size of the danger zone."/>
                                     </StackPanel>
                                 </StackPanel>
                             </GroupBox>
@@ -181,16 +181,16 @@
                         <StackPanel Grid.Column="0">
                             <GroupBox Header="General" Margin="4" Height="355">
                                 <StackPanel>
-                                    <CheckBox IsChecked="{Binding Path=ShowCoalition}" Margin="0,2">Show sov as coalitions</CheckBox>
-                                    <CheckBox IsChecked="{Binding Path=SOVShowConflicts}" Margin="0,2">Highlight sov conflict areas</CheckBox>
-                                    <CheckBox IsChecked="{Binding Path=SOVBasedITCU}" Margin="0,2">Show sov based on TCU</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=ShowCoalition}" Margin="0,2" Content="Show sov as coalitions" ToolTip="Show sovereignty as coalitions, rather than individual alliances."/>
+                                    <CheckBox IsChecked="{Binding Path=SOVShowConflicts}" Margin="0,2" Content="Highlight sov conflict areas" ToolTip="Highlight areas of the map with high entosis activity."/>
+                                    <CheckBox IsChecked="{Binding Path=SOVBasedITCU}" Margin="0,2" Content="Show sov based on TCU" ToolTip="Show sovereignty based on TCU owner rather than the IHUB owner."/>
 
-                                    <CheckBox IsChecked="{Binding Path=ShowIhubVunerabilities}" Margin="0,2">Show IHUB timer</CheckBox>
-                                    <CheckBox IsChecked="{Binding Path=ShowTCUVunerabilities}" Margin="0,2">Show TCU timer</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=ShowIhubVunerabilities}" Margin="0,2" Content="Show IHUB timer" ToolTip="Show IHUB timer on the map."/>
+                                    <CheckBox IsChecked="{Binding Path=ShowTCUVunerabilities}" Margin="0,2" Content="Show TCU timer" ToolTip="Show TCU timer on the map."/>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <xctk:IntegerUpDown Value="{Binding Path=UpcomingSovMinutes}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="5" Maximum="360" Background="Transparent"  Foreground="White" />
-                                        <Label Content="Upcoming period (m)"/>
+                                        <xctk:IntegerUpDown Value="{Binding Path=UpcomingSovMinutes}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="5" Maximum="360" Background="Transparent"  Foreground="White" ToolTip="Change the scale of the upcoming period timer in minutes."/>
+                                        <Label Content="Upcoming period (m)" ToolTip="Change the scale of the upcoming period timer in minutes."/>
                                     </StackPanel>
                                 </StackPanel>
                             </GroupBox>
@@ -207,12 +207,12 @@
                         <StackPanel Grid.Column="0">
                             <GroupBox Header="General" Margin="4" Height="355">
                                 <StackPanel>
-                                    <CheckBox IsChecked="{Binding Path=FleetShowOnMap}" Margin="0,2">Show fleet members</CheckBox>
-                                    <CheckBox IsChecked="{Binding Path=FleetShowShipType}" Margin="0,2">Show fleet member ship type</CheckBox>
+                                    <CheckBox IsChecked="{Binding Path=FleetShowOnMap}" Margin="0,2" Content="Show fleet members" ToolTip="Show fleet members on the map."/>
+                                    <CheckBox IsChecked="{Binding Path=FleetShowShipType}" Margin="0,2" Content="Show fleet member ship type" ToolTip="Show ship type of fleet members on the map."/>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <xctk:IntegerUpDown Value="{Binding Path=FleetMaxMembersPerSystem}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="1" Maximum="30" Background="Transparent"  Foreground="White" />
-                                        <Label Content="Max fleet members to display"/>
+                                        <xctk:IntegerUpDown Value="{Binding Path=FleetMaxMembersPerSystem}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="1" Maximum="30" Background="Transparent"  Foreground="White" ToolTip="Maximum number of fleet members to display on the map."/>
+                                        <Label Content="Max fleet members to display" ToolTip="Maximum number of fleet members to display on the map."/>
                                     </StackPanel>
                                 </StackPanel>
                             </GroupBox>
@@ -224,8 +224,9 @@
 
             </TabControl>
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,2">
-                <Button Content="Default" Margin="3,0" Width="55" Click="Prefs_Default_Click"/>
-                <Button Content="OK" Margin="3,0" Width="55" Click="Prefs_OK_Click"/>
+                <Button Content="Exit" Margin="3,0" Width="55" Click="Prefs_Exit_Click" ToolTip="Close DMT."/>
+                <Button Content="Default" Margin="3,0" Width="55" Click="Prefs_Default_Click" ToolTip="Reset preferences to their default state."/>
+                <Button Content="OK" Margin="3,0" Width="55" Click="Prefs_OK_Click" ToolTip="Apply and save preferences."/>
             </StackPanel>
         </DockPanel>
 
