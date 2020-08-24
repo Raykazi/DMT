@@ -1703,8 +1703,9 @@ namespace SMT
                     if (Region.IsSystemOnMap(sysStr))
                     {
                         MapSystem sys = Region.MapSystems[sysStr];
-
-                        double radiusScale = (DateTime.Now.ToUniversalTime() - id.IntelTime).TotalSeconds / (double)MapConf.MaxIntelSeconds;
+                        
+                        double timeSincePost = (DateTime.Now.ToUniversalTime() - id.IntelTime).TotalSeconds;
+                        double radiusScale = timeSincePost / (double)MapConf.MaxIntelSeconds;
 
                         if (radiusScale < 0.0 || radiusScale >= 1.0)
                         {
@@ -1796,9 +1797,7 @@ namespace SMT
             foreach (KeyValuePair<string, MapSystem> kvp in Region.MapSystems)
             {
                 MapSystem system = kvp.Value;
-
                 Coalition SystemCoalition = null;
-
 
                 double trueSecVal = system.ActualSystem.TrueSec;
                 bool gradeTruesec = MapConf.ShowTrueSec;
