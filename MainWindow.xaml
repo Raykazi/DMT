@@ -150,7 +150,7 @@
                             </xcadl:LayoutAnchorable>
 
                             <xcadl:LayoutAnchorable Title="Map Colours" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="MapColoursContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
-                                <ScrollViewer Background="{DynamicResource ButtonBackground}">
+                                <ScrollViewer>
                                     <StackPanel>
                                         <xctk:PropertyGrid x:Name="ColoursPropertyGrid" AutoGenerateProperties="True" ShowSearchBox="False" ShowSortOptions="False">
                                             <xctk:PropertyGrid.CategoryGroupHeaderTemplate>
@@ -166,9 +166,9 @@
                             </xcadl:LayoutAnchorable>
 
                             <xcadl:LayoutAnchorable Title="Characters" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="CharactersContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
-                                <ScrollViewer Background="{DynamicResource ButtonBackground}">
+                                <ScrollViewer>
                                     <StackPanel>
-                                        <DataGrid  x:Name="CharactersList" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" CanUserAddRows="False" MouseDoubleClick="CharactersList_MouseDoubleClick" HeadersVisibility="Column" SelectionUnit="FullRow" GridLinesVisibility="None" IsSynchronizedWithCurrentItem="False">
+                                        <DataGrid x:Name="CharactersList" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" CanUserAddRows="False" MouseDoubleClick="CharactersList_MouseDoubleClick" HeadersVisibility="Column" SelectionUnit="FullRow" GridLinesVisibility="None" IsSynchronizedWithCurrentItem="False">
 
                                             <DataGrid.ContextMenu>
                                                 <ContextMenu>
@@ -199,18 +199,10 @@
                                 </ScrollViewer>
                             </xcadl:LayoutAnchorable>
 
-                            <xcadl:LayoutAnchorable Title="Corp Characters" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="CharactersContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
-                                <ScrollViewer Background="{DynamicResource ButtonBackground}">
+                            <xcadl:LayoutAnchorable Title="Corp Characters" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="CorpCharactersContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
+                                <ScrollViewer>
                                     <StackPanel>
                                         <DataGrid  x:Name="CorpCharactersList" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" CanUserAddRows="False" MouseDoubleClick="CharactersList_MouseDoubleClick" HeadersVisibility="Column" SelectionUnit="FullRow" GridLinesVisibility="None" IsSynchronizedWithCurrentItem="False">
-
-                                            <DataGrid.ContextMenu>
-                                                <ContextMenu>
-                                                    <MenuItem Header="Delete" Click="CharactersListMenuItemDelete_Click"/>
-                                                </ContextMenu>
-                                            </DataGrid.ContextMenu>
-
-
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
                                                 <DataGridTextColumn Header="Location" Binding="{Binding Location}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
@@ -288,11 +280,11 @@
 
                             <xcadl:LayoutAnchorable Title="Route" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="RouteContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
                                 <Grid x:Name="MainRouteGrid">
-                                    <ScrollViewer Background="{DynamicResource ButtonBackground}">
+                                    <ScrollViewer>
                                         <StackPanel>
 
-                                            <GroupBox Header="Navigation Options">
-                                                <StackPanel Margin="4">
+                                            <!--<GroupBox Header="Navigation Options"> -->
+                                                <StackPanel>
                                                     <StackPanel Orientation="Horizontal">
                                                         <Label Content="Mode" />
                                                         <ComboBox ItemsSource="{Binding Source={StaticResource navigationEnumData}}" SelectedItem="{Binding ActiveCharacter.NavigationMode, ElementName=RegionRC}" Margin="2" Width="150" />
@@ -300,9 +292,9 @@
 
                                                     <CheckBox Content="Use Ansiblex Gates" IsChecked="{Binding ActiveCharacter.UseAnsiblexGates, ElementName=RegionRC}" Margin="2"/>
                                                 </StackPanel>
-                                            </GroupBox>
-                                            <GroupBox Header="WayPoints">
-                                                <StackPanel Margin="4">
+                                            <!-- GroupBox> -->
+                                            <!-- Header="WayPoints"> -->
+                                                <StackPanel>
                                                     <ListBox ItemsSource="{Binding ActiveCharacter.Waypoints, ElementName=RegionUC}" MinHeight="50" Margin="2" />
                                                     <StackPanel Orientation="Horizontal" Margin="2">
                                                         <dotNetKitControls:AutoCompleteComboBox x:Name="RouteSystemDropDownAC" FontSize="12" Width="156" />
@@ -312,19 +304,19 @@
                                                     <Button x:Name="ReCalculateRouteBtn" Click="ReCalculateRouteBtn_Click"  Content="Recalculate" Margin="2" />
                                                     <Button x:Name="ClearWaypointsBtn" Click="ClearWaypointsBtn_Click" Content="Clear All" Margin="2" />
                                                 </StackPanel>
-                                            </GroupBox>
+                                            <!-- </GroupBox> -->
 
-                                            <GroupBox Header="Route">
-                                                <StackPanel Margin="4">
+                                            <!-- <GroupBox Header="Route">-->
+                                                <StackPanel>
                                                     <ListBox ItemsSource="{Binding ActiveCharacter.ActiveRoute, ElementName=RegionUC}" MinHeight="50" />
 
                                                     <StackPanel Orientation="Horizontal" Margin="2">
-                                                        <Label Content="Total number of jumps : " />
+                                                        <Label Content="Total number of jumps:" />
                                                         <Label Content="{Binding ActiveCharacter.ActiveRoute.Count, ElementName=RegionUC}" />
                                                     </StackPanel>
                                                     <Button x:Name="CopyRouteBtn" Click="CopyRouteBtn_Click" Content="Copy Route" Margin="2" />
                                                 </StackPanel>
-                                            </GroupBox>
+                                            <!-- </GroupBox> -->
                                         </StackPanel>
                                     </ScrollViewer>
                                 </Grid>
@@ -416,7 +408,7 @@
                             </xcadl:LayoutAnchorable>
 
                             <xcadl:LayoutAnchorable Title="Fleet" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="FleetContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
-                                <ScrollViewer Background="{DynamicResource ButtonBackground}">
+                                <ScrollViewer>
                                     <DataGrid  x:Name="FleetMembersList"  Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" MouseDoubleClick="CharactersList_MouseDoubleClick" HeadersVisibility="Column" SelectionUnit="FullRow" GridLinesVisibility="None" IsSynchronizedWithCurrentItem="False">
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserReorder="False" Width="*" />
