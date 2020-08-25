@@ -57,7 +57,7 @@
         </StackPanel>
 
 
-        <StatusBar x:Name="AppStatusBar" DockPanel.Dock="Bottom">
+        <StatusBar x:Name="AppStatusBar" DockPanel.Dock="Bottom" Margin="0,0,0,0" >
             <StatusBarItem>
                 <TextBlock><Run Text="EVE Time:" /></TextBlock>
             </StatusBarItem>
