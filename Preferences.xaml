@@ -143,8 +143,8 @@
                             </GroupBox>
                             <GroupBox Header="Intel Sources" Margin="4" Height="230">
                                 <StackPanel>
-                                    <CheckBox IsChecked="{Binding SubscribeToCorp}" Margin="0,2" Content="Show corp chat" ToolTip="Include corp chat in the Chat panel."/>
-                                    <CheckBox IsChecked="{Binding SubscribeToAlliance}" Margin="0,2" Content="Show alliance chat" ToolTip="Include alliance chat in the Chat panel."/>
+                                    <CheckBox IsChecked="{Binding SubscribeToCorp}" Margin="0,2" Content="Watch corp chat" ToolTip="Watch corp chat for intel reports."/>
+                                    <CheckBox IsChecked="{Binding SubscribeToAlliance}" Margin="0,2" Content="Watch alliance chat" ToolTip="Watch alliance chat for intel reports."/>
                                     <CheckBox IsChecked="{Binding SubscribeToAllIntel}" Margin="0,2" Content="Subscribe to all remote intel channels" ToolTip="Recieve intel even if you are not currently in-game or part of the intel channel."/>
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <Label Content="Channels"></Label>
