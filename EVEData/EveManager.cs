@@ -1777,11 +1777,10 @@ namespace SMT.EVEData
         }
         public async void MqttConnect(string url, string token)
         {
-            IntelDataList.ListChanged += IntelDataList_ListChanged;
 #if DEBUG
             mqttOptions = new MqttClientOptionsBuilder()
-                .WithTcpServer("127.0.0.1", 1738)
-                //.WithTcpServer(url, 1738)
+                //.WithTcpServer("127.0.0.1", 1738)
+                .WithTcpServer(url, 1738)
                 .WithClientId($"{Environment.MachineName}\\{Environment.UserName}")
                 .WithCredentials(token, VersionStr)
                 .Build();
@@ -1952,23 +1951,48 @@ namespace SMT.EVEData
                         }
                     }
                     break;
-                case "intel":
-                    DMTIntel intel = JsonConvert.DeserializeObject<DMTIntel>(payload);
-                    IntelData newIdl = new IntelData(intel.RawIntel, intel.Channel);
-                    switch (newIdl.IntelChannel)
+                case "chat":
+                    DMTIntel chat = JsonConvert.DeserializeObject<DMTIntel>(payload);
+                    IntelData chatData = new IntelData(chat.RawIntel, chat.Channel);
+                    switch (chatData.IntelChannel)
                     {
                         case "(Corp)":
                             if (SubscribeToCorp)
-                                CheckChat(false, newIdl);
+                                CheckChat(false, chatData);
                             break;
                         case "(Alliance)":
                             if (SubscribeToAlliance)
-                                CheckChat(false, newIdl);
-                            break;
-                        default:
-                            CheckIntel(false, newIdl);
+                                CheckChat(false, chatData);
                             break;
                     }
+                    break;
+                case "intel":
+                    DMTIntel intel = JsonConvert.DeserializeObject<DMTIntel>(payload);
+                    IntelData newIdl = new IntelData(intel.RawIntel, intel.Channel);
+                    foreach (string s in newIdl.IntelString.Split(' '))
+                    {
+                        if (s == "" || s.Length < 3)
+                        {
+                            continue;
+                        }
+
+                        foreach (String clearMarker in IntelClearFilters)
+                        {
+                            if (clearMarker.IndexOf(s, StringComparison.OrdinalIgnoreCase) == 0)
+                            {
+                                newIdl.ClearNotification = true;
+                            }
+                        }
+
+                        foreach (System sys in Systems)
+                        {
+                            if (sys.Name.IndexOf(s, StringComparison.OrdinalIgnoreCase) == 0 || s.IndexOf(sys.Name, StringComparison.OrdinalIgnoreCase) == 0)
+                            {
+                                newIdl.Systems.Add(sys.Name);
+                            }
+                        }
+                    }
+                    CheckIntel(false, newIdl);
                     break;
                 case "info":
                     if (subtopic == "jbs")
@@ -1984,7 +2008,7 @@ namespace SMT.EVEData
             if (Application.Current == null) return;
             Application.Current.Dispatcher.Invoke((Action)(() =>
             {
-                lock (IntelLocker)
+                lock (_intelLocker)
                 {
                     try
                     {
@@ -2003,7 +2027,7 @@ namespace SMT.EVEData
             if (Application.Current == null) return;
             Application.Current.Dispatcher.Invoke((Action)(() =>
             {
-                lock (IntelLocker)
+                lock (_intelLocker)
                 {
                     try
                     {
@@ -2018,24 +2042,8 @@ namespace SMT.EVEData
 
         }
 
-        private void IntelDataList_ListChanged(object sender, ListChangedEventArgs e)
-        {
-            if (e.ListChangedType == ListChangedType.ItemAdded)
-            {
-                var newID = IntelDataList[e.NewIndex];
-
-                for (int i = 0; i < IntelDataList.Count; i++)
-                {
-                    if (IntelDataList[i].IntelString == newID.IntelString && i != e.NewIndex)
-                    {
-                        IntelDataList.RemoveAt(i);
-                    }
-                }
-            }
-        }
-
         public List<string> DMTBridges = new List<string>();
-        private object IntelLocker = new object();
+        private readonly object _intelLocker = new object();
 
 
         public void SendCharLocation(LocalCharacter c)
