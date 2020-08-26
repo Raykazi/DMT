@@ -2625,7 +2625,7 @@ namespace SMT
 
             if (e.ClickCount == 2)
             {
-                string AURL = $"https://zkillboard.com/region/{Region.ID}/alliance/{AllianceID}";
+                string AURL = $"https://zkillboard.com/region/{Region.ID}/alliance/{AllianceID}/";
                 System.Diagnostics.Process.Start(AURL);
             }
             else
@@ -3228,7 +3228,7 @@ namespace SMT
             MapSystem eveSys = ((FrameworkElement)((FrameworkElement)sender).Parent).DataContext as MapSystem;
             MapRegion rd = EM.GetRegion(eveSys.Region);
 
-            string uRL = string.Format("https://zkillboard.com/system/{0}", eveSys.ActualSystem.ID);
+            string uRL = string.Format("https://zkillboard.com/system/{0}/", eveSys.ActualSystem.ID);
             System.Diagnostics.Process.Start(uRL);
         }
 
