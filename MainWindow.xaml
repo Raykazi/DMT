@@ -53,6 +53,7 @@
 
             <Label Margin="30,0,0,0" Padding="7">Active Character:</Label>
             <ComboBox x:Name="CurrentActiveCharacterCombo" Width="180"  IsReadOnly="True" SelectionChanged="CurrentActiveCharacterCombo_Selected"  Height="18"/>
+            <CheckBox x:Name="FollowCharacterChk" Margin="20,0,0,0" Content="Auto follow active character" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="False"/> <!-- Checked="FollowCharacterChk_Checked" this should probably be here instead --> 
 
         </StackPanel>
 
@@ -141,10 +142,10 @@
                                         </DataGrid.Columns>
                                     </DataGrid>
                                     <StackPanel Grid.Row="2">
-                                        <Button x:Name="btnClearAnomList" Content="Clear" Click="btnClearAnomList_Click" Margin="2"/>
+                                        <Button x:Name="btnClearAnomList" Content="Clear" Click="btnClearAnomList_Click" Margin="3"/>
                                     </StackPanel>
                                     <StackPanel Grid.Row="3">
-                                        <Button x:Name="btnUpdateAnomList" Content="Update from Clipboard" Click="btnUpdateAnomList_Click" Margin="2" />
+                                        <Button x:Name="btnUpdateAnomList" Content="Update from Clipboard" Click="btnUpdateAnomList_Click" Margin="3" />
                                     </StackPanel>
                                 </Grid>
                             </xcadl:LayoutAnchorable>
@@ -160,7 +161,7 @@
                                             </xctk:PropertyGrid.CategoryGroupHeaderTemplate>
                                         </xctk:PropertyGrid>
                                         <Separator />
-                                        <Button x:Name="ResetColourData" Click="ResetColourData_Click" Content="Reset Colours" Margin="0,2" />
+                                        <Button x:Name="ResetColourData" Click="ResetColourData_Click" Content="Reset Colours" Margin="0,3" />
                                     </StackPanel>
                                 </ScrollViewer>
                             </xcadl:LayoutAnchorable>
@@ -239,17 +240,17 @@
                                         <RowDefinition Height="25" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
-                                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="2">
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal">
                                         <Label Content="Gate Search Filter:" />
-                                        <TextBox x:Name="GateSearchFilter" Text=" » " Width="167" />
+                                        <TextBox x:Name="GateSearchFilter" Text=" » " Width="167" Margin="2"/>
                                     </StackPanel>
-                                    <Button x:Name="ImportJumpGatesBtn" Content="Find Gates" Click="ImportJumpGatesBtn_Click" Margin="2" Grid.Row="1" />
-                                    <Button x:Name="ClearJumpGatesBtn" Content="Clear Gates" Click="ClearJumpGatesBtn_Click" Margin="2" Grid.Row="2" />
-                                    <Button x:Name="ImportPasteJumpGatesBtn" Content="Import From Clipboard" Click="ImportPasteJumpGatesBtn_Click" Margin="2" Grid.Row="3" />
-                                    <Button x:Name="SyncDMTBtn" Content="Sync From DMT" Click="SyncDMTBtn_Click" Margin="2" Grid.Row="4" />
-                                    <Button x:Name="ExportJumpGatesBtn" Content="Export Jump Bridges" Click="ExportJumpGatesBtn_Click"  Margin="2" Grid.Row="5" />
+                                    <Button x:Name="ImportJumpGatesBtn" Content="Find Gates" Click="ImportJumpGatesBtn_Click" Margin="3" Grid.Row="1" />
+                                    <Button x:Name="ClearJumpGatesBtn" Content="Clear Gates" Click="ClearJumpGatesBtn_Click" Margin="3" Grid.Row="2" />
+                                    <Button x:Name="ImportPasteJumpGatesBtn" Content="Import From Clipboard" Click="ImportPasteJumpGatesBtn_Click" Margin="3" Grid.Row="3" />
+                                    <Button x:Name="SyncDMTBtn" Content="Sync From DMT" Click="SyncDMTBtn_Click" Margin="3" Grid.Row="4" />
+                                    <Button x:Name="ExportJumpGatesBtn" Content="Export Jump Bridges" Click="ExportJumpGatesBtn_Click"  Margin="3" Grid.Row="5" />
 
-                                    <Label Content="Ansiblex Gates" Margin="2" Grid.Row="6" />
+                                    <Label Content="Ansiblex Gates" Grid.Row="6" />
                                     <DataGrid x:Name="JumpBridgeList" Margin="2" Grid.Row="7" AutoGenerateColumns="False" AreRowDetailsFrozen="True" IsReadOnly="True" SelectionUnit="FullRow" SelectedItem="{Binding SelectedItemProperty, Mode=TwoWay}">
 
                                         <DataGrid.CellStyle>
@@ -306,11 +307,11 @@
                                                     <ListBox ItemsSource="{Binding ActiveCharacter.Waypoints, ElementName=RegionUC}" MinHeight="50" Margin="2" Background="{DynamicResource ButtonBackground}"/>
                                                     <StackPanel Orientation="Horizontal" Margin="2">
                                                         <dotNetKitControls:AutoCompleteComboBox x:Name="RouteSystemDropDownAC" FontSize="12" Width="156" />
-                                                        <Button x:Name="AddWaypointsBtn" Click="AddWaypointsBtn_Click"  Content="Add WayPoint" Margin="2" />
+                                                        <Button x:Name="AddWaypointsBtn" Click="AddWaypointsBtn_Click"  Content="Add WayPoint" Margin="3" />
                                                     </StackPanel>
 
-                                                    <Button x:Name="ReCalculateRouteBtn" Click="ReCalculateRouteBtn_Click"  Content="Recalculate" Margin="2" />
-                                                    <Button x:Name="ClearWaypointsBtn" Click="ClearWaypointsBtn_Click" Content="Clear All" Margin="2" />
+                                                    <Button x:Name="ReCalculateRouteBtn" Click="ReCalculateRouteBtn_Click"  Content="Recalculate" Margin="3" />
+                                                    <Button x:Name="ClearWaypointsBtn" Click="ClearWaypointsBtn_Click" Content="Clear All" Margin="3" />
                                                 </StackPanel>
                                             <!-- </GroupBox> -->
 
@@ -322,7 +323,7 @@
                                                         <Label Content="Total number of jumps:" />
                                                         <Label Content="{Binding ActiveCharacter.ActiveRoute.Count, ElementName=RegionUC}" />
                                                     </StackPanel>
-                                                    <Button x:Name="CopyRouteBtn" Click="CopyRouteBtn_Click" Content="Copy Route" Margin="2" />
+                                                    <Button x:Name="CopyRouteBtn" Click="CopyRouteBtn_Click" Content="Copy Route" Margin="3" />
                                                 </StackPanel>
                                             <!-- </GroupBox> -->
                                         </StackPanel>
@@ -338,7 +339,7 @@
                                                 <ComboBox x:Name="JPShipType" />
                                                 <CheckBox x:Name="JPUseGates" Content="Use Gates" />
 
-                                                <Button x:Name="JPSuggestRoute" Click="JPSuggestRoute_Click" Content="Suggest Route" />
+                                                <Button x:Name="JPSuggestRoute" Click="JPSuggestRoute_Click" Content="Suggest Route" Margin="3"/>
                                                 <ListBox x:Name="JPSuggestedRoute" />
                                             </StackPanel>
                                         </ScrollViewer>
@@ -371,7 +372,7 @@
                                             </DataGrid.Columns>
                                         </DataGrid>
 
-                                        <Button x:Name="btn_UpdateThera" Click="btn_UpdateThera_Click"  Content="Update Connections" />
+                                        <Button x:Name="btn_UpdateThera" Click="btn_UpdateThera_Click"  Content="Update Connections" Margin="3"/>
                                     </StackPanel>
                                 </ScrollViewer>
                             </xcadl:LayoutAnchorable>
