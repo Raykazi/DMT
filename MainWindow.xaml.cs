@@ -241,10 +241,17 @@ namespace SMT
                 lc.WarningSystemRange = MapConf.WarningRange;
                 lc.Location = "";
             }
-
-
         }
 
+        public void FollowCharacterChk_Checked(object sender, RoutedEventArgs e)
+        {
+            RegionUC.FollowCharacter = true;
+            RegionUC.UpdateActiveCharacter();
+        }
+        private void FollowCharacterChk_Unchecked(object sender, RoutedEventArgs e)
+        {
+            RegionUC.FollowCharacter = false;
+        }
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             if (File.Exists("DMTConfig.json"))
@@ -1582,6 +1589,7 @@ namespace SMT
                 }
             }
         }
+
     }
 
 

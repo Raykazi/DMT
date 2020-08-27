@@ -181,17 +181,7 @@ namespace SMT
             }
         }
 
-        public bool FollowCharacter
-        {
-            get
-            {
-                return FollowCharacterChk.IsChecked.Value;
-            }
-            set
-            {
-                FollowCharacterChk.IsChecked = value;
-            }
-        }
+        public bool FollowCharacter { get; set; }
 
         public MapConfig MapConf { get; set; }
         public MapRegion Region { get; set; }

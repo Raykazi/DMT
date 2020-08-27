@@ -53,7 +53,8 @@
 
             <Label Margin="30,0,0,0" Padding="7">Active Character:</Label>
             <ComboBox x:Name="CurrentActiveCharacterCombo" Width="180"  IsReadOnly="True" SelectionChanged="CurrentActiveCharacterCombo_Selected"  Height="18"/>
-            <CheckBox x:Name="FollowCharacterChk" Margin="20,0,0,0" Content="Auto follow active character" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="False"/> <!-- Checked="FollowCharacterChk_Checked" this should probably be here instead --> 
+            <CheckBox x:Name="FollowCharacterChk" Margin="20,6,0,5" Content="Auto follow active character" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="False" Checked="FollowCharacterChk_Checked" Unchecked="FollowCharacterChk_Unchecked"/>
+            <!--  this should probably be here instead --> 
 
         </StackPanel>
 
