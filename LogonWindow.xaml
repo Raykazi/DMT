@@ -5,10 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SMT"
         mc:Ignorable="d"
-        Title="Auth.." Height="120" Width="250" WindowStartupLocation="CenterOwner" ResizeMode="NoResize" Closed="Window_Closed">
+        Title="Auth" Height="100" Width="250" WindowStartupLocation="CenterOwner" ResizeMode="NoResize" Closed="Window_Closed">
     <Grid>
-        <StackPanel Background="#FF232223">
-            <Label>logon using the browser that opened...</Label>
+        <StackPanel Background="{DynamicResource ButtonBorder}">
+            <Label>
+                <TextBlock>Login and authenticate your character in the<LineBreak/>browser window that just opened.</TextBlock>
+            </Label>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,2">
+            <Button Content="Cancel" Margin="3,0" Width="55" Click="AuthWindow_Cancel_Click" ToolTip="OK."/>
         </StackPanel>
     </Grid>
 </Window>
