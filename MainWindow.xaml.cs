@@ -1369,6 +1369,8 @@ namespace SMT
         {
             EVEManager.JumpBridges.Clear();
             EVEData.Navigation.ClearJumpBridges();
+            RegionUC.ReDrawMap(true);
+            UniverseUC.ReDrawMap(true, true, false);
         }
 
 
