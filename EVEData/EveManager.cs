@@ -14,7 +14,6 @@ using MQTTnet.Client.Options;
 using MQTTnet.Extensions.ManagedClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using SMT.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -31,6 +30,10 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml;
 using System.Xml.Serialization;
+using DMT.Helper.Models;
+using DMTCharacter = SMT.Models.DMTCharacter;
+using DMTIntel = SMT.Models.DMTIntel;
+using DMTBridges = SMT.Models.DMTBridges;
 
 namespace SMT.EVEData
 {
@@ -68,6 +71,18 @@ namespace SMT.EVEData
         private MqttFactory factory = new MqttFactory();
         private static IManagedMqttClient mqttClient;
         private IMqttClientOptions mqttOptions;
+        private bool retryAllowed = false;
+        private int mqttConnects = 0;
+
+        public ObservableCollection<DMTCharacter> DMTCharacters = new ObservableCollection<DMTCharacter>();
+        public DMTBridges DMTBridges;
+        private readonly object _intelLocker = new object();
+        public bool AutoSyncJb;
+
+        public delegate void JBUpdateButtonHandler(DateTimeOffset lastUpdate, int Count);
+        public event JBUpdateButtonHandler JBUpdateButtonEvent;
+        public delegate void JBAutoSyncEventHandler();
+        public event JBAutoSyncEventHandler JBAutoSyncEvent;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EveManager" /> class
@@ -1822,8 +1837,6 @@ namespace SMT.EVEData
             await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "chat/#" });
             MqttIntelInit();
         }
-        private bool retryAllowed = false;
-        private int mqttConnects = 0;
         private void OnMqttDisconnect(MqttClientDisconnectedEventArgs arg)
         {
             if (mqttConnects >= 5 && mqttClient.IsStarted)
@@ -1997,7 +2010,10 @@ namespace SMT.EVEData
                 case "info":
                     if (subtopic == "jbs")
                     {
-                        DMTBridges = JsonConvert.DeserializeObject<List<string>>(payload);
+                        DMTBridges = JsonConvert.DeserializeObject<DMTBridges>(payload);
+                        if (AutoSyncJb)
+                            JBAutoSyncEvent?.Invoke();
+                        //JBUpdateButtonEvent?.Invoke(DMTBridges.LastModified, DMTBridges.Bridges.Count);
                     }
                     break;
             }
@@ -2041,10 +2057,6 @@ namespace SMT.EVEData
             }), DispatcherPriority.Normal, null);
 
         }
-
-        public List<string> DMTBridges = new List<string>();
-        private readonly object _intelLocker = new object();
-
 
         public void SendCharLocation(LocalCharacter c)
         {
@@ -2108,7 +2120,6 @@ namespace SMT.EVEData
             MqttIntelInit();
         }
 
-        public ObservableCollection<DMTCharacter> DMTCharacters = new ObservableCollection<DMTCharacter>();
         private void DMTCharacters_CollectionChanged(object sender, global::System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             //throw new NotImplementedException();

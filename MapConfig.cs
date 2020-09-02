@@ -106,6 +106,7 @@ namespace SMT
         private string DMTToken;
         private string DMTUrl;
         private bool m_ShowOnlinePlayers { get; set; }
+        private bool m_AutoSyncJB;
 
         public MapConfig()
         {
@@ -313,6 +314,17 @@ namespace SMT
             {
                 m_ShowDangerZone = value;
                 OnPropertyChanged("ShowDangerZone");
+            }
+        }
+        [Category("SOV")]
+        [DisplayName("Auto Sync JBs")]
+        public bool AutoSyncJB
+        {
+            get => m_AutoSyncJB;
+            set
+            {
+                m_AutoSyncJB = value;
+                OnPropertyChanged("AutoSyncJBs");
             }
         }
 

@@ -121,8 +121,11 @@ namespace SMT
                 _firstRun = true;
             }
             // Create the main EVE manager
-            EVEManager = new EVEData.EveManager(DMT_VERSION);
-            EVEData.EveManager.Instance = EVEManager;
+            EVEManager = new EveManager(DMT_VERSION);
+            EVEManager.JBAutoSyncEvent += EVEManager_JbSyncedEvent;
+            EVEManager.JBUpdateButtonEvent += EVEManager_JBUpdateButtonEvent;
+            EveManager.Instance = EVEManager;
+            EVEManager.AutoSyncJb = MapConf.AutoSyncJB;
             EVEManager.SubscribeAllIntelChannels = MapConf.SubscribeToAllIntel;
             EVEManager.MqttInit();
 
@@ -243,6 +246,11 @@ namespace SMT
             }
         }
 
+        private void EVEManager_JBUpdateButtonEvent(DateTimeOffset dateTimeOffset, int count)
+        {
+            SyncDMTBtn.Content = $"Sync From DMT {dateTimeOffset.DateTime}";
+        }
+
         public void FollowCharacterChk_Checked(object sender, RoutedEventArgs e)
         {
             RegionUC.FollowCharacter = true;
@@ -280,7 +288,7 @@ namespace SMT
         {
             Application.Current.Dispatcher.Invoke((Action)(() =>
             {
-                foreach (string jb in EVEManager.DMTBridges)
+                foreach (string jb in EVEManager.DMTBridges.Bridges)
                 {
                     string[] bits = jb.Split(' ');
                     if (bits.Length > 3)
@@ -298,27 +306,6 @@ namespace SMT
                 Navigation.UpdateJumpBridges(EVEManager.JumpBridges.ToList());
                 RegionUC.ReDrawMap(true);
             }), DispatcherPriority.Normal, null);
-        }
-
-        private void JbSyncedEvent(List<string> jbs)
-        {
-            foreach (string jb in jbs)
-            {
-                string[] bits = jb.Split(' ');
-                if (bits.Length > 3)
-                {
-                    long IDFrom = 0;
-                    long.TryParse(bits[0], out IDFrom);
-
-                    string from = bits[1];
-                    string to = bits[3];
-
-                    EVEManager.AddUpdateJumpBridge(from, to, IDFrom);
-                }
-            }
-            Navigation.ClearJumpBridges();
-            Navigation.UpdateJumpBridges(EVEManager.JumpBridges.ToList());
-            RegionUC.ReDrawMap(true);
         }
 
         private void BroadcastOnCheck(object sender, RoutedEventArgs e)
@@ -572,6 +559,15 @@ namespace SMT
                 {
                     lc.WarningSystemRange = MapConf.WarningRange;
                     lc.warningSystemsNeedsUpdate = true;
+                }
+            }
+
+            if (e.PropertyName == "AutoSyncJBs")
+            {
+                EVEManager.AutoSyncJb = MapConf.AutoSyncJB;
+                if (EVEManager.AutoSyncJb)
+                {
+                    SyncDMTBtn_Click(null, null);
                 }
             }
 
