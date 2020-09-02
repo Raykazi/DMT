@@ -352,7 +352,7 @@
                                 <ScrollViewer>
                                     <StackPanel>
 
-                                        <DataGrid  x:Name="TheraConnectionsList" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" IsReadOnly="True" MouseDoubleClick="TheraConnectionsList_MouseDoubleClick" HeadersVisibility="Column" Background="AliceBlue">
+                                        <DataGrid  x:Name="TheraConnectionsList" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" MouseDoubleClick="TheraConnectionsList_MouseDoubleClick" HeadersVisibility="Column" GridLinesVisibility="None" SelectionUnit="FullRow">
                                             <DataGrid.CellStyle>
                                                 <Style TargetType="{x:Type DataGridCell}">
 
@@ -373,7 +373,7 @@
                                             </DataGrid.Columns>
                                         </DataGrid>
 
-                                        <Button x:Name="btn_UpdateThera" Click="btn_UpdateThera_Click"  Content="Update Connections" Margin="3"/>
+                                        <Button x:Name="btn_UpdateThera" Click="btn_UpdateThera_Click"  Content="Update Connections" Margin="3" ToolTip="Update Thera connections from EVE-Scout."/>
                                     </StackPanel>
                                 </ScrollViewer>
                             </xcadl:LayoutAnchorable>
@@ -423,7 +423,7 @@
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserReorder="False" Width="*" />
                                             <DataGridTextColumn Header="Location" Binding="{Binding Location}" CanUserReorder="False" Width="*" />
-                                            <DataGridTextColumn Header="ShipType" Binding="{Binding ShipType}" CanUserReorder="False" Width="*" />
+                                            <DataGridTextColumn Header="Ship Type" Binding="{Binding ShipType}" CanUserReorder="False" Width="*" />
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </ScrollViewer>
@@ -437,10 +437,10 @@
                         <xcadl:LayoutAnchorablePane>
                             <xcadl:LayoutAnchorable x:Name="ZKBLayoutAnchorable"  Title="ZKB Feed" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="ZKBContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
                                 <Grid>
-                                    <ScrollViewer Background="{DynamicResource ButtonBackground}">
+                                    <ScrollViewer>
                                         <StackPanel CanVerticallyScroll="True" ScrollViewer.CanContentScroll="True">
-                                            <CheckBox Content="Selected region only" x:Name="ZKBFeedFilterViewChk" IsChecked="True" Checked="ZKBFeedFilterViewChk_Checked" Unchecked="ZKBFeedFilterViewChk_Checked" Margin="4" />
-                                            <DataGrid x:Name="ZKBFeed" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" CanUserAddRows="False" MouseDoubleClick="ZKBFeed_MouseDoubleClick_1" HeadersVisibility="Column" SelectionUnit="FullRow" GridLinesVisibility="None"  MinHeight="200">
+                                            <CheckBox Content="Selected region only" x:Name="ZKBFeedFilterViewChk" IsChecked="True" Checked="ZKBFeedFilterViewChk_Checked" Unchecked="ZKBFeedFilterViewChk_Checked" Margin="3" />
+                                            <DataGrid x:Name="ZKBFeed" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" CanUserAddRows="False" MouseDoubleClick="ZKBFeed_MouseDoubleClick_1" HeadersVisibility="Column" SelectionUnit="FullRow" GridLinesVisibility="None">
                                                 <DataGrid.Columns>
                                                     <DataGridTextColumn Header="System" Binding="{Binding SystemName}" Width="30*" IsReadOnly="True" CanUserReorder="False" CanUserSort="False" />
                                                     <DataGridTextColumn Header="Alliance" Binding="{Binding VictimAllianceName}" Width="40*" IsReadOnly="True" CanUserReorder="False" CanUserSort="False" />

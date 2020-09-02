@@ -1141,6 +1141,7 @@ namespace SMT
             JumpBridgeList.IsEnabled = false;
             ImportPasteJumpGatesBtn.IsEnabled = false;
             ExportJumpGatesBtn.IsEnabled = false;
+            SyncDMTBtn.IsEnabled = false;
 
             foreach (EVEData.LocalCharacter c in EVEManager.LocalCharacters)
             {
@@ -1239,6 +1240,7 @@ namespace SMT
             JumpBridgeList.IsEnabled = true;
             ImportPasteJumpGatesBtn.IsEnabled = true;
             ExportJumpGatesBtn.IsEnabled = true;
+            SyncDMTBtn.IsEnabled = true;
 
         }
 
