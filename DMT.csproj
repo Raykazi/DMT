@@ -288,6 +288,7 @@
     <Compile Include="External\nAlpha\Shape.cs" />
     <Compile Include="External\nAlpha\VertexCounter.cs" />
     <Compile Include="GitHubRelease.cs" />
+    <Compile Include="Models\DMTBridges.cs" />
     <Compile Include="Models\DMTCharacter.cs" />
     <Compile Include="Models\DMTIntel.cs" />
     <Compile Include="NewVersionWindow.xaml.cs">
