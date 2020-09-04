@@ -1,4 +1,4 @@
-
+﻿
 using ESI.NET.Models.Universe;
 using SMT.EVEData;
 using SMT.Models;
@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using Triangles;
 using WpfHelpers.ResourceUsage;
 
 namespace SMT
@@ -129,6 +130,14 @@ namespace SMT
 
         private Dictionary<string, EveManager.JumpShip> activeJumpSpheres;
 
+        private System.Windows.Media.Imaging.BitmapImage joveLogoImage;
+
+        private System.Windows.Media.Imaging.BitmapImage trigLogoImage;
+
+        private System.Windows.Media.Imaging.BitmapImage edencomLogoImage;
+
+        private System.Windows.Media.Imaging.BitmapImage fightImage;
+
 
         /// <summary>
         /// Constructor
@@ -138,6 +147,10 @@ namespace SMT
             InitializeComponent();
             DataContext = this;
             activeJumpSpheres = new Dictionary<string, EveManager.JumpShip>();
+            joveLogoImage = ResourceLoader.LoadBitmapFromResource("Images/Jove_logo.png");
+            trigLogoImage = ResourceLoader.LoadBitmapFromResource("Images/TrigTile.png");
+            edencomLogoImage = ResourceLoader.LoadBitmapFromResource("Images/edencom.png");
+            fightImage = ResourceLoader.LoadBitmapFromResource("Images/fight.png");
         }
 
 
@@ -358,6 +371,68 @@ namespace SMT
                 OnPropertyChanged("ShowSystemTimers");
             }
         }
+        public void AddTrigInvasionSytemsToMap()
+        {
+            if (!MapConf.ShowTrigInvasions)
+            {
+                return;
+            }
+            Brush trigBrush = new SolidColorBrush(Colors.DarkRed);
+            Brush trigOutlineBrush = new SolidColorBrush(Colors.Black);
+            Brush trigSecStatusChangeBrush = new SolidColorBrush(Colors.Orange);
+
+
+            ImageBrush ib = new ImageBrush();
+            ib.TileMode = TileMode.Tile;
+            ib.Stretch = Stretch.None;
+            ib.ImageSource = trigLogoImage;
+            foreach (Triangles.Invasion ti in EM.TrigInvasions)
+            {
+                if (Region.IsSystemOnMap(ti.SystemName))
+                {
+                    MapSystem ms = Region.MapSystems[ti.SystemName];
+                    bool addTriangle = !(MapConf.ShowOnlyFinalLiminality && ti.Status != Status.FinalLiminality);
+                    if (addTriangle)
+                    {
+                        Polygon TrigShape;
+                        TrigShape = new Polygon();
+                        TrigShape.Points.Add(new Point(ms.LayoutX - 13, ms.LayoutY + 6));
+                        TrigShape.Points.Add(new Point(ms.LayoutX, ms.LayoutY - 14));
+                        TrigShape.Points.Add(new Point(ms.LayoutX + 13, ms.LayoutY + 6));
+
+
+                        TrigShape.Stroke = trigOutlineBrush;
+                        TrigShape.StrokeThickness = 1;
+                        TrigShape.StrokeLineJoin = PenLineJoin.Round;
+                        TrigShape.Fill = trigBrush;
+
+                        Canvas.SetZIndex(TrigShape, SYSTEM_Z_INDEX - 3);
+
+                        MainCanvas.Children.Add(TrigShape);
+                        DynamicMapElements.Add(TrigShape);
+                    }
+                    if (ti.DerivedSecurityStatus != null)
+                    {
+                        Label TrigSecChangeHighlight = new Label();
+                        TrigSecChangeHighlight.Content = "»";
+                        TrigSecChangeHighlight.Foreground = trigSecStatusChangeBrush;
+                        TrigSecChangeHighlight.IsHitTestVisible = false;
+                        TrigSecChangeHighlight.RenderTransform = new RotateTransform(90);
+                        TrigSecChangeHighlight.FontSize = 15;
+                        TrigSecChangeHighlight.FontWeight = FontWeights.Bold;
+
+                        Canvas.SetLeft(TrigSecChangeHighlight, ms.LayoutX + 28);
+                        Canvas.SetTop(TrigSecChangeHighlight, ms.LayoutY - 18);
+                        Canvas.SetZIndex(TrigSecChangeHighlight, SYSTEM_Z_INDEX - 3);
+                        MainCanvas.Children.Add(TrigSecChangeHighlight);
+                        DynamicMapElements.Add(TrigSecChangeHighlight);
+                    }
+
+                }
+            }
+
+
+        }
 
         public void AddTheraSystemsToMap()
         {
@@ -414,8 +489,8 @@ namespace SMT
                     {
                         Width = 10,
                         Height = 10,
-                        Name = "JoveLogo",
-                        Source = ResourceLoader.LoadBitmapFromResource("Images/Fight.png"),
+                        Name = "FightLogo",
+                        Source = fightImage,
                         Stretch = Stretch.Uniform,
                         IsHitTestVisible = false,
                     };
@@ -543,6 +618,7 @@ namespace SMT
             AddRouteToMap();
             AddTheraSystemsToMap();
             AddSovConflictsToMap();
+            AddTrigInvasionSytemsToMap();
         }
 
         /// <summary>
@@ -1791,10 +1867,8 @@ namespace SMT
 
 
                 double trueSecVal = system.ActualSystem.TrueSec;
-                bool gradeTruesec = MapConf.ShowTrueSec;
                 if (MapConf.ShowSimpleSecurityView)
                 {
-                    // gradeTruesec = false;
                     if (system.ActualSystem.TrueSec >= 0.45)
                     {
                         trueSecVal = 1.0;
@@ -1803,13 +1877,9 @@ namespace SMT
                     {
                         trueSecVal = 0.4;
                     }
-                    else
-                    {
-                        trueSecVal = 0.0;
-                    }
                 }
 
-                Brush securityColorFill = new SolidColorBrush(MapColours.GetSecStatusColour(trueSecVal, gradeTruesec));
+                Brush securityColorFill = new SolidColorBrush(MapColours.GetSecStatusColour(trueSecVal, MapConf.ShowTrueSec));
 
                 if (MapConf.SOVBasedITCU)
                 {
@@ -2191,7 +2261,7 @@ namespace SMT
                         Width = 10,
                         Height = 9,
                         Name = "JoveLogo",
-                        Source = ResourceLoader.LoadBitmapFromResource("Images/Jove_logo.png"),
+                        Source = joveLogoImage,
                         Stretch = Stretch.Uniform,
                         IsHitTestVisible = false,
                     };
