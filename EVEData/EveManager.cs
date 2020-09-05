@@ -31,9 +31,6 @@ using System.Windows.Threading;
 using System.Xml;
 using System.Xml.Serialization;
 using DMT.Helper.Models;
-using DMTCharacter = SMT.Models.DMTCharacter;
-using DMTIntel = SMT.Models.DMTIntel;
-using DMTBridges = SMT.Models.DMTBridges;
 
 namespace SMT.EVEData
 {
@@ -90,7 +87,7 @@ namespace SMT.EVEData
         public EveManager(string version)
         {
 
-            LocalCharacters = new BindingList<LocalCharacter>();
+            LocalCharacters = new ObservableCollection<LocalCharacter>();
             VersionStr = version;
 
             // ensure we have the cache folder setup
@@ -235,7 +232,7 @@ namespace SMT.EVEData
         /// Gets or sets the list of Characters we are tracking
         /// </summary>
         [XmlIgnore]
-        public BindingList<LocalCharacter> LocalCharacters { get; set; }
+        public ObservableCollection<LocalCharacter> LocalCharacters { get; set; }
 
         /// <summary>
         /// Gets or sets the master list of Regions
@@ -1990,34 +1987,35 @@ namespace SMT.EVEData
             switch (topic)
             {
                 case "location":
-                    var dmtc = JsonConvert.DeserializeObject<DMTCharacter>(payload);
-                    //Check to see if we own them. #Slavery
-                    if (!dmtc.BroadcastLocation)
+                    Application.Current.Dispatcher.Invoke((Action)(() =>
                     {
-                        foreach (var ch in DMTCharacters)
+                        var dmtc = JsonConvert.DeserializeObject<DMTCharacter>(payload);
+                        //Check to see if we own them. #Slavery
+                        var local = DMTCharacters.FirstOrDefault(x => x.Name == dmtc.Name);
+
+                        if (!dmtc.BroadcastLocation)
                         {
-                            if (ch.Name == dmtc.Name)
-                                DMTCharacters.Remove(ch);
+                            DMTCharacters.Remove(local);
                         }
-                    }
-                    else
-                    {
-                        if (LocalCharacters.Any(lc => dmtc.Name == lc.Name))
+                        else
                         {
-                            return;
+                            if (LocalCharacters.Any(lc => dmtc.Name == lc.Name))
+                            {
+                                return;
+                            }
+                            bool found = false;
+                            for (int i = 0; i < DMTCharacters.Count; i++)
+                            {
+                                if (DMTCharacters[i].Name != dmtc.Name) continue;
+                                DMTCharacters[i] = dmtc;
+                                found = true;
+                            }
+                            if (!found)
+                            {
+                                DMTCharacters.Add(dmtc);
+                            }
                         }
-                        bool found = false;
-                        for (int i = 0; i < DMTCharacters.Count; i++)
-                        {
-                            if (DMTCharacters[i].Name != dmtc.Name) continue;
-                            DMTCharacters[i] = dmtc;
-                            found = true;
-                        }
-                        if (!found)
-                        {
-                            DMTCharacters.Add(dmtc);
-                        }
-                    }
+                    }), DispatcherPriority.Normal, null);
                     break;
                 case "chat":
                     DMTIntel chat = JsonConvert.DeserializeObject<DMTIntel>(payload);

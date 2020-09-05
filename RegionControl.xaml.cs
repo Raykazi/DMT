@@ -1,7 +1,6 @@
 ﻿
 using ESI.NET.Models.Universe;
 using SMT.EVEData;
-using SMT.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using DMT.Helper.Models;
 using Triangles;
 using WpfHelpers.ResourceUsage;
 
@@ -763,11 +763,6 @@ namespace SMT
 
             foreach (DMTCharacter c in EM.DMTCharacters)
             {
-                //Still need this checked
-                if (LocalCharacter.Find(c, EM.LocalCharacters))
-                {
-                    result = c;
-                }
                 if (MapConf.ShowDMTCharactersOnMap)
                 {
                     if (!Region.IsSystemOnMap(c.Location))
