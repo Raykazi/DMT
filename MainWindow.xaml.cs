@@ -1553,6 +1553,8 @@ namespace SMT
 
             EVEData.IntelData chat = RawChatBox.SelectedItem as EVEData.IntelData;
 
+            bool selectedSystem = false;
+
             foreach (string s in chat.IntelString.Split(' '))
             {
                 if (s == "")
@@ -1572,18 +1574,21 @@ namespace SMT
                         Process.Start(url);
                     }
                 }
-
-                foreach (EVEData.System sys in EVEManager.Systems)
+                // only select the first system
+                if (!selectedSystem)
                 {
-                    if (s.IndexOf(sys.Name, StringComparison.OrdinalIgnoreCase) == 0)
+                    foreach (EVEData.System sys in EVEManager.Systems)
                     {
-                        if (RegionUC.Region.Name != sys.Region)
+                        if (s.IndexOf(sys.Name, StringComparison.OrdinalIgnoreCase) == 0)
                         {
-                            RegionUC.SelectRegion(sys.Region);
-                        }
+                            if (RegionUC.Region.Name != sys.Region)
+                            {
+                                RegionUC.SelectRegion(sys.Region);
+                            }
 
-                        RegionUC.SelectSystem(s, true);
-                        return;
+                            RegionUC.SelectSystem(s, true);
+                            selectedSystem = true;
+                        }
                     }
                 }
             }
