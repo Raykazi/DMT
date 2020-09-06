@@ -1,7 +1,6 @@
 ﻿
 using ESI.NET.Models.Universe;
 using SMT.EVEData;
-using SMT.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using DMT.Helper.Models;
 using Triangles;
 using WpfHelpers.ResourceUsage;
 
@@ -759,17 +759,16 @@ namespace SMT
                 }
                 NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(0, c.Name));
             }
-            DMTCharacter result = null;
 
-            foreach (DMTCharacter c in EM.DMTCharacters)
+            foreach (DMTLocation c in EM.DMTLocations)
             {
-                //Still need this checked
-                if (LocalCharacter.Find(c, EM.LocalCharacters))
+                if (EM.LocalCharacters.Any(x => x.Name == c.Name))
                 {
-                    result = c;
+                    return;
                 }
                 if (MapConf.ShowDMTCharactersOnMap)
                 {
+                    var kvp = new KeyValuePair<int, string>(1, c.Name);
                     if (!Region.IsSystemOnMap(c.Location))
                     {
                         continue;
@@ -779,16 +778,12 @@ namespace SMT
                     {
                         NameTrackingLocationMap[c.Location] = new List<KeyValuePair<int, string>>();
                     }
-                    NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(1, c.Name));
+                    if (c.BroadcastLocation && !NameTrackingLocationMap[c.Location].Contains(kvp))
+                        NameTrackingLocationMap[c.Location].Add(kvp);
+                    else
+                        NameTrackingLocationMap[c.Location].Remove(kvp);
                 }
             }
-            if (result != null)
-            {
-                EM.DMTCharacters.Remove(result);
-                if (NameTrackingLocationMap.ContainsKey(result.Location))
-                    NameTrackingLocationMap[result.Location].Remove(new KeyValuePair<int, string>(1, result.Name));
-            }
-
 
             if (ActiveCharacter != null && MapConf.FleetShowOnMap)
             {

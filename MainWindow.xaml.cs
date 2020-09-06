@@ -21,6 +21,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml;
 using System.Xml.Serialization;
+using DMT.Helper.Models;
 
 namespace SMT
 {
@@ -157,6 +158,7 @@ namespace SMT
             EVEManager.InitNavigation();
 
             CharactersList.ItemsSource = EVEManager.LocalCharacters;
+            CorpCharactersList.ItemsSource = EVEManager.DMTLocations;
             CurrentActiveCharacterCombo.ItemsSource = EVEManager.LocalCharacters;
 
             FleetMembersList.DataContext = this;
@@ -1608,6 +1610,21 @@ namespace SMT
             }
         }
 
+        private void CorpCharactersList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke((Action)(() =>
+            {
+                if (sender == null) return;
+                if (!(sender is DataGrid grid) || grid.SelectedItems == null || grid.SelectedItems.Count != 1) return;
+                DataGridRow dgr = grid.ItemContainerGenerator.ContainerFromItem(grid.SelectedItem) as DataGridRow;
+
+                if (dgr?.Item is DMTLocation lc)
+                {
+                    RegionUC.SelectSystem(lc.Location, true);
+                }
+            }), DispatcherPriority.Normal, null);
+
+        }
     }
 
 

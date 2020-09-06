@@ -31,9 +31,6 @@ using System.Windows.Threading;
 using System.Xml;
 using System.Xml.Serialization;
 using DMT.Helper.Models;
-using DMTCharacter = SMT.Models.DMTCharacter;
-using DMTIntel = SMT.Models.DMTIntel;
-using DMTBridges = SMT.Models.DMTBridges;
 
 namespace SMT.EVEData
 {
@@ -74,7 +71,7 @@ namespace SMT.EVEData
         private bool retryAllowed = false;
         private int mqttConnects = 0;
 
-        public ObservableCollection<DMTCharacter> DMTCharacters = new ObservableCollection<DMTCharacter>();
+        public ObservableCollection<DMTLocation> DMTLocations = new ObservableCollection<DMTLocation>();
         public DMTBridges DMTBridges;
         private readonly object _intelLocker = new object();
         public bool AutoSyncJb;
@@ -90,7 +87,8 @@ namespace SMT.EVEData
         public EveManager(string version)
         {
 
-            LocalCharacters = new BindingList<LocalCharacter>();
+            LocalCharacters = new ObservableCollection<LocalCharacter>();
+            LocalCharacters.CollectionChanged += LocalCharacters_CollectionChanged;
             VersionStr = version;
 
             // ensure we have the cache folder setup
@@ -138,6 +136,41 @@ namespace SMT.EVEData
             NameToSystem = new Dictionary<string, System>();
 
             ServerInfo = new Server();
+        }
+
+        private void LocalCharacters_CollectionChanged(object sender, global::System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke((Action)(() =>
+            {
+                if (e.Action == global::System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+                {
+                    foreach (LocalCharacter item in e.OldItems)
+                    {
+                        var rc = DMTLocations.FirstOrDefault(x => x.Name == item.Name);
+                        if (rc != null)
+                        {
+                            DMTLocations.Remove(rc);
+                            rc.IsLocalCharacter = false;
+                            DMTLocations.Add(rc);
+                        }
+                    }
+                }
+
+                if (e.Action == global::System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+                {
+                    foreach (LocalCharacter item in e.NewItems)
+                    {
+                        var dc = DMTLocations.FirstOrDefault(x => x.Name == item.Name);
+                        if (dc != null)
+                        {
+                            DMTLocations.Remove(dc);
+                            dc.IsLocalCharacter = true;
+                            DMTLocations.Add(dc);
+                        }
+                    }
+
+                }
+            }), DispatcherPriority.Normal, null);
         }
 
         /// <summary>
@@ -235,7 +268,7 @@ namespace SMT.EVEData
         /// Gets or sets the list of Characters we are tracking
         /// </summary>
         [XmlIgnore]
-        public BindingList<LocalCharacter> LocalCharacters { get; set; }
+        public ObservableCollection<LocalCharacter> LocalCharacters { get; set; }
 
         /// <summary>
         /// Gets or sets the master list of Regions
@@ -1838,7 +1871,7 @@ namespace SMT.EVEData
             StartUpdateCoalitionInfo();
 
             StartBackgroundThread();
-            DMTCharacters.CollectionChanged += DMTCharacters_CollectionChanged;
+            DMTLocations.CollectionChanged += DMTCharacters_CollectionChanged;
         }
 
         public void MqttInit()
@@ -1990,34 +2023,44 @@ namespace SMT.EVEData
             switch (topic)
             {
                 case "location":
-                    var dmtc = JsonConvert.DeserializeObject<DMTCharacter>(payload);
-                    //Check to see if we own them. #Slavery
-                    if (!dmtc.BroadcastLocation)
+                    Application.Current.Dispatcher.Invoke((Action)(() =>
                     {
-                        foreach (var ch in DMTCharacters)
+                        var dmtl = JsonConvert.DeserializeObject<DMTLocation>(payload);
+                        //Check to see if we own them. #Slavery
+                        var local = DMTLocations.FirstOrDefault(x => x.Name == dmtl.Name);
+
+                        if (!dmtl.BroadcastLocation)
                         {
-                            if (ch.Name == dmtc.Name)
-                                DMTCharacters.Remove(ch);
+                            //DMTLocations.Remove(local);
                         }
-                    }
-                    else
-                    {
-                        if (LocalCharacters.Any(lc => dmtc.Name == lc.Name))
+                        else
                         {
-                            return;
+                            if (LocalCharacters.Any(lc => dmtl.Name == lc.Name))
+                            {
+                                return;
+                            }
+                            var cdmtl = DMTLocations.FirstOrDefault(x => x.Name == dmtl.Name);
+                            var idx = DMTLocations.IndexOf(cdmtl);
+                            if (cdmtl != null)
+                            {
+                                DMTLocations[idx] = dmtl;
+
+                            }
+                            else
+                                DMTLocations.Add(dmtl);
+
+                            //bool found = false;
+                            //for (int i = 0; i < DMTLocations.Count; i++)
+                            //{
+                            //    if (DMTLocations[i].Name != dmtl.Name) continue;
+                            //    DMTLocations[i] = dmtl;
+                            //    found = true;
+                            //}
+                            //if (!found)
+                            //{
+                            //}
                         }
-                        bool found = false;
-                        for (int i = 0; i < DMTCharacters.Count; i++)
-                        {
-                            if (DMTCharacters[i].Name != dmtc.Name) continue;
-                            DMTCharacters[i] = dmtc;
-                            found = true;
-                        }
-                        if (!found)
-                        {
-                            DMTCharacters.Add(dmtc);
-                        }
-                    }
+                    }), DispatcherPriority.Normal, null);
                     break;
                 case "chat":
                     DMTIntel chat = JsonConvert.DeserializeObject<DMTIntel>(payload);
@@ -2119,7 +2162,7 @@ namespace SMT.EVEData
             if (!mqttClient.IsConnected || c.Location.Length == 0)
                 return;
             c.LastUpdate = DateTime.Now;
-            string payload = JsonConvert.SerializeObject(c);
+            string payload = JsonConvert.SerializeObject(new DMTLocation{ BroadcastLocation = c.BroadcastLocation, Id = c.ID, IsOnline = c.IsOnline, LastUpdated = c.LastUpdate, Location = c.Location, Name = c.Name, Region = c.Region});
             var message = new MqttApplicationMessageBuilder()
                .WithTopic($"location/{c.Name}")
                .WithPayload(payload)

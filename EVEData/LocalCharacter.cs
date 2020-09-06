@@ -1,4 +1,4 @@
-﻿using DMT.Helper.Models;
+using DMT.Helper.Models;
 using ESI.NET.Enumerations;
 using ESI.NET.Models.SSO;
 using System;
@@ -290,15 +290,6 @@ namespace SMT.EVEData
 
             routeNeedsUpdate = true;
             esiRouteNeedsUpdate = true;
-        }
-        internal static bool Find(Models.DMTCharacter c, BindingList<LocalCharacter> localCharacters)
-        {
-            for (int i = 0; i < localCharacters.Count; i++)
-            {
-                if (localCharacters[i].Name == c.Name)
-                    return true;
-            }
-            return false;
         }
         public async Task<List<JumpBridge>> FindJumpGates(string JumpBridgeFilterString = " » ")
         {

@@ -204,19 +204,11 @@
                             <xcadl:LayoutAnchorable Title="Corp Characters" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="CorpCharactersContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
                                 <ScrollViewer>
                                     <StackPanel>
-                                        <DataGrid  x:Name="CorpCharactersList" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" CanUserAddRows="False" MouseDoubleClick="CharactersList_MouseDoubleClick" HeadersVisibility="Column" SelectionUnit="FullRow" GridLinesVisibility="None" IsSynchronizedWithCurrentItem="False">
+                                        <DataGrid  x:Name="CorpCharactersList" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" CanUserAddRows="False" MouseDoubleClick="CorpCharactersList_MouseDoubleClick" HeadersVisibility="Column" SelectionUnit="FullRow" GridLinesVisibility="None" IsSynchronizedWithCurrentItem="False">
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
                                                 <DataGridTextColumn Header="Location" Binding="{Binding Location}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
                                                 <DataGridTextColumn Header="Region" Binding="{Binding Region}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
-                                                <DataGridCheckBoxColumn Header="Display"  Binding="{Binding Path=CorpCharacterDisplayLocation}"  CanUserReorder="False" Width="*" IsReadOnly="False">
-                                                    <!--<DataGridCheckBoxColumn.CellStyle>
-                                                        <Style>
-                                                            <EventSetter Event="CheckBox.Checked" Handler="CorpCharacterDisplayLocationCheck"/>
-                                                            <EventSetter Event="CheckBox.Unchecked" Handler="CorpCharacterDisplayLocationUnCheck"/>
-                                                        </Style>
-                                                    </DataGridCheckBoxColumn.CellStyle> --> <!-- this doesn't work without the handler existing lol -->
-                                                </DataGridCheckBoxColumn>
                                             </DataGrid.Columns>
                                         </DataGrid>
                                         <StackPanel>
