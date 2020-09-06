@@ -158,7 +158,7 @@ namespace SMT
             EVEManager.InitNavigation();
 
             CharactersList.ItemsSource = EVEManager.LocalCharacters;
-            CorpCharactersList.ItemsSource = EVEManager.DMTCharacters;
+            CorpCharactersList.ItemsSource = EVEManager.DMTLocations;
             CurrentActiveCharacterCombo.ItemsSource = EVEManager.LocalCharacters;
 
             FleetMembersList.DataContext = this;
@@ -1618,7 +1618,7 @@ namespace SMT
                 if (!(sender is DataGrid grid) || grid.SelectedItems == null || grid.SelectedItems.Count != 1) return;
                 DataGridRow dgr = grid.ItemContainerGenerator.ContainerFromItem(grid.SelectedItem) as DataGridRow;
 
-                if (dgr?.Item is DMTCharacter lc)
+                if (dgr?.Item is DMTLocation lc)
                 {
                     RegionUC.SelectSystem(lc.Location, true);
                 }

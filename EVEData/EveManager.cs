@@ -71,7 +71,7 @@ namespace SMT.EVEData
         private bool retryAllowed = false;
         private int mqttConnects = 0;
 
-        public ObservableCollection<DMTCharacter> DMTCharacters = new ObservableCollection<DMTCharacter>();
+        public ObservableCollection<DMTLocation> DMTLocations = new ObservableCollection<DMTLocation>();
         public DMTBridges DMTBridges;
         private readonly object _intelLocker = new object();
         public bool AutoSyncJb;
@@ -88,6 +88,7 @@ namespace SMT.EVEData
         {
 
             LocalCharacters = new ObservableCollection<LocalCharacter>();
+            LocalCharacters.CollectionChanged += LocalCharacters_CollectionChanged;
             VersionStr = version;
 
             // ensure we have the cache folder setup
@@ -135,6 +136,41 @@ namespace SMT.EVEData
             NameToSystem = new Dictionary<string, System>();
 
             ServerInfo = new Server();
+        }
+
+        private void LocalCharacters_CollectionChanged(object sender, global::System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke((Action)(() =>
+            {
+                if (e.Action == global::System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+                {
+                    foreach (LocalCharacter item in e.OldItems)
+                    {
+                        var rc = DMTLocations.FirstOrDefault(x => x.Name == item.Name);
+                        if (rc != null)
+                        {
+                            DMTLocations.Remove(rc);
+                            rc.IsLocalCharacter = false;
+                            DMTLocations.Add(rc);
+                        }
+                    }
+                }
+
+                if (e.Action == global::System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+                {
+                    foreach (LocalCharacter item in e.NewItems)
+                    {
+                        var dc = DMTLocations.FirstOrDefault(x => x.Name == item.Name);
+                        if (dc != null)
+                        {
+                            DMTLocations.Remove(dc);
+                            dc.IsLocalCharacter = true;
+                            DMTLocations.Add(dc);
+                        }
+                    }
+
+                }
+            }), DispatcherPriority.Normal, null);
         }
 
         /// <summary>
@@ -1835,7 +1871,7 @@ namespace SMT.EVEData
             StartUpdateCoalitionInfo();
 
             StartBackgroundThread();
-            DMTCharacters.CollectionChanged += DMTCharacters_CollectionChanged;
+            DMTLocations.CollectionChanged += DMTCharacters_CollectionChanged;
         }
 
         public void MqttInit()
@@ -1989,31 +2025,40 @@ namespace SMT.EVEData
                 case "location":
                     Application.Current.Dispatcher.Invoke((Action)(() =>
                     {
-                        var dmtc = JsonConvert.DeserializeObject<DMTCharacter>(payload);
+                        var dmtl = JsonConvert.DeserializeObject<DMTLocation>(payload);
                         //Check to see if we own them. #Slavery
-                        var local = DMTCharacters.FirstOrDefault(x => x.Name == dmtc.Name);
+                        var local = DMTLocations.FirstOrDefault(x => x.Name == dmtl.Name);
 
-                        if (!dmtc.BroadcastLocation)
+                        if (!dmtl.BroadcastLocation)
                         {
-                            DMTCharacters.Remove(local);
+                            //DMTLocations.Remove(local);
                         }
                         else
                         {
-                            if (LocalCharacters.Any(lc => dmtc.Name == lc.Name))
+                            if (LocalCharacters.Any(lc => dmtl.Name == lc.Name))
                             {
                                 return;
                             }
-                            bool found = false;
-                            for (int i = 0; i < DMTCharacters.Count; i++)
+                            var cdmtl = DMTLocations.FirstOrDefault(x => x.Name == dmtl.Name);
+                            var idx = DMTLocations.IndexOf(cdmtl);
+                            if (cdmtl != null)
                             {
-                                if (DMTCharacters[i].Name != dmtc.Name) continue;
-                                DMTCharacters[i] = dmtc;
-                                found = true;
+                                DMTLocations[idx] = dmtl;
+
                             }
-                            if (!found)
-                            {
-                                DMTCharacters.Add(dmtc);
-                            }
+                            else
+                                DMTLocations.Add(dmtl);
+
+                            //bool found = false;
+                            //for (int i = 0; i < DMTLocations.Count; i++)
+                            //{
+                            //    if (DMTLocations[i].Name != dmtl.Name) continue;
+                            //    DMTLocations[i] = dmtl;
+                            //    found = true;
+                            //}
+                            //if (!found)
+                            //{
+                            //}
                         }
                     }), DispatcherPriority.Normal, null);
                     break;
@@ -2117,7 +2162,7 @@ namespace SMT.EVEData
             if (!mqttClient.IsConnected || c.Location.Length == 0)
                 return;
             c.LastUpdate = DateTime.Now;
-            string payload = JsonConvert.SerializeObject(c);
+            string payload = JsonConvert.SerializeObject(new DMTLocation{ BroadcastLocation = c.BroadcastLocation, Id = c.ID, IsOnline = c.IsOnline, LastUpdated = c.LastUpdate, Location = c.Location, Name = c.Name, Region = c.Region});
             var message = new MqttApplicationMessageBuilder()
                .WithTopic($"location/{c.Name}")
                .WithPayload(payload)

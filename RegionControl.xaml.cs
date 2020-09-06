@@ -759,12 +759,16 @@ namespace SMT
                 }
                 NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(0, c.Name));
             }
-            DMTCharacter result = null;
 
-            foreach (DMTCharacter c in EM.DMTCharacters)
+            foreach (DMTLocation c in EM.DMTLocations)
             {
+                if (EM.LocalCharacters.Any(x => x.Name == c.Name))
+                {
+                    return;
+                }
                 if (MapConf.ShowDMTCharactersOnMap)
                 {
+                    var kvp = new KeyValuePair<int, string>(1, c.Name);
                     if (!Region.IsSystemOnMap(c.Location))
                     {
                         continue;
@@ -774,16 +778,12 @@ namespace SMT
                     {
                         NameTrackingLocationMap[c.Location] = new List<KeyValuePair<int, string>>();
                     }
-                    NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(1, c.Name));
+                    if (c.BroadcastLocation && !NameTrackingLocationMap[c.Location].Contains(kvp))
+                        NameTrackingLocationMap[c.Location].Add(kvp);
+                    else
+                        NameTrackingLocationMap[c.Location].Remove(kvp);
                 }
             }
-            if (result != null)
-            {
-                EM.DMTCharacters.Remove(result);
-                if (NameTrackingLocationMap.ContainsKey(result.Location))
-                    NameTrackingLocationMap[result.Location].Remove(new KeyValuePair<int, string>(1, result.Name));
-            }
-
 
             if (ActiveCharacter != null && MapConf.FleetShowOnMap)
             {
