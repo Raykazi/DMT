@@ -1,4 +1,5 @@
 using AutoUpdaterDotNET;
+using ESI.NET.Models.PlanetaryInteraction;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using SMT.EVEData;
@@ -11,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -1557,17 +1559,14 @@ namespace SMT
                 {
                     continue;
                 }
-
-                if (s.StartsWith("https://") || s.StartsWith("http://"))
+                var linkParser = new Regex(@"\b(?:https?://|www\.)\S+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                foreach (Match m in linkParser.Matches(s))
                 {
-                    //Check if niggas said something after url
-                    int end = s.IndexOf(" ", StringComparison.Ordinal);
-                    string url;
-                    if (end == -1)
-                        url = s.Substring(0);
-                    else
-                        url = s.Substring(0, end);
-
+                    string url = m.Value;
+                    if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                    {
+                        url = "http://" + url;
+                    }
                     if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
                     {
                         Process.Start(url);
