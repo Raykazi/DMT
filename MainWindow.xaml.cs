@@ -158,7 +158,7 @@ namespace SMT
             EVEManager.InitNavigation();
 
             CharactersList.ItemsSource = EVEManager.LocalCharacters;
-            CorpCharactersList.ItemsSource = EVEManager.DMTLocations;
+            CorpCharactersList.ItemsSource = EVEManager.DMTLocations; 
             CurrentActiveCharacterCombo.ItemsSource = EVEManager.LocalCharacters;
 
             FleetMembersList.DataContext = this;
@@ -288,26 +288,27 @@ namespace SMT
 
         private void EVEManager_JbSyncedEvent()
         {
-            Application.Current.Dispatcher.Invoke((Action)(() =>
-            {
-                foreach (string jb in EVEManager.DMTBridges.Bridges)
+            if (Application.Current != null)
+                Application.Current.Dispatcher.Invoke((Action)(() =>
                 {
-                    string[] bits = jb.Split(' ');
-                    if (bits.Length > 3)
+                    foreach (string jb in EVEManager.DMTBridges.Bridges)
                     {
-                        long IDFrom = 0;
-                        long.TryParse(bits[0], out IDFrom);
+                        string[] bits = jb.Split(' ');
+                        if (bits.Length > 3)
+                        {
+                            long IDFrom = 0;
+                            long.TryParse(bits[0], out IDFrom);
 
-                        string from = bits[1];
-                        string to = bits[3];
-                        EVEManager.AddUpdateJumpBridge(from, to, IDFrom);
+                            string from = bits[1];
+                            string to = bits[3];
+                            EVEManager.AddUpdateJumpBridge(from, to, IDFrom);
 
+                        }
                     }
-                }
-                Navigation.ClearJumpBridges();
-                Navigation.UpdateJumpBridges(EVEManager.JumpBridges.ToList());
-                RegionUC.ReDrawMap(true);
-            }), DispatcherPriority.Normal, null);
+                    Navigation.ClearJumpBridges();
+                    Navigation.UpdateJumpBridges(EVEManager.JumpBridges.ToList());
+                    RegionUC.ReDrawMap(true);
+                }), DispatcherPriority.Normal, null);
         }
 
         private void BroadcastOnCheck(object sender, RoutedEventArgs e)
