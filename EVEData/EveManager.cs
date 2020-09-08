@@ -2258,7 +2258,7 @@ namespace SMT.EVEData
                                 fileReadFrom++;
 
                                 // explicitly skip just "local"
-                                if (l.Contains("Channel Name:    Local"))
+                                if (l.Contains("Channel Name:    Local") || (l.Contains("Channel changed to Corp :")))
                                 {
                                     // now can read the next line
                                     l = file.ReadLine(); // should be the "Listener : <CharName>"
