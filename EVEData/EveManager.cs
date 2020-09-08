@@ -2029,10 +2029,11 @@ namespace SMT.EVEData
                         var dmtl = JsonConvert.DeserializeObject<DMTLocation>(payload);
                         //Check to see if we own them. #Slavery
                         var local = DMTLocations.FirstOrDefault(x => x.Name == dmtl.Name);
-
                         if (!dmtl.BroadcastLocation)
                         {
-                            //DMTLocations.Remove(local);
+                            if (local != null)
+                                DMTLocations.Remove(local);
+                            return;
                         }
                         else
                         {
@@ -2040,26 +2041,15 @@ namespace SMT.EVEData
                             {
                                 return;
                             }
-                            var cdmtl = DMTLocations.FirstOrDefault(x => x.Name == dmtl.Name);
-                            var idx = DMTLocations.IndexOf(cdmtl);
-                            if (cdmtl != null)
+                            //var cdmtl = DMTLocations.FirstOrDefault(x => x.Name == dmtl.Name);
+                            var idx = DMTLocations.IndexOf(local);
+                            if (local != null)
                             {
                                 DMTLocations[idx] = dmtl;
 
                             }
                             else
                                 DMTLocations.Add(dmtl);
-
-                            //bool found = false;
-                            //for (int i = 0; i < DMTLocations.Count; i++)
-                            //{
-                            //    if (DMTLocations[i].Name != dmtl.Name) continue;
-                            //    DMTLocations[i] = dmtl;
-                            //    found = true;
-                            //}
-                            //if (!found)
-                            //{
-                            //}
                         }
                     }), DispatcherPriority.Normal, null);
                     break;
@@ -2179,7 +2169,7 @@ namespace SMT.EVEData
             if (!mqttClient.IsConnected || c.Location.Length == 0)
                 return;
             c.LastUpdate = DateTime.Now;
-            string payload = JsonConvert.SerializeObject(new DMTLocation{ BroadcastLocation = c.BroadcastLocation, Id = c.ID, IsOnline = c.IsOnline, LastUpdated = c.LastUpdate, Location = c.Location, Name = c.Name, Region = c.Region});
+            string payload = JsonConvert.SerializeObject(new DMTLocation { BroadcastLocation = c.BroadcastLocation, Id = c.ID, IsOnline = c.IsOnline, LastUpdated = c.LastUpdate, Location = c.Location, Name = c.Name, Region = c.Region });
             var message = new MqttApplicationMessageBuilder()
                .WithTopic($"location/{c.Name}")
                .WithPayload(payload)
