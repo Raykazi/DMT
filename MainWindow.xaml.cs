@@ -1,4 +1,5 @@
 using AutoUpdaterDotNET;
+using ESI.NET.Models.PlanetaryInteraction;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using SMT.EVEData;
@@ -11,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -1569,40 +1571,42 @@ namespace SMT
 
             EVEData.IntelData chat = RawChatBox.SelectedItem as EVEData.IntelData;
 
+            bool selectedSystem = false;
+
             foreach (string s in chat.IntelString.Split(' '))
             {
                 if (s == "")
                 {
                     continue;
                 }
-
-                if (s.StartsWith("https://") || s.StartsWith("http://"))
+                var linkParser = new Regex(@"\b(?:https?://|www\.)\S+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                foreach (Match m in linkParser.Matches(s))
                 {
-                    //Check if niggas said something after url
-                    int end = s.IndexOf(" ", StringComparison.Ordinal);
-                    string url;
-                    if (end == -1)
-                        url = s.Substring(0);
-                    else
-                        url = s.Substring(0, end);
-
+                    string url = m.Value;
+                    if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                    {
+                        url = "http://" + url;
+                    }
                     if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
                     {
                         Process.Start(url);
                     }
                 }
-
-                foreach (EVEData.System sys in EVEManager.Systems)
+                // only select the first system
+                if (!selectedSystem)
                 {
-                    if (s.IndexOf(sys.Name, StringComparison.OrdinalIgnoreCase) == 0)
+                    foreach (EVEData.System sys in EVEManager.Systems)
                     {
-                        if (RegionUC.Region.Name != sys.Region)
+                        if (s.IndexOf(sys.Name, StringComparison.OrdinalIgnoreCase) == 0)
                         {
-                            RegionUC.SelectRegion(sys.Region);
-                        }
+                            if (RegionUC.Region.Name != sys.Region)
+                            {
+                                RegionUC.SelectRegion(sys.Region);
+                            }
 
-                        RegionUC.SelectSystem(s, true);
-                        return;
+                            RegionUC.SelectSystem(s, true);
+                            selectedSystem = true;
+                        }
                     }
                 }
             }
