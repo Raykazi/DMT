@@ -140,19 +140,14 @@ namespace SMT.EVEData
 
         private void LocalCharacters_CollectionChanged(object sender, global::System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            Application.Current.Dispatcher.Invoke((Action)(() =>
+            Application.Current.Dispatcher.Invoke((Action)(async () =>
             {
                 if (e.Action == global::System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
                 {
-                    foreach (LocalCharacter item in e.OldItems)
+                    if (mqttClient.IsConnected)
                     {
-                        var rc = DMTLocations.FirstOrDefault(x => x.Name == item.Name);
-                        if (rc != null)
-                        {
-                            DMTLocations.Remove(rc);
-                            rc.IsLocalCharacter = false;
-                            DMTLocations.Add(rc);
-                        }
+                        await mqttClient.UnsubscribeAsync("location");
+                        await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "location/#" });
                     }
                 }
 
@@ -160,18 +155,13 @@ namespace SMT.EVEData
                 {
                     foreach (LocalCharacter item in e.NewItems)
                     {
-                        var dc = DMTLocations.FirstOrDefault(x => x.Name == item.Name);
-                        if (dc != null)
-                        {
-                            DMTLocations.Remove(dc);
-                            dc.IsLocalCharacter = true;
-                            DMTLocations.Add(dc);
-                        }
                     }
 
                 }
             }), DispatcherPriority.Normal, null);
         }
+
+        public ObservableCollection<DMTLocation> RemovedCharacters = new ObservableCollection<DMTLocation>();
 
         /// <summary>
         /// Intel Added Event Handler
@@ -1874,14 +1864,25 @@ namespace SMT.EVEData
             DMTLocations.CollectionChanged += DMTCharacters_CollectionChanged;
         }
 
+        private string _dmtToken = string.Empty;
         public void MqttInit()
         {
             mqttClient = factory.CreateManagedMqttClient();
         }
+        public MqttApplicationMessage LastWillMessage()
+        {
+            return new MqttApplicationMessageBuilder()
+                .WithTopic($"lwt")
+                .WithPayload($"{Environment.MachineName}\\{Environment.UserName}")
+                .WithExactlyOnceQoS()
+                .Build();
+        }
         public async void MqttConnect(string url, string token)
         {
+            _dmtToken = token;
 #if DEBUG
             mqttOptions = new MqttClientOptionsBuilder()
+                .WithWillMessage(LastWillMessage())
                 //.WithTcpServer("127.0.0.1", 1738)
                 .WithTcpServer(url, 1738)
                 .WithClientId($"{Environment.MachineName}\\{Environment.UserName}")
@@ -2028,10 +2029,11 @@ namespace SMT.EVEData
                         var dmtl = JsonConvert.DeserializeObject<DMTLocation>(payload);
                         //Check to see if we own them. #Slavery
                         var local = DMTLocations.FirstOrDefault(x => x.Name == dmtl.Name);
-
                         if (!dmtl.BroadcastLocation)
                         {
-                            //DMTLocations.Remove(local);
+                            if (local != null)
+                                DMTLocations.Remove(local);
+                            return;
                         }
                         else
                         {
@@ -2039,26 +2041,15 @@ namespace SMT.EVEData
                             {
                                 return;
                             }
-                            var cdmtl = DMTLocations.FirstOrDefault(x => x.Name == dmtl.Name);
-                            var idx = DMTLocations.IndexOf(cdmtl);
-                            if (cdmtl != null)
+                            //var cdmtl = DMTLocations.FirstOrDefault(x => x.Name == dmtl.Name);
+                            var idx = DMTLocations.IndexOf(local);
+                            if (local != null)
                             {
                                 DMTLocations[idx] = dmtl;
 
                             }
                             else
                                 DMTLocations.Add(dmtl);
-
-                            //bool found = false;
-                            //for (int i = 0; i < DMTLocations.Count; i++)
-                            //{
-                            //    if (DMTLocations[i].Name != dmtl.Name) continue;
-                            //    DMTLocations[i] = dmtl;
-                            //    found = true;
-                            //}
-                            //if (!found)
-                            //{
-                            //}
                         }
                     }), DispatcherPriority.Normal, null);
                     break;
@@ -2156,13 +2147,29 @@ namespace SMT.EVEData
 
         }
 
+
+        private void SendCharacters()
+        {
+            if (mqttClient == null) return;
+            if (!mqttClient.IsConnected) return;
+            if (_dmtToken == string.Empty) return;
+            string payload = JsonConvert.SerializeObject(LocalCharacters);
+            var message = new MqttApplicationMessageBuilder()
+                .WithTopic($"pilots/{_dmtToken}")
+                .WithPayload(payload)
+                .WithExactlyOnceQoS()
+                .WithRetainFlag(true)
+                .Build();
+            mqttClient.PublishAsync(message);
+        }
+
         public void SendCharLocation(LocalCharacter c)
         {
             if (mqttClient == null) return;
             if (!mqttClient.IsConnected || c.Location.Length == 0)
                 return;
             c.LastUpdate = DateTime.Now;
-            string payload = JsonConvert.SerializeObject(new DMTLocation{ BroadcastLocation = c.BroadcastLocation, Id = c.ID, IsOnline = c.IsOnline, LastUpdated = c.LastUpdate, Location = c.Location, Name = c.Name, Region = c.Region});
+            string payload = JsonConvert.SerializeObject(new DMTLocation { BroadcastLocation = c.BroadcastLocation, Id = c.ID, IsOnline = c.IsOnline, LastUpdated = c.LastUpdate, Location = c.Location, Name = c.Name, Region = c.Region });
             var message = new MqttApplicationMessageBuilder()
                .WithTopic($"location/{c.Name}")
                .WithPayload(payload)
@@ -2534,10 +2541,12 @@ namespace SMT.EVEData
                 TimeSpan CharacterUpdateRate = TimeSpan.FromSeconds(1);
                 TimeSpan LowFreqUpdateRate = TimeSpan.FromMinutes(20);
                 TimeSpan SOVCampaignUpdateRate = TimeSpan.FromSeconds(30);
+                TimeSpan NextDMTCharacterSendRate = TimeSpan.FromMinutes(5);
 
                 DateTime NextCharacterUpdate = DateTime.Now;
                 DateTime NextLowFreqUpdate = DateTime.Now;
                 DateTime NextSOVCampaignUpdate = DateTime.Now;
+                DateTime NextDMTCharacterSend = DateTime.Now;
 
                 // loop forever
                 while (BackgroundThreadShouldTerminate == false)
@@ -2551,7 +2560,21 @@ namespace SMT.EVEData
                         {
                             LocalCharacter c = LocalCharacters.ElementAt(i);
                             await c.Update();
+                            Application.Current.Dispatcher.Invoke((Action)(() =>
+                            {
+                                var dmtl = DMTLocations.FirstOrDefault(x => x.Name == c.Name);
+                                if (dmtl != null)
+                                {
+                                    DMTLocations.Remove(dmtl);
+                                }
+
+                            }), DispatcherPriority.Normal, null);
                         }
+                    }
+                    if ((NextDMTCharacterSend - DateTime.Now).Ticks < 0)
+                    {
+                        NextDMTCharacterSend = DateTime.Now + NextDMTCharacterSendRate;
+                        SendCharacters();
                     }
 
                     // sov update
