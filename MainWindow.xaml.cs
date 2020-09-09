@@ -127,6 +127,7 @@ namespace SMT
             EVEManager = new EveManager(DMT_VERSION);
             EVEManager.JBAutoSyncEvent += EVEManager_JbSyncedEvent;
             EVEManager.JBUpdateButtonEvent += EVEManager_JBUpdateButtonEvent;
+            EVEManager.WarningSystemRange = MapConf.WarningRange;
             EveManager.Instance = EVEManager;
             EVEManager.AutoSyncJb = MapConf.AutoSyncJB;
             EVEManager.SubscribeAllIntelChannels = MapConf.SubscribeToAllIntel;
@@ -313,27 +314,28 @@ namespace SMT
                 }), DispatcherPriority.Normal, null);
         }
 
-        private void BroadcastOnCheck(object sender, RoutedEventArgs e)
+        private void BroadcastChanged(object sender, RoutedEventArgs e)
         {
             LocalCharacter selected = (LocalCharacter)CharactersList.SelectedItem;
-            if (!EVEManager.LocalCharacters.Contains(selected)) return;
-            foreach (LocalCharacter c in EVEManager.LocalCharacters)
-            {
-                if (c.Name != selected.Name) continue;
-                c.BroadcastLocation = true;
-                EVEManager.SendCharLocation(c);
-            }
+            if (selected == null) return;
+            var lc = EVEManager.LocalCharacters.FirstOrDefault(x => x.Name == selected.Name);
+            if (lc == null) return;
+            var idx = EVEManager.LocalCharacters.IndexOf(lc);
+            CheckBox cb = (CheckBox)((DataGridCell)sender).Content;
+            lc.BroadcastLocation = (bool)cb.IsChecked;
+            EVEManager.LocalCharacters[idx] = lc;
         }
-        private void BroadcastOnUnCheck(object sender, RoutedEventArgs e)
+        private void DangerzoneChanged(object sender, RoutedEventArgs e)
         {
             LocalCharacter selected = (LocalCharacter)CharactersList.SelectedItem;
-            if (!EVEManager.LocalCharacters.Contains(selected)) return;
-            foreach (LocalCharacter c in EVEManager.LocalCharacters)
-            {
-                if (c.Name != selected.Name) continue;
-                c.BroadcastLocation = false;
-                EVEManager.SendCharLocation(c);
-            }
+            if (selected == null) return;
+            var lc = EVEManager.LocalCharacters.FirstOrDefault(x => x.Name == selected.Name);
+            if (lc == null) return;
+            var idx = EVEManager.LocalCharacters.IndexOf(lc);
+            CheckBox cb = (CheckBox)((DataGridCell)sender).Content;
+            lc.DangerzoneActive = (bool)cb.IsChecked;
+            lc.warningSystemsNeedsUpdate = true;
+            EVEManager.LocalCharacters[idx] = lc;
         }
         private void ActiveSovCampaigns_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
@@ -992,7 +994,7 @@ namespace SMT
                     {
                         foreach (EVEData.LocalCharacter lc in EVEManager.LocalCharacters)
                         {
-                            if (lc.WarningSystems != null)
+                            if (lc.WarningSystems != null && lc.DangerzoneActive)
                             {
                                 foreach (string ls in lc.WarningSystems)
                                 {

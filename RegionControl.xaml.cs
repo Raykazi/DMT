@@ -968,7 +968,7 @@ namespace SMT
 
             foreach (LocalCharacter c in EM.LocalCharacters)
             {
-                if (MapConf.ShowDangerZone && c.WarningSystems != null)
+                if (MapConf.ShowDangerZone && c.WarningSystems != null && c.DangerzoneActive)
                 {
                     foreach (string s in c.WarningSystems)
                     {

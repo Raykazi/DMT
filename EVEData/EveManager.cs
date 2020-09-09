@@ -63,7 +63,7 @@ namespace SMT.EVEData
         public bool SubscribeAllIntelChannels;
         public bool SubscribeToCorp { get; set; }
         public bool SubscribeToAlliance { get; set; }
-
+        public int WarningSystemRange { get; set; }
         // Create a new MQTT client.
         private MqttFactory factory = new MqttFactory();
         private static IManagedMqttClient mqttClient;
@@ -2559,6 +2559,8 @@ namespace SMT.EVEData
                         for (int i = 0; i < LocalCharacters.Count; i++)
                         {
                             LocalCharacter c = LocalCharacters.ElementAt(i);
+                            if (c.WarningSystemRange != WarningSystemRange)
+                                c.WarningSystemRange = WarningSystemRange;
                             await c.Update();
                             Application.Current.Dispatcher.Invoke((Action)(() =>
                             {

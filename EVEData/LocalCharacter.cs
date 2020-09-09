@@ -52,6 +52,7 @@ namespace SMT.EVEData
 
         public DateTime LastUpdate { get; set; }
         public bool IsOnline { get; set; }
+        public bool DangerzoneActive { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Character" /> class
@@ -939,7 +940,7 @@ namespace SMT.EVEData
         }
         private void UpdateWarningSystems()
         {
-            if (!string.IsNullOrEmpty(Location) && WarningSystemRange > 0)
+            if (!string.IsNullOrEmpty(Location) && WarningSystemRange > 0 && DangerzoneActive)
             {
                 WarningSystems = Navigation.GetSystemsXJumpsFrom(new List<string>(), Location, WarningSystemRange);
             }
