@@ -54,7 +54,7 @@
             <Label Margin="30,0,0,0" Padding="7">Active Character:</Label>
             <ComboBox x:Name="CurrentActiveCharacterCombo" Width="180"  IsReadOnly="True" SelectionChanged="CurrentActiveCharacterCombo_Selected"  Height="18"/>
             <CheckBox x:Name="FollowCharacterChk" Margin="20,6,0,5" Content="Auto follow active character" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="False" Checked="FollowCharacterChk_Checked" Unchecked="FollowCharacterChk_Unchecked"/>
-            <!--  this should probably be here instead --> 
+            <!--  this should probably be here instead -->
 
         </StackPanel>
 
@@ -183,13 +183,22 @@
                                                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
                                                 <DataGridTextColumn Header="Location" Binding="{Binding Location}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
                                                 <DataGridTextColumn Header="Region" Binding="{Binding Region}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
-                                                <DataGridCheckBoxColumn Header="Broadcast"  Binding="{Binding Path=BroadcastLocation}"  CanUserReorder="False" Width="*" IsReadOnly="False">
+                                                <DataGridCheckBoxColumn Header="Broadcast" Binding="{Binding BroadcastLocation}"  CanUserReorder="False" Width="*" IsReadOnly="False">
                                                     <DataGridCheckBoxColumn.CellStyle>
                                                         <Style>
-                                                            <EventSetter Event="CheckBox.Checked" Handler="BroadcastOnCheck"/>
-                                                            <EventSetter Event="CheckBox.Unchecked" Handler="BroadcastOnUnCheck"/>
+                                                            <EventSetter Event="CheckBox.Checked" Handler="BroadcastChanged"/>
+                                                            <EventSetter Event="CheckBox.Unchecked" Handler="BroadcastChanged"/>
                                                         </Style>
                                                     </DataGridCheckBoxColumn.CellStyle>
+                                                </DataGridCheckBoxColumn>
+                                                <DataGridCheckBoxColumn Header="Dangerzone"  Binding="{Binding DangerzoneActive}"  CanUserReorder="False" Width="*" IsReadOnly="False">
+                                                    <DataGridCheckBoxColumn.CellStyle>
+                                                        <Style>
+                                                            <EventSetter Event="CheckBox.Checked" Handler="DangerzoneChanged"/>
+                                                            <EventSetter Event="CheckBox.Unchecked" Handler="DangerzoneChanged"/>
+                                                        </Style>
+                                                    </DataGridCheckBoxColumn.CellStyle>
+
                                                 </DataGridCheckBoxColumn>
                                             </DataGrid.Columns>
                                         </DataGrid>
@@ -286,38 +295,38 @@
                                         <StackPanel>
 
                                             <!--<GroupBox Header="Navigation Options"> -->
-                                                <StackPanel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Label Content="Mode" />
+                                            <StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Label Content="Mode" />
                                                     <ComboBox ItemsSource="{Binding Source={StaticResource navigationEnumData}}" SelectedItem="{Binding ActiveCharacter.NavigationMode, ElementName=RegionRC}" Margin="2" Width="150" Background="{DynamicResource ButtonBackground}"/>
-                                                    </StackPanel>
-
-                                                    <CheckBox Content="Use Ansiblex Gates" IsChecked="{Binding ActiveCharacter.UseAnsiblexGates, ElementName=RegionRC}" Margin="2"/>
                                                 </StackPanel>
+
+                                                <CheckBox Content="Use Ansiblex Gates" IsChecked="{Binding ActiveCharacter.UseAnsiblexGates, ElementName=RegionRC}" Margin="2"/>
+                                            </StackPanel>
                                             <!-- GroupBox> -->
                                             <!-- Header="WayPoints"> -->
-                                                <StackPanel>
-                                                    <ListBox ItemsSource="{Binding ActiveCharacter.Waypoints, ElementName=RegionUC}" MinHeight="50" Margin="2" Background="{DynamicResource ButtonBackground}"/>
-                                                    <StackPanel Orientation="Horizontal" Margin="2">
-                                                        <dotNetKitControls:AutoCompleteComboBox x:Name="RouteSystemDropDownAC" FontSize="12" Width="156" />
-                                                        <Button x:Name="AddWaypointsBtn" Click="AddWaypointsBtn_Click"  Content="Add WayPoint" Margin="3" />
-                                                    </StackPanel>
-
-                                                    <Button x:Name="ReCalculateRouteBtn" Click="ReCalculateRouteBtn_Click"  Content="Recalculate" Margin="3" />
-                                                    <Button x:Name="ClearWaypointsBtn" Click="ClearWaypointsBtn_Click" Content="Clear All" Margin="3" />
+                                            <StackPanel>
+                                                <ListBox ItemsSource="{Binding ActiveCharacter.Waypoints, ElementName=RegionUC}" MinHeight="50" Margin="2" Background="{DynamicResource ButtonBackground}"/>
+                                                <StackPanel Orientation="Horizontal" Margin="2">
+                                                    <dotNetKitControls:AutoCompleteComboBox x:Name="RouteSystemDropDownAC" FontSize="12" Width="156" />
+                                                    <Button x:Name="AddWaypointsBtn" Click="AddWaypointsBtn_Click"  Content="Add WayPoint" Margin="3" />
                                                 </StackPanel>
+
+                                                <Button x:Name="ReCalculateRouteBtn" Click="ReCalculateRouteBtn_Click"  Content="Recalculate" Margin="3" />
+                                                <Button x:Name="ClearWaypointsBtn" Click="ClearWaypointsBtn_Click" Content="Clear All" Margin="3" />
+                                            </StackPanel>
                                             <!-- </GroupBox> -->
 
                                             <!-- <GroupBox Header="Route">-->
-                                                <StackPanel>
+                                            <StackPanel>
                                                 <ListBox ItemsSource="{Binding ActiveCharacter.ActiveRoute, ElementName=RegionUC}" MinHeight="50" Background="{DynamicResource ButtonBackground}"/>
 
-                                                    <StackPanel Orientation="Horizontal" Margin="2">
-                                                        <Label Content="Total number of jumps:" />
-                                                        <Label Content="{Binding ActiveCharacter.ActiveRoute.Count, ElementName=RegionUC}" />
-                                                    </StackPanel>
-                                                    <Button x:Name="CopyRouteBtn" Click="CopyRouteBtn_Click" Content="Copy Route" Margin="3" />
+                                                <StackPanel Orientation="Horizontal" Margin="2">
+                                                    <Label Content="Total number of jumps:" />
+                                                    <Label Content="{Binding ActiveCharacter.ActiveRoute.Count, ElementName=RegionUC}" />
                                                 </StackPanel>
+                                                <Button x:Name="CopyRouteBtn" Click="CopyRouteBtn_Click" Content="Copy Route" Margin="3" />
+                                            </StackPanel>
                                             <!-- </GroupBox> -->
                                         </StackPanel>
                                     </ScrollViewer>
