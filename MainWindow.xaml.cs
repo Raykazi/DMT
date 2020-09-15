@@ -564,7 +564,7 @@ namespace SMT
             {
                 foreach (EVEData.LocalCharacter lc in EVEManager.LocalCharacters)
                 {
-                    lc.WarningSystemRange = MapConf.WarningRange;
+                    lc.WarningSystemRange = EVEManager.WarningSystemRange = MapConf.WarningRange;
                     lc.warningSystemsNeedsUpdate = true;
                 }
             }
