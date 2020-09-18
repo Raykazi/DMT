@@ -39,11 +39,9 @@
                                             <ColumnDefinition Width="175"></ColumnDefinition>
                                         </Grid.ColumnDefinitions>
 
-                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="DMT Token" ToolTip="Enter your DMT Token provided by the corp."/>
-                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="DMT URL" ToolTip="Enter your DMT URL provided by the corp."/>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="DMT URL" ToolTip="Enter your DMT URL provided by the corp."/>
 
-                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Token}" Foreground="White" ToolTip="Enter your DMT Token provided by the corp."/>
-                                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Url}" Foreground="White" ToolTip="Enter your DMT URL provided by the corp."/>
+                                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Url}" Foreground="White" ToolTip="Enter your DMT URL provided by your corp."/>
                                     </Grid>
                                 </StackPanel>
                             </GroupBox>
@@ -147,7 +145,6 @@
                                 <StackPanel>
                                     <CheckBox IsChecked="{Binding SubscribeToCorp}" Margin="0,2" Content="Watch corp chat" ToolTip="Watch corp chat for intel reports."/>
                                     <CheckBox IsChecked="{Binding SubscribeToAlliance}" Margin="0,2" Content="Watch alliance chat" ToolTip="Watch alliance chat for intel reports."/>
-                                    <CheckBox IsChecked="{Binding SubscribeToAllIntel}" Margin="0,2" Content="Subscribe to all remote intel channels" ToolTip="Recieve intel even if you are not currently in-game or part of the intel channel."/>
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <Label Content="Channels"></Label>
                                     </StackPanel>

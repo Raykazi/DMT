@@ -1880,19 +1880,28 @@ namespace SMT.EVEData
         public async void MqttConnect(string url, string token)
         {
             _dmtToken = token;
+            var esiChars = LocalCharacters.Where(w => w.ESILinked);
+            if (!esiChars.Any())
+            {
+                ServerInfo.MqttStatusColor = Colors.Orange;
+                SetStatus($"No ESI'd Character!");
+                return;
+            }
+            LocalCharacter chr = esiChars.First();
 #if DEBUG
             mqttOptions = new MqttClientOptionsBuilder()
                 .WithWillMessage(LastWillMessage())
-                //.WithTcpServer("127.0.0.1", 1738)
+                .WithTcpServer("127.0.0.1", 1738)
                 .WithTcpServer(url, 1738)
                 .WithClientId($"{Environment.MachineName}\\{Environment.UserName}")
-                .WithCredentials(token, VersionStr)
+                .WithCredentials(chr.ESIAccessToken, VersionStr)
                 .Build();
-#else
+#else       
+            
             mqttOptions = new MqttClientOptionsBuilder()
                 .WithTcpServer(url, 1738)
                 .WithClientId($"{Environment.MachineName}\\{Environment.UserName}")
-                .WithCredentials(token, VersionStr)
+                .WithCredentials(chr.ESIAccessToken, VersionStr)
                 .Build();
 #endif
             var managedOptions = new ManagedMqttClientOptionsBuilder()

@@ -1506,38 +1506,38 @@ namespace SMT
         /// <summary>
         /// Clear system Anoms button clicked
         /// </summary>
-        private void btnClearAnomList_Click(object sender, RoutedEventArgs e)
-        {
-            EVEData.AnomData ad = ANOMManager.ActiveSystem;
-            if (ad != null)
-            {
-                ad.Anoms.Clear();
-                AnomSigList.Items.Refresh();
-                AnomSigList.UpdateLayout();
-                CollectionViewSource.GetDefaultView(AnomSigList.ItemsSource).Refresh();
-            }
-        }
+        //private void btnClearAnomList_Click(object sender, RoutedEventArgs e)
+        //{
+        //    EVEData.AnomData ad = ANOMManager.ActiveSystem;
+        //    if (ad != null)
+        //    {
+        //        ad.Anoms.Clear();
+        //        AnomSigList.Items.Refresh();
+        //        AnomSigList.UpdateLayout();
+        //        CollectionViewSource.GetDefaultView(AnomSigList.ItemsSource).Refresh();
+        //    }
+        //}
 
         /// <summary>
         /// Update Anoms clicked
         /// </summary>
-        private void btnUpdateAnomList_Click(object sender, RoutedEventArgs e)
-        {
-            string pasteData = Clipboard.GetText();
+        //private void btnUpdateAnomList_Click(object sender, RoutedEventArgs e)
+        //{
+        //    string pasteData = Clipboard.GetText();
 
-            if (pasteData != null || pasteData != string.Empty)
-            {
-                EVEData.AnomData ad = ANOMManager.ActiveSystem;
+        //    if (pasteData != null || pasteData != string.Empty)
+        //    {
+        //        EVEData.AnomData ad = ANOMManager.ActiveSystem;
 
-                if (ad != null)
-                {
-                    ad.UpdateFromPaste(pasteData);
-                    AnomSigList.Items.Refresh();
-                    AnomSigList.UpdateLayout();
-                    CollectionViewSource.GetDefaultView(AnomSigList.ItemsSource).Refresh();
-                }
-            }
-        }
+        //        if (ad != null)
+        //        {
+        //            ad.UpdateFromPaste(pasteData);
+        //            AnomSigList.Items.Refresh();
+        //            AnomSigList.UpdateLayout();
+        //            CollectionViewSource.GetDefaultView(AnomSigList.ItemsSource).Refresh();
+        //        }
+        //    }
+        //}
 
 
 

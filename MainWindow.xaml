@@ -107,7 +107,7 @@
                     <xcadl:LayoutAnchorSide>
                         <xcadl:LayoutAnchorGroup>
 
-                            <xcadl:LayoutAnchorable Title="Anoms" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="AnomsContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
+                            <!--<xcadl:LayoutAnchorable Title="Anoms" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="AnomsContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
                                 <Grid x:Name="MainAnomGrid"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="26" />
@@ -149,7 +149,7 @@
                                         <Button x:Name="btnUpdateAnomList" Content="Update from Clipboard" Click="btnUpdateAnomList_Click" Margin="3" />
                                     </StackPanel>
                                 </Grid>
-                            </xcadl:LayoutAnchorable>
+                            </xcadl:LayoutAnchorable>-->
 
                             <xcadl:LayoutAnchorable Title="Map Colours" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="MapColoursContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
                                 <ScrollViewer>
