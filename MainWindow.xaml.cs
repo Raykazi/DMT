@@ -119,7 +119,7 @@ namespace SMT
                 MapConf.SetDefaultColours();
             }
             MapConf.PropertyChanged += MapConf_PropertyChanged;
-            if (MapConf.Url == null || MapConf.Token == null)
+            if (MapConf.Url == null)
             {
                 _firstRun = true;
             }
