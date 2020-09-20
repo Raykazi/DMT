@@ -52,7 +52,7 @@ namespace SMT.EVEData
 
         public DateTime LastUpdate { get; set; }
         public bool IsOnline { get; set; }
-        public bool DangerzoneActive { get; set; }
+        public bool DangerzoneActive { get; set; } = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Character" /> class
