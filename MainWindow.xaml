@@ -183,7 +183,7 @@
                                                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
                                                 <DataGridTextColumn Header="Location" Binding="{Binding Location}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
                                                 <DataGridTextColumn Header="Region" Binding="{Binding Region}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
-                                                <DataGridCheckBoxColumn Header="Broadcast" Binding="{Binding BroadcastLocation}"  CanUserReorder="False" Width="*" IsReadOnly="False">
+                                                <DataGridCheckBoxColumn Header="Broadcast" Binding="{Binding BroadcastLocation}" CanUserReorder="False" Width="*" IsReadOnly="False">
                                                     <DataGridCheckBoxColumn.CellStyle>
                                                         <Style>
                                                             <EventSetter Event="CheckBox.Checked" Handler="BroadcastChanged"/>
@@ -191,7 +191,7 @@
                                                         </Style>
                                                     </DataGridCheckBoxColumn.CellStyle>
                                                 </DataGridCheckBoxColumn>
-                                                <DataGridCheckBoxColumn Header="Dangerzone"  Binding="{Binding DangerzoneActive}"  CanUserReorder="False" Width="*" IsReadOnly="False">
+                                                <DataGridCheckBoxColumn Header="Dangerzone"  Binding="{Binding DangerzoneActive}" CanUserReorder="False" Width="*" IsReadOnly="False">
                                                     <DataGridCheckBoxColumn.CellStyle>
                                                         <Style>
                                                             <EventSetter Event="CheckBox.Checked" Handler="DangerzoneChanged"/>
@@ -199,6 +199,14 @@
                                                         </Style>
                                                     </DataGridCheckBoxColumn.CellStyle>
 
+                                                </DataGridCheckBoxColumn>
+                                                <DataGridCheckBoxColumn Header="ESI" Binding="{Binding ESIEnabled}" CanUserReorder="False" Width="5" IsReadOnly="True">
+                                                    <DataGridCheckBoxColumn.CellStyle>
+                                                        <Style>
+                                                            <!--<EventSetter Event="CheckBox.Checked" Handler="ESIChanged"/>
+                                                            <EventSetter Event="CheckBox.Unchecked" Handler="ESIChanged"/>-->
+                                                        </Style>
+                                                    </DataGridCheckBoxColumn.CellStyle>
                                                 </DataGridCheckBoxColumn>
                                             </DataGrid.Columns>
                                         </DataGrid>
