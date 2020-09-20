@@ -270,7 +270,7 @@ namespace SMT
             if (File.Exists("DMTConfig.json"))
                 File.Delete("DMTConfig.json");
             if (!_firstRun)
-                EVEManager.MqttConnect(MapConf.Url, MapConf.Token);
+                EVEManager.MqttConnect(MapConf.Url);
             else
             {
                 EVEManager.ServerInfo.MqttStatusColor = Colors.Red;
@@ -713,7 +713,7 @@ namespace SMT
                     _firstRun = false;
                     if (MapConf.IntelChannels != null)
                         EVEManager.SetupIntelFiles(MapConf.IntelChannels);
-                    EVEManager.MqttConnect(MapConf.Url, MapConf.Token);
+                    EVEManager.MqttConnect(MapConf.Url);
                     EVEManager.MqttIntelInit();
                 }
             }
@@ -1631,6 +1631,11 @@ namespace SMT
                 }
             }), DispatcherPriority.Normal, null);
 
+        }
+
+        private void StatusBarItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            EVEManager.MqttForceReconnect(MapConf.Url);
         }
     }
 

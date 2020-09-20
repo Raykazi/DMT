@@ -88,7 +88,7 @@
                 <TextBlock Text="Players" />
             </StatusBarItem>
             <Separator />
-            <StatusBarItem>
+            <StatusBarItem MouseDoubleClick="StatusBarItem_MouseDoubleClick">
                 <Ellipse x:Name="mqttStatusColor" Fill="Orange" Width="15" Height="15" />
             </StatusBarItem>
             <StatusBarItem x:Name="MqttStatusBarItem">
