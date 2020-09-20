@@ -793,14 +793,14 @@ namespace SMT
                 DisabledJumpBridgeColour = Color.FromRgb(205, 55, 50),
                 SystemOutlineColour = Color.FromRgb(0, 0, 0),
                 InRegionSystemColour = Color.FromRgb(255, 239, 213),
-                InRegionSystemTextColour = Color.FromRgb(0, 0, 0),
+                InRegionSystemTextColour = Colors.WhiteSmoke,
                 OutRegionSystemColour = Color.FromRgb(218, 165, 32),
                 OutRegionSystemTextColour = Color.FromRgb(0, 0, 0),
 
                 PopupText = Color.FromRgb(0, 0, 0),
                 PopupBackground = (Color)ColorConverter.ConvertFromString("#FF959595"),
 
-                MapBackgroundColour = (Color)ColorConverter.ConvertFromString("#FF4E5B68"),
+                MapBackgroundColour = Colors.DimGray,
                 RegionMarkerTextColour = (Color)ColorConverter.ConvertFromString("#6E716E"),
                 RegionMarkerTextColourFull = Color.FromRgb(0, 0, 0),
                 ESIOverlayColour = Color.FromRgb(188, 143, 143),
@@ -861,7 +861,7 @@ namespace SMT
             PlayIntelSoundOnUnknown = false;
             PlayIntelSound = true;
 
-            ShowJoveObservatories = true;
+            ShowJoveObservatories = false;
 
             UniverseMaxZoomDisplaySystems = 1.3f;
             UniverseMaxZoomDisplaySystemsText = 2.0f;
