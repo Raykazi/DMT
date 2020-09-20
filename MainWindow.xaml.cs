@@ -119,7 +119,7 @@ namespace SMT
                 MapConf.SetDefaultColours();
             }
             MapConf.PropertyChanged += MapConf_PropertyChanged;
-            if (MapConf.Url == null || MapConf.Token == null)
+            if (MapConf.Url == null)
             {
                 _firstRun = true;
             }
@@ -700,11 +700,11 @@ namespace SMT
             }
             else
             {
-                if (MapConf.Token == null || MapConf.Url == null)
+                if (MapConf.Url == null)
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        MessageBox.Show("Please enter your DMT info.");
+                        MessageBox.Show("Please enter your DMT url.");
                         Preferences_MenuItem_Click(null, null);
                     }, DispatcherPriority.ApplicationIdle);
                 }
