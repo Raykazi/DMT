@@ -147,6 +147,7 @@ namespace SMT.EVEData
         {
             if (e.ListChangedType == ListChangedType.ItemDeleted)
             {
+                if (AuthCharacter == null) return;
                 if (LocalCharacters.Any(x => x.Name == AuthCharacter.Name)) return;
                 authCharRemoved = true;
                 if (mqttClient.IsConnected)
@@ -1922,7 +1923,7 @@ namespace SMT.EVEData
             if (mqttClient.IsConnected) return;
             if (mqttClient.IsStarted)
                 await mqttClient.StopAsync();
-            //MqttConnect(url);
+            MqttConnect(url);
 
         }
 
