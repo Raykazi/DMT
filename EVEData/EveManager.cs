@@ -89,9 +89,9 @@ namespace SMT.EVEData
         public EveManager(string version)
         {
 
-            LocalCharacters = new BindingList<LocalCharacter>();
-            //LocalCharacters.CollectionChanged += LocalCharacters_CollectionChanged;
-            LocalCharacters.ListChanged += LocalCharacters_ListChanged;
+            LocalCharacters = new ObservableCollection<LocalCharacter>();
+            LocalCharacters.CollectionChanged += LocalCharacters_CollectionChanged;
+            //LocalCharacters.ListChanged += LocalCharacters_ListChanged;
             VersionStr = version;
             Fingerprint = Security.FingerPrint.Value();
 
@@ -147,11 +147,6 @@ namespace SMT.EVEData
         {
             if (e.ListChangedType == ListChangedType.ItemDeleted)
             {
-                if (AuthCharacter == null) return;
-                if (LocalCharacters.Any(x => x.Name == AuthCharacter.Name)) return;
-                authCharRemoved = true;
-                if (mqttClient.IsConnected)
-                    mqttClient.StopAsync();
             }
 
             if (e.ListChangedType == ListChangedType.ItemChanged)
@@ -160,7 +155,8 @@ namespace SMT.EVEData
                 if (newChar == null) return;
                 if (newChar.ESILinked == false) return;
                 if (mqttClient.IsConnected) return;
-                MqttConnect(dmtUrl);
+                if (WasConnected)
+                    MqttConnect(dmtUrl);
 
             }
             //if (e.ListChangedType == ListChangedType.ItemAdded)
@@ -181,19 +177,18 @@ namespace SMT.EVEData
             {
                 if (e.Action == global::System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
                 {
+                    if (AuthCharacter == null) return;
+                    if (LocalCharacters.Any(x => x.Name == AuthCharacter.Name)) return;
+                    authCharRemoved = true;
                     if (mqttClient.IsConnected)
-                    {
-                        await mqttClient.UnsubscribeAsync("location");
-                        await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "location/#" });
-                    }
+                        mqttClient.StopAsync();
                 }
 
                 if (e.Action == global::System.Collections.Specialized.NotifyCollectionChangedAction.Add)
                 {
-                    foreach (LocalCharacter item in e.NewItems)
-                    {
-                    }
-
+                }
+                if (e.Action == global::System.Collections.Specialized.NotifyCollectionChangedAction.Replace)
+                {
                 }
             }), DispatcherPriority.Normal, null);
         }
@@ -295,7 +290,7 @@ namespace SMT.EVEData
         /// Gets or sets the list of Characters we are tracking
         /// </summary>
         [XmlIgnore]
-        public BindingList<LocalCharacter> LocalCharacters { get; set; }
+        public ObservableCollection<LocalCharacter> LocalCharacters { get; set; }
 
         /// <summary>
         /// Gets or sets the master list of Regions
@@ -1244,6 +1239,8 @@ namespace SMT.EVEData
             if (esiChar == null)
             {
                 esiChar = new LocalCharacter(acd.CharacterName, string.Empty, string.Empty);
+                esiChar.PropertyChanged += SomethingChanged;
+                
 
                 Application.Current.Dispatcher.Invoke((Action)(() =>
                 {
@@ -1261,8 +1258,23 @@ namespace SMT.EVEData
             if (item == null) return;
             var index = LocalCharacters.IndexOf(item);
             if (index > -1)
-                LocalCharacters[index] = item;
+                Application.Current.Dispatcher.Invoke((Action)(() =>
+                {
+                    LocalCharacters[index] = item;
+                }), DispatcherPriority.Normal, null);
             // now to find if a matching character
+        }
+
+        public delegate void UpdateDataGridColorHandler(LocalCharacter lc, LocalCharacter ac);
+
+        public event UpdateDataGridColorHandler UpdateDataGridColors;
+        private void SomethingChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var character = sender as LocalCharacter;
+            if (e.PropertyName == "ESILinked")
+            {
+                UpdateDataGridColors?.Invoke(character, AuthCharacter);
+            }
         }
 
         public void InitNavigation()
@@ -1950,13 +1962,17 @@ namespace SMT.EVEData
              .WithAutoReconnectDelay(TimeSpan.FromSeconds(30))
              .WithClientOptions(mqttOptions)
              .Build();
-            if (!mqttClient.IsStarted)
-                await mqttClient.StartAsync(managedOptions);
+            if (mqttClient.IsStarted || mqttClient.IsConnected)
+                await mqttClient.StopAsync();
+            await mqttClient.StartAsync(managedOptions);
 
-            if (ServerInfo != null && !authCharRemoved)
+            if (ServerInfo != null && mqttClient.IsStarted)
             {
-                SetStatus($"Connecting to {url}");
-                ServerInfo.MqttStatusColor = Colors.Orange;
+                if (!authCharRemoved)
+                {
+                    SetStatus($"Connecting to {url}");
+                    ServerInfo.MqttStatusColor = Colors.Orange;
+                }
             }
             mqttClient.ConnectingFailedHandler = new ConnectingFailedHandlerDelegate(OnMqttFailed);
             mqttClient.UseConnectedHandler(OnMqttConnect);
@@ -2423,7 +2439,9 @@ namespace SMT.EVEData
                                     {
                                         Application.Current.Dispatcher.Invoke((Action)(() =>
                                         {
-                                            LocalCharacters.Add(new LocalCharacter(characterName, changedFile, system));
+                                            var localChar = new LocalCharacter(characterName, changedFile, system);
+                                            localChar.PropertyChanged += SomethingChanged;
+                                            LocalCharacters.Add(localChar);
                                         }), DispatcherPriority.Normal, null);
                                     }
 
@@ -2601,6 +2619,7 @@ namespace SMT.EVEData
                     c.LocalChatFile = string.Empty;
                     c.Location = string.Empty;
                     c.Region = string.Empty;
+                    c.PropertyChanged += SomethingChanged;
 
                     LocalCharacters.Add(c);
                     SendCharLocation(c);

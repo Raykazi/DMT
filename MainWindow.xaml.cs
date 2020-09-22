@@ -161,7 +161,7 @@ namespace SMT
             EVEManager.InitNavigation();
 
             CharactersList.ItemsSource = EVEManager.LocalCharacters;
-            CorpCharactersList.ItemsSource = EVEManager.DMTLocations; 
+            CorpCharactersList.ItemsSource = EVEManager.DMTLocations;
             CurrentActiveCharacterCombo.ItemsSource = EVEManager.LocalCharacters;
 
             FleetMembersList.DataContext = this;
@@ -469,6 +469,18 @@ namespace SMT
                 {
                     CollectionViewSource.GetDefaultView(FleetMembersList.ItemsSource).Refresh();
                 }
+                if (Application.Current != null)
+                    Application.Current.Dispatcher.Invoke((Action)(() =>
+                    {
+                        //Scuffed as imo
+                        for (int i = 0; i < CharactersList.Items.Count; i++)
+                        {
+                            var dgvCharacter = CharactersList.Items[i] as LocalCharacter;
+                            DataGridRow row = (DataGridRow)CharactersList.ItemContainerGenerator.ContainerFromIndex(i);
+                            row.Background = dgvCharacter != null && dgvCharacter.ESILinked ? Brushes.Green : Brushes.Red;
+                            row.InvalidateVisual();
+                        }
+                    }), DispatcherPriority.Normal, null);
 
             }
             if (MapConf.SyncActiveCharacterBasedOnActiveEVEClient)
