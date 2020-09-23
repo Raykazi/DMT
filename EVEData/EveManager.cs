@@ -2773,6 +2773,15 @@ namespace SMT.EVEData
         /// </summary>
         private async void StartUpdateJumpsFromESI()
         {
+            try
+            {
+
+            }
+            catch (System.Net.WebException)
+            {
+
+            }
+
             EsiResponse<List<ESI.NET.Models.Universe.Jumps>> esr = await ESIClient.Universe.Jumps();
             if (ESIHelpers.ValidateESICall(esr))
             {
