@@ -190,6 +190,12 @@
                                                             <EventSetter Event="CheckBox.Unchecked" Handler="BroadcastChanged"/>
                                                         </Style>
                                                     </DataGridCheckBoxColumn.CellStyle>
+                                                    <DataGridCheckBoxColumn.ElementStyle>
+                                                        <Style TargetType="CheckBox">
+                                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                        </Style>
+                                                    </DataGridCheckBoxColumn.ElementStyle>
                                                 </DataGridCheckBoxColumn>
                                                 <DataGridCheckBoxColumn Header="Dangerzone"  Binding="{Binding DangerzoneActive}"  CanUserReorder="False" Width="*" IsReadOnly="False">
                                                     <DataGridCheckBoxColumn.CellStyle>
@@ -198,7 +204,12 @@
                                                             <EventSetter Event="CheckBox.Unchecked" Handler="DangerzoneChanged"/>
                                                         </Style>
                                                     </DataGridCheckBoxColumn.CellStyle>
-
+                                                    <DataGridCheckBoxColumn.ElementStyle>
+                                                        <Style TargetType="CheckBox">
+                                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                        </Style>
+                                                    </DataGridCheckBoxColumn.ElementStyle>
                                                 </DataGridCheckBoxColumn>
                                             </DataGrid.Columns>
                                         </DataGrid>
