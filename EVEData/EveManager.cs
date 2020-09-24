@@ -31,6 +31,7 @@ using System.Windows.Threading;
 using System.Xml;
 using System.Xml.Serialization;
 using DMT.Helper.Models;
+using System.Net.Http;
 
 namespace SMT.EVEData
 {
