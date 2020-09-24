@@ -144,33 +144,6 @@ namespace SMT.EVEData
         }
         private LocalCharacter AuthCharacter;
         private bool authCharRemoved = false;
-        private void LocalCharacters_ListChanged(object sender, ListChangedEventArgs e)
-        {
-            if (e.ListChangedType == ListChangedType.ItemDeleted)
-            {
-            }
-
-            if (e.ListChangedType == ListChangedType.ItemChanged)
-            {
-                var newChar = LocalCharacters[e.NewIndex];
-                if (newChar == null) return;
-                if (newChar.ESILinked == false) return;
-                if (mqttClient.IsConnected) return;
-                if (WasConnected)
-                    MqttConnect(dmtUrl);
-
-            }
-            //if (e.ListChangedType == ListChangedType.ItemAdded)
-            //{
-            //    var newChar = LocalCharacters[e.NewIndex];
-            //    if (newChar == null) return;
-            //    //if (newChar.ESILinked == false) return;
-            //    if (mqttClient.IsConnected) return;
-            //    if (WasConnected == false) return;
-            //        MqttConnect(dmtUrl);
-
-            //}
-        }
 
         private void LocalCharacters_CollectionChanged(object sender, global::System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {

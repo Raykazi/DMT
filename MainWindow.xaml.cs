@@ -480,7 +480,6 @@ namespace SMT
                             DataGridRow row = (DataGridRow)CharactersList.ItemContainerGenerator.ContainerFromIndex(i);
                             if (row == null) continue;
                             row.Background = dgvCharacter != null && dgvCharacter.ESILinked ? Brushes.Green : Brushes.Red;
-                            ///row.InvalidateVisual();
                         }
                     }), DispatcherPriority.Normal, null);
 
