@@ -2776,23 +2776,23 @@ namespace SMT.EVEData
             try
             {
 
-            }
-            catch (System.Net.WebException)
-            {
-
-            }
-
-            EsiResponse<List<ESI.NET.Models.Universe.Jumps>> esr = await ESIClient.Universe.Jumps();
-            if (ESIHelpers.ValidateESICall(esr))
-            {
-                foreach (ESI.NET.Models.Universe.Jumps j in esr.Data)
+                EsiResponse<List<ESI.NET.Models.Universe.Jumps>> esr = await ESIClient.Universe.Jumps();
+                if (ESIHelpers.ValidateESICall(esr))
                 {
-                    System es = GetEveSystemFromID(j.SystemId);
-                    if (es != null)
+                    foreach (ESI.NET.Models.Universe.Jumps j in esr.Data)
                     {
-                        es.JumpsLastHour = j.ShipJumps;
+                        System es = GetEveSystemFromID(j.SystemId);
+                        if (es != null)
+                        {
+                            es.JumpsLastHour = j.ShipJumps;
+                        }
                     }
                 }
+
+            }
+            catch (HttpRequestException ex)
+            {
+                //For when Zahzi wakes up his PC.
             }
         }
 
