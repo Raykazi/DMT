@@ -473,6 +473,7 @@ namespace SMT
                     Application.Current.Dispatcher.Invoke((Action)(() =>
                     {
                         //Scuffed as imo
+                        if (CharactersList == null) return;
                         for (int i = 0; i < CharactersList.Items.Count; i++)
                         {
                             var dgvCharacter = CharactersList.Items[i] as LocalCharacter;
