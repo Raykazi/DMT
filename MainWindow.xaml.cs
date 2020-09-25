@@ -131,6 +131,7 @@ namespace SMT
             EveManager.Instance = EVEManager;
             EVEManager.AutoSyncJb = MapConf.AutoSyncJB;
             EVEManager.SubscribeAllIntelChannels = MapConf.SubscribeToAllIntel;
+            EVEManager.MaxChatLines = MapConf.MaxChatLines;
             EVEManager.MqttInit();
 
             EVEManager.UseESIForCharacterPositions = MapConf.UseESIForCharacterPositions;
@@ -550,6 +551,10 @@ namespace SMT
                 }
             }
 
+            if (e.PropertyName == "MaxChatLines")
+            {
+                EVEManager.MaxChatLines = MapConf.MaxChatLines;
+            }
             if (e.PropertyName == "SubscribeToAllIntel")
             {
                 if (!MapConf.SubscribeToAllIntel)

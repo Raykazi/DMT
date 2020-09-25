@@ -73,6 +73,13 @@ namespace SMT.EVEData
         private IMqttClientOptions mqttOptions;
         private bool retryAllowed = false;
         private int mqttConnects = 0;
+        public int MaxChatLines;
+
+        public enum ChatMode
+        {
+            Intel = 0,
+            Chat = 1
+        }
 
         public ObservableCollection<DMTLocation> DMTLocations = new ObservableCollection<DMTLocation>();
         public DMTBridges DMTBridges;
@@ -249,11 +256,11 @@ namespace SMT.EVEData
         /// <summary>
         /// Gets or sets the Intel List
         /// </summary>
-        public BindingList<IntelData> IntelDataList { get; set; }
+        public ObservableCollection<IntelData> IntelDataList { get; set; }
         /// <summary>
         /// Gets or sets the Chat List
         /// </summary>
-        public BindingList<IntelData> ChatDataList { get; set; }
+        public ObservableCollection<IntelData> ChatDataList { get; set; }
 
         /// <summary>
         /// Gets or sets the current list of Jump Bridges
@@ -1214,7 +1221,7 @@ namespace SMT.EVEData
             {
                 esiChar = new LocalCharacter(acd.CharacterName, string.Empty, string.Empty);
                 esiChar.PropertyChanged += SomethingChanged;
-                
+
 
                 Application.Current.Dispatcher.Invoke((Action)(() =>
                 {
@@ -1537,9 +1544,11 @@ namespace SMT.EVEData
         /// </summary>
         public void SetupIntelWatcher()
         {
-            IntelDataList = new BindingList<IntelData>();
-            ChatDataList = new BindingList<IntelData>();
+            IntelDataList = new ObservableCollection<IntelData>();
+            ChatDataList = new ObservableCollection<IntelData>();
             IntelClearFilters = new List<string> { "Clear", "Clr", "Despike" };
+            IntelDataList.CollectionChanged += IntelDataList_CollectionChanged;
+            ChatDataList.CollectionChanged += ChatDataList_CollectionChanged;
 
 
             intelFileReadPos = new Dictionary<string, int>();
@@ -1571,6 +1580,69 @@ namespace SMT.EVEData
 
             // END SUPERHACK
             // -----------------------------------------------------------------
+        }
+
+        private void IntelDataList_CollectionChanged(object sender, global::System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+
+            if (e.Action == global::System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            {
+                if (IntelDataList.Count > MaxChatLines)
+                {
+                    _cleanIntel = true;
+
+                }
+            }
+        }
+
+        private void ChatDataList_CollectionChanged(object sender, global::System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+
+            if (e.Action == global::System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            {
+                if (ChatDataList.Count > MaxChatLines)
+                {
+                    _cleanChat = true;
+
+                }
+            }
+        }
+
+        private bool _cleanIntel;
+        private bool _cleanChat;
+
+        public void CheckChatLines(ChatMode mode)
+        {
+            switch (mode)
+            {
+                case ChatMode.Intel:
+                    {
+                        if (IntelDataList.Count > MaxChatLines)
+                        {
+                            for (int i = MaxChatLines - 1; i < IntelDataList.Count; i++)
+                            {
+                                IntelDataList.RemoveAt(i);
+                            }
+                            _cleanIntel = false;
+                        }
+                        break;
+                    }
+                case ChatMode.Chat:
+                    {
+                        if (ChatDataList.Count > MaxChatLines)
+                        {
+                            for (int i = MaxChatLines - 1; i < ChatDataList.Count; i++)
+                            {
+                                ChatDataList.RemoveAt(i);
+                            }
+                            _cleanChat = false;
+                        }
+
+                        break;
+                    }
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+            }
         }
 
         private void FileWatcher(string eveLogFolder)
@@ -2612,6 +2684,7 @@ namespace SMT.EVEData
             {
                 Thread.CurrentThread.IsBackground = false;
 
+                TimeSpan ChatCleanupUpdateRate = TimeSpan.FromSeconds(2);
                 TimeSpan CharacterUpdateRate = TimeSpan.FromSeconds(1);
                 TimeSpan LowFreqUpdateRate = TimeSpan.FromMinutes(20);
                 TimeSpan SOVCampaignUpdateRate = TimeSpan.FromSeconds(30);
@@ -2621,6 +2694,7 @@ namespace SMT.EVEData
                 DateTime NextLowFreqUpdate = DateTime.Now;
                 DateTime NextSOVCampaignUpdate = DateTime.Now;
                 DateTime NextDMTCharacterSend = DateTime.Now;
+                DateTime NextChatCleanup = DateTime.Now;
 
                 // loop forever
                 while (BackgroundThreadShouldTerminate == false)
@@ -2652,6 +2726,20 @@ namespace SMT.EVEData
                     {
                         NextDMTCharacterSend = DateTime.Now + NextDMTCharacterSendRate;
                         SendCharacters();
+                    }
+                    if ((NextChatCleanup - DateTime.Now).Ticks < 0)
+                    {
+                        NextChatCleanup = DateTime.Now + ChatCleanupUpdateRate;
+                        if (Application.Current != null)
+                            Application.Current.Dispatcher.Invoke((Action)(() =>
+                            {
+                                if (_cleanIntel)
+                                    CheckChatLines(ChatMode.Intel);
+                                if (_cleanChat)
+                                    CheckChatLines(ChatMode.Chat);
+                            }), DispatcherPriority.Normal, null);
+
+                        //CheckChatLines(ChatMode.Chat);
                     }
 
                     // sov update
