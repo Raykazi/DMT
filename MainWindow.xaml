@@ -162,7 +162,7 @@
                                             </xctk:PropertyGrid.CategoryGroupHeaderTemplate>
                                         </xctk:PropertyGrid>
                                         <Separator />
-                                        <Button x:Name="ResetColourData" Click="ResetColourData_Click" Content="Reset Colours" Margin="0,3" />
+                                        <Button x:Name="ResetColourData" Click="ResetColourData_Click" Content="Reset Colours" Margin="0,3" ToolTip="Reset map colors to default."/>
                                     </StackPanel>
                                 </ScrollViewer>
                             </xcadl:LayoutAnchorable>
@@ -180,10 +180,10 @@
 
 
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
+                                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserReorder="False" Width="*" IsReadOnly="True" SortDirection="Ascending"/>
                                                 <DataGridTextColumn Header="Location" Binding="{Binding Location}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
                                                 <DataGridTextColumn Header="Region" Binding="{Binding Region}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
-                                                <DataGridCheckBoxColumn Header="Broadcast" Binding="{Binding BroadcastLocation}"  CanUserReorder="False" Width="*" IsReadOnly="False">
+                                                <DataGridCheckBoxColumn Header="Broadcast" Binding="{Binding BroadcastLocation}" CanUserReorder="False" Width="*" IsReadOnly="False">
                                                     <DataGridCheckBoxColumn.CellStyle>
                                                         <Style>
                                                             <EventSetter Event="CheckBox.Checked" Handler="BroadcastChanged"/>
@@ -197,7 +197,7 @@
                                                         </Style>
                                                     </DataGridCheckBoxColumn.ElementStyle>
                                                 </DataGridCheckBoxColumn>
-                                                <DataGridCheckBoxColumn Header="Dangerzone"  Binding="{Binding DangerzoneActive}"  CanUserReorder="False" Width="*" IsReadOnly="False">
+                                                <DataGridCheckBoxColumn Header="Dangerzone" Binding="{Binding DangerzoneActive}"  CanUserReorder="False" Width="*" IsReadOnly="False">
                                                     <DataGridCheckBoxColumn.CellStyle>
                                                         <Style>
                                                             <EventSetter Event="CheckBox.Checked" Handler="DangerzoneChanged"/>
@@ -214,8 +214,8 @@
                                             </DataGrid.Columns>
                                         </DataGrid>
                                         <StackPanel>
-                                            <CheckBox Content="Show characters on map" IsChecked="{Binding MapConf.ShowCharacterNamesOnMap}" Margin="3"/>
-                                            <Button x:Name="btn_AddCharacter" Click="btn_AddCharacter_Click" Content="Add Character" Margin="3"/>
+                                            <CheckBox Content="Show characters on map" IsChecked="{Binding MapConf.ShowCharacterNamesOnMap}" Margin="3" ToolTip="Show or hide character locations on the map."/>
+                                            <Button x:Name="btn_AddCharacter" Click="btn_AddCharacter_Click" Content="Add Character" Margin="3" ToolTip="Add a character to DMT using the ESI."/>
                                         </StackPanel>
                                     </StackPanel>
                                 </ScrollViewer>
@@ -232,8 +232,8 @@
                                             </DataGrid.Columns>
                                         </DataGrid>
                                         <StackPanel>
-                                            <CheckBox Content="Show all corp characters on map" IsChecked="{Binding MapConf.ShowDMTCharactersOnMap}" Margin="3"/>
-                                            <CheckBox Content="Show online characters only" IsChecked="{Binding ShowOnlinePlayers}" Margin="3"/>
+                                            <CheckBox Content="Show all corp characters on map" IsChecked="{Binding MapConf.ShowDMTCharactersOnMap}" Margin="3" ToolTip="Show or hide corp character locations on the map."/>
+                                            <CheckBox Content="Show online characters only" IsChecked="{Binding ShowOnlinePlayers}" Margin="3" ToolTip="Only display online corp characters on the map."/>
                                             <!-- <CheckBox x:Name="ShowOnlineChk" Margin="5,-1,5,0" Content="Show online characters" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="{Binding ShowOnlinePlayers}" Checked="ShowOnline_Checked" Unchecked="ShowOnline_Checked"/>
                                             this doesn't work because of missing stuff ¯\_(ツ)_/¯ so i replacd it with something that compiles but doesn't have any functionality -->
                                         </StackPanel>
@@ -257,11 +257,11 @@
                                         <Label Content="Gate Search Filter:" />
                                         <TextBox x:Name="GateSearchFilter" Text=" » " Width="167" Margin="2"/>
                                     </StackPanel>
-                                    <Button x:Name="ImportJumpGatesBtn" Content="Find Gates" Click="ImportJumpGatesBtn_Click" Margin="3" Grid.Row="1" />
-                                    <Button x:Name="ClearJumpGatesBtn" Content="Clear Gates" Click="ClearJumpGatesBtn_Click" Margin="3" Grid.Row="2" />
-                                    <Button x:Name="ImportPasteJumpGatesBtn" Content="Import From Clipboard" Click="ImportPasteJumpGatesBtn_Click" Margin="3" Grid.Row="3" />
-                                    <Button x:Name="SyncDMTBtn" Content="Sync From DMT" Click="SyncDMTBtn_Click" Margin="3" Grid.Row="4" />
-                                    <Button x:Name="ExportJumpGatesBtn" Content="Export Jump Bridges" Click="ExportJumpGatesBtn_Click"  Margin="3" Grid.Row="5" />
+                                    <Button x:Name="ImportJumpGatesBtn" Content="Find Gates" Click="ImportJumpGatesBtn_Click" Margin="3" Grid.Row="1" ToolTip="Try to find Jump Bridges using the ESI."/>
+                                    <Button x:Name="ClearJumpGatesBtn" Content="Clear Gates" Click="ClearJumpGatesBtn_Click" Margin="3" Grid.Row="2" ToolTip="Delete all Jump Bridges from the list."/>
+                                    <Button x:Name="ImportPasteJumpGatesBtn" Content="Import From Clipboard" Click="ImportPasteJumpGatesBtn_Click" Margin="3" Grid.Row="3" ToolTip="Import correctly formatted Jump Bridges from your clipboard."/>
+                                    <Button x:Name="SyncDMTBtn" Content="Sync From DMT" Click="SyncDMTBtn_Click" Margin="3" Grid.Row="4" ToolTip="Sync Jump Bridges from the DMT server."/>
+                                    <Button x:Name="ExportJumpGatesBtn" Content="Export Jump Bridges" Click="ExportJumpGatesBtn_Click"  Margin="3" Grid.Row="5" ToolTip="Save all Jump Bridges to a text file."/>
 
                                     <Label Content="Ansiblex Gates" Grid.Row="6" />
                                     <DataGrid x:Name="JumpBridgeList" Margin="2" Grid.Row="7" AutoGenerateColumns="False" AreRowDetailsFrozen="True" IsReadOnly="True" SelectionUnit="FullRow" SelectedItem="{Binding SelectedItemProperty, Mode=TwoWay}">
@@ -308,11 +308,11 @@
                                             <!--<GroupBox Header="Navigation Options"> -->
                                             <StackPanel>
                                                 <StackPanel Orientation="Horizontal">
-                                                    <Label Content="Mode" />
+                                                    <Label Content="Mode:" />
                                                     <ComboBox ItemsSource="{Binding Source={StaticResource navigationEnumData}}" SelectedItem="{Binding ActiveCharacter.NavigationMode, ElementName=RegionRC}" Margin="2" Width="150" Background="{DynamicResource ButtonBackground}"/>
                                                 </StackPanel>
 
-                                                <CheckBox Content="Use Ansiblex Gates" IsChecked="{Binding ActiveCharacter.UseAnsiblexGates, ElementName=RegionRC}" Margin="2"/>
+                                                <CheckBox Content="Use Ansiblex Gates" IsChecked="{Binding ActiveCharacter.UseAnsiblexGates, ElementName=RegionRC}" Margin="2" ToolTip="Allow use of Jump Bridges when calculating your route."/>
                                             </StackPanel>
                                             <!-- GroupBox> -->
                                             <!-- Header="WayPoints"> -->
@@ -320,11 +320,11 @@
                                                 <ListBox ItemsSource="{Binding ActiveCharacter.Waypoints, ElementName=RegionUC}" MinHeight="50" Margin="2" Background="{DynamicResource ButtonBackground}"/>
                                                 <StackPanel Orientation="Horizontal" Margin="2">
                                                     <dotNetKitControls:AutoCompleteComboBox x:Name="RouteSystemDropDownAC" FontSize="12" Width="156" />
-                                                    <Button x:Name="AddWaypointsBtn" Click="AddWaypointsBtn_Click"  Content="Add WayPoint" Margin="3" />
+                                                    <Button x:Name="AddWaypointsBtn" Click="AddWaypointsBtn_Click"  Content="Add Waypoint" Margin="3" ToolTip="Add a waypoint."/>
                                                 </StackPanel>
 
-                                                <Button x:Name="ReCalculateRouteBtn" Click="ReCalculateRouteBtn_Click"  Content="Recalculate" Margin="3" />
-                                                <Button x:Name="ClearWaypointsBtn" Click="ClearWaypointsBtn_Click" Content="Clear All" Margin="3" />
+                                                <Button x:Name="ReCalculateRouteBtn" Click="ReCalculateRouteBtn_Click"  Content="Recalculate" Margin="3" ToolTip="Recalculate your route using the listed systems."/>
+                                                <Button x:Name="ClearWaypointsBtn" Click="ClearWaypointsBtn_Click" Content="Clear All" Margin="3" ToolTip="Clear all systems from your route."/>
                                             </StackPanel>
                                             <!-- </GroupBox> -->
 
@@ -336,7 +336,7 @@
                                                     <Label Content="Total number of jumps:" />
                                                     <Label Content="{Binding ActiveCharacter.ActiveRoute.Count, ElementName=RegionUC}" />
                                                 </StackPanel>
-                                                <Button x:Name="CopyRouteBtn" Click="CopyRouteBtn_Click" Content="Copy Route" Margin="3" />
+                                                <Button x:Name="CopyRouteBtn" Click="CopyRouteBtn_Click" Content="Copy Route" Margin="3" ToolTip="Copy route to your clipboard."/>
                                             </StackPanel>
                                             <!-- </GroupBox> -->
                                         </StackPanel>
@@ -385,7 +385,7 @@
                                             </DataGrid.Columns>
                                         </DataGrid>
 
-                                        <Button x:Name="btn_UpdateThera" Click="btn_UpdateThera_Click"  Content="Update Connections" Margin="3" ToolTip="Update Thera connections from EVE-Scout."/>
+                                        <Button x:Name="btn_UpdateThera" Click="btn_UpdateThera_Click"  Content="Update Connections" Margin="3" ToolTip="Update Thera connections from the EVE-Scout website."/>
                                     </StackPanel>
                                 </ScrollViewer>
                             </xcadl:LayoutAnchorable>
