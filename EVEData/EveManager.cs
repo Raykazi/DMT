@@ -1980,7 +1980,7 @@ namespace SMT.EVEData
             {
                 mqttClient.StopAsync();
                 SetStatus("Server might be offline. Ray????");
-                ServerInfo.MqttStatusColor = Colors.Red;
+                ServerInfo.MqttStatusColor = Colors.IndianRed;
                 retryAllowed = true;
             }
             else
@@ -1997,7 +1997,7 @@ namespace SMT.EVEData
                         var nextChar = LocalCharacters.FirstOrDefault(x => x.ESILinked == true);
                         if (nextChar == null)
                         {
-                            ServerInfo.MqttStatusColor = Colors.Red;
+                            ServerInfo.MqttStatusColor = Colors.IndianRed;
                             ServerInfo.MqttStatus = $"Authed character removed.";
                             retryAllowed = true;
                         }
@@ -2025,13 +2025,13 @@ namespace SMT.EVEData
             Exception ex = obj.Exception;
             if (ex.Message.Contains("ClientIdentifierNotValid") || ex.Message.Contains("NotAuthorized"))
             {
-                ServerInfo.MqttStatusColor = Colors.Red;
+                ServerInfo.MqttStatusColor = Colors.IndianRed;
                 MessageBox.Show("DMT Token invalid.", "Error");
                 mqttClient.StopAsync();
             }
             if (ex.Message.Contains("ServerUnavailable"))
             {
-                ServerInfo.MqttStatusColor = Colors.Red;
+                ServerInfo.MqttStatusColor = Colors.IndianRed;
                 mqttClient.StopAsync();
                 MessageBox.Show("New Update. Go download please.");
                 Application.Current.Shutdown(0);
