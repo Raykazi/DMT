@@ -287,7 +287,7 @@ namespace SMT
             AutoUpdater.Synchronous = true;
             AutoUpdater.Mandatory = true;
             AutoUpdater.UpdateMode = Mode.Forced;
-            AutoUpdater.Start("https://dmt.windrammers.com/updates/update.xml");
+            AutoUpdater.Start("https://dmt.daquan.gq/updates/update.xml");
         }
 
         private void EVEManager_JbSyncedEvent()
