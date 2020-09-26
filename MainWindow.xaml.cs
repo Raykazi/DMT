@@ -68,7 +68,7 @@ namespace SMT
             timer.Tick += Timer_Tick;
             DependencyPropertyDescriptor dpd = DependencyPropertyDescriptor.FromProperty(TextBlock.TextProperty, typeof(TextBlock));
 
-            Title = "DMT (RIP Horizon's Gila : " + DMT_VERSION + ")";
+            Title = "DMT (It's Never To Late - Zahzi : " + DMT_VERSION + ")";
 
             //CheckGitHubVersion();
 
