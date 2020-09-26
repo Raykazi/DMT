@@ -131,6 +131,7 @@ namespace SMT
             EveManager.Instance = EVEManager;
             EVEManager.AutoSyncJb = MapConf.AutoSyncJB;
             EVEManager.SubscribeAllIntelChannels = MapConf.SubscribeToAllIntel;
+            EVEManager.MaxChatLines = MapConf.MaxChatLines;
             EVEManager.MqttInit();
 
             EVEManager.UseESIForCharacterPositions = MapConf.UseESIForCharacterPositions;
@@ -161,7 +162,7 @@ namespace SMT
             EVEManager.InitNavigation();
 
             CharactersList.ItemsSource = EVEManager.LocalCharacters;
-            CorpCharactersList.ItemsSource = EVEManager.DMTLocations; 
+            CorpCharactersList.ItemsSource = EVEManager.DMTLocations;
             CurrentActiveCharacterCombo.ItemsSource = EVEManager.LocalCharacters;
 
             FleetMembersList.DataContext = this;
@@ -286,7 +287,7 @@ namespace SMT
             AutoUpdater.Synchronous = true;
             AutoUpdater.Mandatory = true;
             AutoUpdater.UpdateMode = Mode.Forced;
-            AutoUpdater.Start("https://dmt.windrammers.com/updates/update.xml");
+            AutoUpdater.Start("https://dmt.daquan.gq/updates/update.xml");
         }
 
         private void EVEManager_JbSyncedEvent()
@@ -294,20 +295,21 @@ namespace SMT
             if (Application.Current != null)
                 Application.Current.Dispatcher.Invoke((Action)(() =>
                 {
-                    foreach (string jb in EVEManager.DMTBridges.Bridges)
-                    {
-                        string[] bits = jb.Split(' ');
-                        if (bits.Length > 3)
+                    if (EVEManager.DMTBridges != null && EVEManager.DMTBridges.Bridges != null)
+                        foreach (string jb in EVEManager.DMTBridges.Bridges)
                         {
-                            long IDFrom = 0;
-                            long.TryParse(bits[0], out IDFrom);
+                            string[] bits = jb.Split(' ');
+                            if (bits.Length > 3)
+                            {
+                                long IDFrom = 0;
+                                long.TryParse(bits[0], out IDFrom);
 
-                            string from = bits[1];
-                            string to = bits[3];
-                            EVEManager.AddUpdateJumpBridge(from, to, IDFrom);
+                                string from = bits[1];
+                                string to = bits[3];
+                                EVEManager.AddUpdateJumpBridge(from, to, IDFrom);
 
+                            }
                         }
-                    }
                     Navigation.ClearJumpBridges();
                     Navigation.UpdateJumpBridges(EVEManager.JumpBridges.ToList());
                     RegionUC.ReDrawMap(true);
@@ -468,6 +470,19 @@ namespace SMT
                 {
                     CollectionViewSource.GetDefaultView(FleetMembersList.ItemsSource).Refresh();
                 }
+                if (Application.Current != null)
+                    Application.Current.Dispatcher.Invoke((Action)(() =>
+                    {
+                        //Scuffed as imo
+                        if (CharactersList == null) return;
+                        for (int i = 0; i < CharactersList.Items.Count; i++)
+                        {
+                            var dgvCharacter = CharactersList.Items[i] as LocalCharacter;
+                            DataGridRow row = (DataGridRow)CharactersList.ItemContainerGenerator.ContainerFromIndex(i);
+                            if (row == null) continue;
+                            row.Background = dgvCharacter != null && dgvCharacter.ESILinked ? Brushes.Green : Brushes.Red;
+                        }
+                    }), DispatcherPriority.Normal, null);
 
             }
             if (MapConf.SyncActiveCharacterBasedOnActiveEVEClient)
@@ -536,6 +551,10 @@ namespace SMT
                 }
             }
 
+            if (e.PropertyName == "MaxChatLines")
+            {
+                EVEManager.MaxChatLines = MapConf.MaxChatLines;
+            }
             if (e.PropertyName == "SubscribeToAllIntel")
             {
                 if (!MapConf.SubscribeToAllIntel)
@@ -994,16 +1013,10 @@ namespace SMT
                     {
                         foreach (EVEData.LocalCharacter lc in EVEManager.LocalCharacters)
                         {
-                            if (lc.WarningSystems != null && lc.DangerzoneActive)
+                            if (lc.WarningSystems == null || !lc.DangerzoneActive) continue;
+                            if (lc.WarningSystems.Any(ls => ls == s))
                             {
-                                foreach (string ls in lc.WarningSystems)
-                                {
-                                    if (ls == s)
-                                    {
-                                        playSound = true;
-                                        break;
-                                    }
-                                }
+                                playSound = true;
                             }
                         }
                     }
@@ -1013,13 +1026,14 @@ namespace SMT
                     playSound = true;
                 }
             }
-
-            if (playSound)
+            //TODO App Dispatcher shit here
+            Application.Current.Dispatcher.Invoke((Action)(() =>
             {
+                if (!playSound) return;
                 mediaPlayer.Stop();
                 mediaPlayer.Position = new TimeSpan(0, 0, 0);
                 mediaPlayer.Play();
-            }
+            }), DispatcherPriority.ApplicationIdle);
         }
 
         private void ClearIntelBtn_Click(object sender, RoutedEventArgs e)

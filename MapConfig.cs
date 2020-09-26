@@ -34,7 +34,7 @@ namespace SMT
         public ObservableCollection<StaticJumpOverlay> StaticJumpPoints;
 
         private bool m_AlwaysOnTop;
-        
+
         private string m_DefaultRegion;
 
         private double m_IntelTextSize = 10;
@@ -107,6 +107,7 @@ namespace SMT
         private string DMTUrl;
         private bool m_ShowOnlinePlayers { get; set; }
         private bool m_AutoSyncJB;
+        private int m_MaxChatLines;
 
         public MapConfig()
         {
@@ -115,6 +116,17 @@ namespace SMT
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        [Category("General")]
+        [DisplayName("Max Chat Lines")]
+        public int MaxChatLines
+        {
+            get => m_MaxChatLines;
+            set
+            {
+                m_MaxChatLines = value;
+                OnPropertyChanged("MaxChatLines");
+            }
+        }
         [Category("General")]
         [DisplayName("Always on top")]
         public bool AlwaysOnTop
@@ -704,8 +716,8 @@ namespace SMT
 
         public bool UseESIForCharacterPositions { get; set; }
 
-        public bool ShowCharacterNamesOnMap 
-        { 
+        public bool ShowCharacterNamesOnMap
+        {
             get => m_ShowCharacterNamesOnMap;
             set
             {
@@ -724,7 +736,7 @@ namespace SMT
             }
 
         }
-        
+
         public bool SyncActiveCharacterBasedOnActiveEVEClient
         {
             get => m_SyncActiveCharacterBasedOnActiveEVEClient;
@@ -744,7 +756,7 @@ namespace SMT
                 OnPropertyChanged("DisableJumpBridgesPathAnimation");
             }
         }
-        
+
         public bool DisableRoutePathAnimation
         {
             get => m_DisableRoutePathAnimation;
@@ -867,6 +879,7 @@ namespace SMT
             UniverseMaxZoomDisplaySystemsText = 2.0f;
 
             WarningRange = 4;
+            MaxChatLines = 20;
         }
 
         protected void OnPropertyChanged(string name)
