@@ -1,7 +1,6 @@
-
+﻿
 using ESI.NET.Models.Universe;
 using SMT.EVEData;
-using SMT.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,6 +12,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using DMT.Helper.Models;
+using Triangles;
 using WpfHelpers.ResourceUsage;
 
 namespace SMT
@@ -129,6 +130,14 @@ namespace SMT
 
         private Dictionary<string, EveManager.JumpShip> activeJumpSpheres;
 
+        private System.Windows.Media.Imaging.BitmapImage joveLogoImage;
+
+        private System.Windows.Media.Imaging.BitmapImage trigLogoImage;
+
+        private System.Windows.Media.Imaging.BitmapImage edencomLogoImage;
+
+        private System.Windows.Media.Imaging.BitmapImage fightImage;
+
 
         /// <summary>
         /// Constructor
@@ -138,6 +147,10 @@ namespace SMT
             InitializeComponent();
             DataContext = this;
             activeJumpSpheres = new Dictionary<string, EveManager.JumpShip>();
+            joveLogoImage = ResourceLoader.LoadBitmapFromResource("Images/Jove_logo.png");
+            trigLogoImage = ResourceLoader.LoadBitmapFromResource("Images/TrigTile.png");
+            edencomLogoImage = ResourceLoader.LoadBitmapFromResource("Images/edencom.png");
+            fightImage = ResourceLoader.LoadBitmapFromResource("Images/fight.png");
         }
 
 
@@ -181,17 +194,7 @@ namespace SMT
             }
         }
 
-        public bool FollowCharacter
-        {
-            get
-            {
-                return FollowCharacterChk.IsChecked.Value;
-            }
-            set
-            {
-                FollowCharacterChk.IsChecked = value;
-            }
-        }
+        public bool FollowCharacter { get; set; }
 
         public MapConfig MapConf { get; set; }
         public MapRegion Region { get; set; }
@@ -368,6 +371,68 @@ namespace SMT
                 OnPropertyChanged("ShowSystemTimers");
             }
         }
+        public void AddTrigInvasionSytemsToMap()
+        {
+            if (!MapConf.ShowTrigInvasions)
+            {
+                return;
+            }
+            Brush trigBrush = new SolidColorBrush(Colors.DarkRed);
+            Brush trigOutlineBrush = new SolidColorBrush(Colors.Black);
+            Brush trigSecStatusChangeBrush = new SolidColorBrush(Colors.Orange);
+
+
+            ImageBrush ib = new ImageBrush();
+            ib.TileMode = TileMode.Tile;
+            ib.Stretch = Stretch.None;
+            ib.ImageSource = trigLogoImage;
+            foreach (Triangles.Invasion ti in EM.TrigInvasions)
+            {
+                if (Region.IsSystemOnMap(ti.SystemName))
+                {
+                    MapSystem ms = Region.MapSystems[ti.SystemName];
+                    bool addTriangle = !(MapConf.ShowOnlyFinalLiminality && ti.Status != Status.FinalLiminality);
+                    if (addTriangle)
+                    {
+                        Polygon TrigShape;
+                        TrigShape = new Polygon();
+                        TrigShape.Points.Add(new Point(ms.LayoutX - 13, ms.LayoutY + 6));
+                        TrigShape.Points.Add(new Point(ms.LayoutX, ms.LayoutY - 14));
+                        TrigShape.Points.Add(new Point(ms.LayoutX + 13, ms.LayoutY + 6));
+
+
+                        TrigShape.Stroke = trigOutlineBrush;
+                        TrigShape.StrokeThickness = 1;
+                        TrigShape.StrokeLineJoin = PenLineJoin.Round;
+                        TrigShape.Fill = trigBrush;
+
+                        Canvas.SetZIndex(TrigShape, SYSTEM_Z_INDEX - 3);
+
+                        MainCanvas.Children.Add(TrigShape);
+                        DynamicMapElements.Add(TrigShape);
+                    }
+                    if (ti.DerivedSecurityStatus != null)
+                    {
+                        Label TrigSecChangeHighlight = new Label();
+                        TrigSecChangeHighlight.Content = "»";
+                        TrigSecChangeHighlight.Foreground = trigSecStatusChangeBrush;
+                        TrigSecChangeHighlight.IsHitTestVisible = false;
+                        TrigSecChangeHighlight.RenderTransform = new RotateTransform(90);
+                        TrigSecChangeHighlight.FontSize = 15;
+                        TrigSecChangeHighlight.FontWeight = FontWeights.Bold;
+
+                        Canvas.SetLeft(TrigSecChangeHighlight, ms.LayoutX + 28);
+                        Canvas.SetTop(TrigSecChangeHighlight, ms.LayoutY - 18);
+                        Canvas.SetZIndex(TrigSecChangeHighlight, SYSTEM_Z_INDEX - 3);
+                        MainCanvas.Children.Add(TrigSecChangeHighlight);
+                        DynamicMapElements.Add(TrigSecChangeHighlight);
+                    }
+
+                }
+            }
+
+
+        }
 
         public void AddTheraSystemsToMap()
         {
@@ -424,8 +489,8 @@ namespace SMT
                     {
                         Width = 10,
                         Height = 10,
-                        Name = "JoveLogo",
-                        Source = ResourceLoader.LoadBitmapFromResource("Images/Fight.png"),
+                        Name = "FightLogo",
+                        Source = fightImage,
                         Stretch = Stretch.Uniform,
                         IsHitTestVisible = false,
                     };
@@ -553,6 +618,7 @@ namespace SMT
             AddRouteToMap();
             AddTheraSystemsToMap();
             AddSovConflictsToMap();
+            AddTrigInvasionSytemsToMap();
         }
 
         /// <summary>
@@ -687,31 +753,22 @@ namespace SMT
                     continue;
                 }
 
-                if (EM.DMTCharacters.Count > 0)
-                {
-                    DMTCharacter pilot = EM.DMTCharacters.First(x => x.Name == c.Name);
-                    if (pilot != null)
-                    {
-                        EM.DMTCharacters.Remove(pilot);
-                        if (NameTrackingLocationMap.ContainsKey(pilot.Location))
-                            NameTrackingLocationMap[pilot.Location].Remove(new KeyValuePair<int, string>(1, pilot.Name));
-                    }
-                }
-
                 if (!NameTrackingLocationMap.ContainsKey(c.Location))
                 {
                     NameTrackingLocationMap[c.Location] = new List<KeyValuePair<int, string>>();
                 }
-                if (c.IsOnline && MapConf.ShowOnlinePlayers)
-                    NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(0, c.Name));
-                else if (!MapConf.ShowOnlinePlayers)
-                    NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(0, c.Name));
+                NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(0, c.Name));
             }
 
-            foreach (DMTCharacter c in EM.DMTCharacters)
+            foreach (DMTLocation c in EM.DMTLocations)
             {
+                if (EM.LocalCharacters.Any(x => x.Name == c.Name))
+                {
+                    return;
+                }
                 if (MapConf.ShowDMTCharactersOnMap)
                 {
+                    var kvp = new KeyValuePair<int, string>(1, c.Name);
                     if (!Region.IsSystemOnMap(c.Location))
                     {
                         continue;
@@ -721,10 +778,10 @@ namespace SMT
                     {
                         NameTrackingLocationMap[c.Location] = new List<KeyValuePair<int, string>>();
                     }
-                    if (c.IsOnline && MapConf.ShowOnlinePlayers)
-                        NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(1, c.Name));
-                    else if (!MapConf.ShowOnlinePlayers)
-                        NameTrackingLocationMap[c.Location].Add(new KeyValuePair<int, string>(1, c.Name));
+                    if (c.BroadcastLocation && !NameTrackingLocationMap[c.Location].Contains(kvp))
+                        NameTrackingLocationMap[c.Location].Add(kvp);
+                    else
+                        NameTrackingLocationMap[c.Location].Remove(kvp);
                 }
             }
 
@@ -911,7 +968,7 @@ namespace SMT
 
             foreach (LocalCharacter c in EM.LocalCharacters)
             {
-                if (MapConf.ShowDangerZone && c.WarningSystems != null)
+                if (MapConf.ShowDangerZone && c.WarningSystems != null && c.DangerzoneActive)
                 {
                     foreach (string s in c.WarningSystems)
                     {
@@ -1805,10 +1862,8 @@ namespace SMT
 
 
                 double trueSecVal = system.ActualSystem.TrueSec;
-                bool gradeTruesec = MapConf.ShowTrueSec;
                 if (MapConf.ShowSimpleSecurityView)
                 {
-                    // gradeTruesec = false;
                     if (system.ActualSystem.TrueSec >= 0.45)
                     {
                         trueSecVal = 1.0;
@@ -1817,13 +1872,9 @@ namespace SMT
                     {
                         trueSecVal = 0.4;
                     }
-                    else
-                    {
-                        trueSecVal = 0.0;
-                    }
                 }
 
-                Brush securityColorFill = new SolidColorBrush(MapColours.GetSecStatusColour(trueSecVal, gradeTruesec));
+                Brush securityColorFill = new SolidColorBrush(MapColours.GetSecStatusColour(trueSecVal, MapConf.ShowTrueSec));
 
                 if (MapConf.SOVBasedITCU)
                 {
@@ -2205,7 +2256,7 @@ namespace SMT
                         Width = 10,
                         Height = 9,
                         Name = "JoveLogo",
-                        Source = ResourceLoader.LoadBitmapFromResource("Images/Jove_logo.png"),
+                        Source = joveLogoImage,
                         Stretch = Stretch.Uniform,
                         IsHitTestVisible = false,
                     };
@@ -2629,7 +2680,7 @@ namespace SMT
 
             if (e.ClickCount == 2)
             {
-                string AURL = $"https://zkillboard.com/region/{Region.ID}/alliance/{AllianceID}";
+                string AURL = $"https://zkillboard.com/region/{Region.ID}/alliance/{AllianceID}/";
                 System.Diagnostics.Process.Start(AURL);
             }
             else
@@ -3232,7 +3283,7 @@ namespace SMT
             MapSystem eveSys = ((FrameworkElement)((FrameworkElement)sender).Parent).DataContext as MapSystem;
             MapRegion rd = EM.GetRegion(eveSys.Region);
 
-            string uRL = string.Format("https://zkillboard.com/system/{0}", eveSys.ActualSystem.ID);
+            string uRL = string.Format("https://zkillboard.com/system/{0}/", eveSys.ActualSystem.ID);
             System.Diagnostics.Process.Start(uRL);
         }
 
@@ -3274,10 +3325,10 @@ namespace SMT
             public MapSystem to { get; set; }
         }
 
-        private void ShowOnline_Checked(object sender, RoutedEventArgs e)
-        {
-            if (ShowOnlineChk.IsChecked != null) 
-                MapConf.ShowOnlinePlayers = (bool)ShowOnlineChk.IsChecked;
-        }
+        //private void ShowOnline_Checked(object sender, RoutedEventArgs e)
+        //{
+        //    if (ShowOnlineChk.IsChecked != null) 
+        //        MapConf.ShowOnlinePlayers = (bool)ShowOnlineChk.IsChecked;
+        //}
     }
 }

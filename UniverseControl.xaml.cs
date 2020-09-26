@@ -1359,7 +1359,7 @@ namespace SMT
             EVEData.System eveSys = ((FrameworkElement)((FrameworkElement)sender).Parent).DataContext as EVEData.System;
             EVEData.MapRegion rd = EM.GetRegion(eveSys.Region);
 
-            string uRL = string.Format("https://zkillboard.com/system/{0}", eveSys.ID);
+            string uRL = string.Format("https://zkillboard.com/system/{0}/", eveSys.ID);
             System.Diagnostics.Process.Start(uRL);
         }
 

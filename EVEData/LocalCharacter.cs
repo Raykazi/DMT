@@ -1,10 +1,11 @@
-﻿using DMT.Helper.Models;
+using DMT.Helper.Models;
 using ESI.NET.Enumerations;
 using ESI.NET.Models.SSO;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -52,6 +53,7 @@ namespace SMT.EVEData
 
         public DateTime LastUpdate { get; set; }
         public bool IsOnline { get; set; }
+        public bool DangerzoneActive { get; set; } = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Character" /> class
@@ -136,40 +138,54 @@ namespace SMT.EVEData
         /// Gets or sets the ESI access token
         /// </summary>
         [XmlIgnore]
-        [JsonIgnore]
         public string ESIAccessToken { get; set; }
 
         /// <summary>
         /// Gets or sets the ESI access token expiry time
         /// </summary>
-        [JsonIgnore]
         public DateTime ESIAccessTokenExpiry { get; set; }
 
         /// <summary>
         /// Gets or sets the ESI auth code
         /// </summary>
-        [JsonIgnore]
         public string ESIAuthCode { get; set; }
 
         [XmlIgnore]
-        [JsonIgnore]
         public AuthorizedCharacterData ESIAuthData { get; set; }
 
+        private bool _esiLinked = false;
+        [XmlIgnore]
+        public Brush CLColor { get; set; }
         /// <summary>
         /// Gets or sets if this character is linked with ESI
         /// </summary>
-        public bool ESILinked { get; set; }
-
+        public bool ESILinked
+        {
+            get { return _esiLinked; }
+            set
+            {
+                _esiLinked = value;
+                OnPropertyChanged("ESILinked");
+            }
+        }
+        protected void OnPropertyChanged(string name)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(name));
+            }
+        }
         /// <summary>
         /// Gets or sets the ESI refresh Token
         /// </summary>
-        [JsonIgnore]
         public string ESIRefreshToken { get; set; }
 
         /// <summary>
         /// Gets or sets the current fleet info for this character
         /// </summary>
         [XmlIgnore]
+        [JsonIgnore]
         public Fleet FleetInfo { get; set; }
 
         public SerializableDictionary<String, ObservableCollection<Structure>> KnownStructures { get; set; }
@@ -205,6 +221,7 @@ namespace SMT.EVEData
                 location = value;
                 routeNeedsUpdate = true;
                 warningSystemsNeedsUpdate = true;
+                OnPropertyChanged(nameof(Location));
             }
         }
 
@@ -226,7 +243,16 @@ namespace SMT.EVEData
             }
         }
 
-        public string Region { get; set; }
+        private string region = "";
+        public string Region
+        {
+            get { return region; }
+            set
+            {
+                region = value;
+                OnPropertyChanged("Region");
+            }
+        }
 
         /// <summary>
         /// Gets or sets the character standings dictionary
@@ -267,7 +293,7 @@ namespace SMT.EVEData
         /// </summary>
         [XmlIgnore]
         public ObservableCollection<string> Waypoints { get; set; }
-        public bool Active { get;  set; }
+        public bool Active { get; set; }
         public bool BroadcastLocation { get; set; }
 
         /// <summary>
@@ -291,7 +317,6 @@ namespace SMT.EVEData
             routeNeedsUpdate = true;
             esiRouteNeedsUpdate = true;
         }
-
         public async Task<List<JumpBridge>> FindJumpGates(string JumpBridgeFilterString = " » ")
         {
             List<JumpBridge> jbl = new List<JumpBridge>();
@@ -485,14 +510,14 @@ namespace SMT.EVEData
 
 
 
-        protected void OnPropertyChanged(string name)
-        {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(name));
-            }
-        }
+        //protected void OnPropertyChanged(string name)
+        //{
+        //    PropertyChangedEventHandler handler = PropertyChanged;
+        //    if (handler != null)
+        //    {
+        //        handler(this, new PropertyChangedEventArgs(name));
+        //    }
+        //}
 
         /// <summary>
         /// Refresh the ESI access token
@@ -697,14 +722,14 @@ namespace SMT.EVEData
                     }
                 }
 
-                if(FleetInfo.FleetID != 0 && FleetInfo.IsFleetBoss)
+                if (FleetInfo.FleetID != 0 && FleetInfo.IsFleetBoss)
                 {
                     List<long> characterIDsToResolve = new List<long>();
 
                     ESI.NET.EsiResponse<List<ESI.NET.Models.Fleets.Member>> esrf = await esiClient.Fleets.Members(FleetInfo.FleetID);
                     if (ESIHelpers.ValidateESICall(esrf))
                     {
-                        foreach(Fleet.FleetMember ff in FleetInfo.Members)
+                        foreach (Fleet.FleetMember ff in FleetInfo.Members)
                         {
                             ff.IsValid = false;
                         }
@@ -716,14 +741,14 @@ namespace SMT.EVEData
 
                             foreach (Fleet.FleetMember ff in FleetInfo.Members)
                             {
-                                if(ff.CharacterID == esifm.CharacterId)
+                                if (ff.CharacterID == esifm.CharacterId)
                                 {
                                     fm = ff;
                                     fm.IsValid = true;
                                 }
                             }
 
-                            if(fm == null)
+                            if (fm == null)
                             {
                                 fm = new Fleet.FleetMember();
                                 fm.IsValid = true;
@@ -793,7 +818,7 @@ namespace SMT.EVEData
         {
             if (ID == 0 || !ESILinked || ESIAuthData == null)
             {
-                if(ESILinked)
+                if (ESILinked)
                 {
                     ESIAccessTokenExpiry = DateTime.Now;
                 }
@@ -875,7 +900,7 @@ namespace SMT.EVEData
         /// </summary>
         private async Task UpdatePositionFromESI()
         {
-            if(i % 10 == 0)
+            if (i % 10 == 0)
             {
                 EveManager.Instance.SendCharLocation(this);
                 if (i >= 300)
@@ -940,7 +965,7 @@ namespace SMT.EVEData
         }
         private void UpdateWarningSystems()
         {
-            if (!string.IsNullOrEmpty(Location) && WarningSystemRange > 0)
+            if (!string.IsNullOrEmpty(Location) && WarningSystemRange > 0 && DangerzoneActive)
             {
                 WarningSystems = Navigation.GetSystemsXJumpsFrom(new List<string>(), Location, WarningSystemRange);
             }

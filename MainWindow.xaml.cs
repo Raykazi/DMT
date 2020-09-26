@@ -1,4 +1,5 @@
 using AutoUpdaterDotNET;
+using ESI.NET.Models.PlanetaryInteraction;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using SMT.EVEData;
@@ -11,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,6 +23,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml;
 using System.Xml.Serialization;
+using DMT.Helper.Models;
 
 namespace SMT
 {
@@ -116,14 +119,19 @@ namespace SMT
                 MapConf.SetDefaultColours();
             }
             MapConf.PropertyChanged += MapConf_PropertyChanged;
-            if (MapConf.Url == null || MapConf.Token == null)
+            if (MapConf.Url == null)
             {
                 _firstRun = true;
             }
             // Create the main EVE manager
-            EVEManager = new EVEData.EveManager(DMT_VERSION);
-            EVEData.EveManager.Instance = EVEManager;
+            EVEManager = new EveManager(DMT_VERSION);
+            EVEManager.JBAutoSyncEvent += EVEManager_JbSyncedEvent;
+            EVEManager.JBUpdateButtonEvent += EVEManager_JBUpdateButtonEvent;
+            EVEManager.WarningSystemRange = MapConf.WarningRange;
+            EveManager.Instance = EVEManager;
+            EVEManager.AutoSyncJb = MapConf.AutoSyncJB;
             EVEManager.SubscribeAllIntelChannels = MapConf.SubscribeToAllIntel;
+            EVEManager.MaxChatLines = MapConf.MaxChatLines;
             EVEManager.MqttInit();
 
             EVEManager.UseESIForCharacterPositions = MapConf.UseESIForCharacterPositions;
@@ -154,6 +162,7 @@ namespace SMT
             EVEManager.InitNavigation();
 
             CharactersList.ItemsSource = EVEManager.LocalCharacters;
+            CorpCharactersList.ItemsSource = EVEManager.DMTLocations;
             CurrentActiveCharacterCombo.ItemsSource = EVEManager.LocalCharacters;
 
             FleetMembersList.DataContext = this;
@@ -165,7 +174,7 @@ namespace SMT
             EVEManager.ActiveSovCampaigns.CollectionChanged += ActiveSovCampaigns_CollectionChanged;
 
             RegionUC.MapConf = MapConf;
-            RegionUC.ShowOnlineChk.DataContext = MapConf;
+            //RegionUC.ShowOnlineChk.DataContext = MapConf;
             RegionUC.Init();
             RegionUC.SelectRegion(MapConf.DefaultRegion);
 
@@ -241,16 +250,28 @@ namespace SMT
                 lc.WarningSystemRange = MapConf.WarningRange;
                 lc.Location = "";
             }
-
-
         }
 
+        private void EVEManager_JBUpdateButtonEvent(DateTimeOffset dateTimeOffset, int count)
+        {
+            SyncDMTBtn.Content = $"Sync From DMT {dateTimeOffset.DateTime}";
+        }
+
+        public void FollowCharacterChk_Checked(object sender, RoutedEventArgs e)
+        {
+            RegionUC.FollowCharacter = true;
+            RegionUC.UpdateActiveCharacter();
+        }
+        private void FollowCharacterChk_Unchecked(object sender, RoutedEventArgs e)
+        {
+            RegionUC.FollowCharacter = false;
+        }
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             if (File.Exists("DMTConfig.json"))
                 File.Delete("DMTConfig.json");
             if (!_firstRun)
-                EVEManager.MqttConnect(MapConf.Url, MapConf.Token);
+                EVEManager.MqttConnect(MapConf.Url);
             else
             {
                 EVEManager.ServerInfo.MqttStatusColor = Colors.Red;
@@ -266,75 +287,57 @@ namespace SMT
             AutoUpdater.Synchronous = true;
             AutoUpdater.Mandatory = true;
             AutoUpdater.UpdateMode = Mode.Forced;
-            AutoUpdater.Start("https://dmt.windrammers.com/updates/update.xml");
+            AutoUpdater.Start("https://dmt.daquan.gq/updates/update.xml");
         }
 
         private void EVEManager_JbSyncedEvent()
         {
-            Application.Current.Dispatcher.Invoke((Action)(() =>
-            {
-                foreach (string jb in EVEManager.DMTBridges)
+            if (Application.Current != null)
+                Application.Current.Dispatcher.Invoke((Action)(() =>
                 {
-                    string[] bits = jb.Split(' ');
-                    if (bits.Length > 3)
-                    {
-                        long IDFrom = 0;
-                        long.TryParse(bits[0], out IDFrom);
+                    if (EVEManager.DMTBridges != null && EVEManager.DMTBridges.Bridges != null)
+                        foreach (string jb in EVEManager.DMTBridges.Bridges)
+                        {
+                            string[] bits = jb.Split(' ');
+                            if (bits.Length > 3)
+                            {
+                                long IDFrom = 0;
+                                long.TryParse(bits[0], out IDFrom);
 
-                        string from = bits[1];
-                        string to = bits[3];
-                        EVEManager.AddUpdateJumpBridge(from, to, IDFrom);
+                                string from = bits[1];
+                                string to = bits[3];
+                                EVEManager.AddUpdateJumpBridge(from, to, IDFrom);
 
-                    }
-                }
-                Navigation.ClearJumpBridges();
-                Navigation.UpdateJumpBridges(EVEManager.JumpBridges.ToList());
-                RegionUC.ReDrawMap(true);
-            }), DispatcherPriority.Normal, null);
+                            }
+                        }
+                    Navigation.ClearJumpBridges();
+                    Navigation.UpdateJumpBridges(EVEManager.JumpBridges.ToList());
+                    RegionUC.ReDrawMap(true);
+                }), DispatcherPriority.Normal, null);
         }
 
-        private void JbSyncedEvent(List<string> jbs)
-        {
-            foreach (string jb in jbs)
-            {
-                string[] bits = jb.Split(' ');
-                if (bits.Length > 3)
-                {
-                    long IDFrom = 0;
-                    long.TryParse(bits[0], out IDFrom);
-
-                    string from = bits[1];
-                    string to = bits[3];
-
-                    EVEManager.AddUpdateJumpBridge(from, to, IDFrom);
-                }
-            }
-            Navigation.ClearJumpBridges();
-            Navigation.UpdateJumpBridges(EVEManager.JumpBridges.ToList());
-            RegionUC.ReDrawMap(true);
-        }
-
-        private void BroadcastOnCheck(object sender, RoutedEventArgs e)
+        private void BroadcastChanged(object sender, RoutedEventArgs e)
         {
             LocalCharacter selected = (LocalCharacter)CharactersList.SelectedItem;
-            if (!EVEManager.LocalCharacters.Contains(selected)) return;
-            foreach (LocalCharacter c in EVEManager.LocalCharacters)
-            {
-                if (c.Name != selected.Name) continue;
-                c.BroadcastLocation = true;
-                EVEManager.SendCharLocation(c);
-            }
+            if (selected == null) return;
+            var lc = EVEManager.LocalCharacters.FirstOrDefault(x => x.Name == selected.Name);
+            if (lc == null) return;
+            var idx = EVEManager.LocalCharacters.IndexOf(lc);
+            CheckBox cb = (CheckBox)((DataGridCell)sender).Content;
+            lc.BroadcastLocation = (bool)cb.IsChecked;
+            EVEManager.LocalCharacters[idx] = lc;
         }
-        private void BroadcastOnUnCheck(object sender, RoutedEventArgs e)
+        private void DangerzoneChanged(object sender, RoutedEventArgs e)
         {
             LocalCharacter selected = (LocalCharacter)CharactersList.SelectedItem;
-            if (!EVEManager.LocalCharacters.Contains(selected)) return;
-            foreach (LocalCharacter c in EVEManager.LocalCharacters)
-            {
-                if (c.Name != selected.Name) continue;
-                c.BroadcastLocation = false;
-                EVEManager.SendCharLocation(c);
-            }
+            if (selected == null) return;
+            var lc = EVEManager.LocalCharacters.FirstOrDefault(x => x.Name == selected.Name);
+            if (lc == null) return;
+            var idx = EVEManager.LocalCharacters.IndexOf(lc);
+            CheckBox cb = (CheckBox)((DataGridCell)sender).Content;
+            lc.DangerzoneActive = (bool)cb.IsChecked;
+            lc.warningSystemsNeedsUpdate = true;
+            EVEManager.LocalCharacters[idx] = lc;
         }
         private void ActiveSovCampaigns_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
@@ -467,6 +470,19 @@ namespace SMT
                 {
                     CollectionViewSource.GetDefaultView(FleetMembersList.ItemsSource).Refresh();
                 }
+                if (Application.Current != null)
+                    Application.Current.Dispatcher.Invoke((Action)(() =>
+                    {
+                        //Scuffed as imo
+                        if (CharactersList == null) return;
+                        for (int i = 0; i < CharactersList.Items.Count; i++)
+                        {
+                            var dgvCharacter = CharactersList.Items[i] as LocalCharacter;
+                            DataGridRow row = (DataGridRow)CharactersList.ItemContainerGenerator.ContainerFromIndex(i);
+                            if (row == null) continue;
+                            row.Background = dgvCharacter != null && dgvCharacter.ESILinked ? Brushes.Green : Brushes.Red;
+                        }
+                    }), DispatcherPriority.Normal, null);
 
             }
             if (MapConf.SyncActiveCharacterBasedOnActiveEVEClient)
@@ -535,6 +551,10 @@ namespace SMT
                 }
             }
 
+            if (e.PropertyName == "MaxChatLines")
+            {
+                EVEManager.MaxChatLines = MapConf.MaxChatLines;
+            }
             if (e.PropertyName == "SubscribeToAllIntel")
             {
                 if (!MapConf.SubscribeToAllIntel)
@@ -563,8 +583,17 @@ namespace SMT
             {
                 foreach (EVEData.LocalCharacter lc in EVEManager.LocalCharacters)
                 {
-                    lc.WarningSystemRange = MapConf.WarningRange;
+                    lc.WarningSystemRange = EVEManager.WarningSystemRange = MapConf.WarningRange;
                     lc.warningSystemsNeedsUpdate = true;
+                }
+            }
+
+            if (e.PropertyName == "AutoSyncJBs")
+            {
+                EVEManager.AutoSyncJb = MapConf.AutoSyncJB;
+                if (EVEManager.AutoSyncJb)
+                {
+                    SyncDMTBtn_Click(null, null);
                 }
             }
 
@@ -690,11 +719,11 @@ namespace SMT
             }
             else
             {
-                if (MapConf.Token == null || MapConf.Url == null)
+                if (MapConf.Url == null)
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        MessageBox.Show("Please enter your DMT info.");
+                        MessageBox.Show("Please enter your DMT url.");
                         Preferences_MenuItem_Click(null, null);
                     }, DispatcherPriority.ApplicationIdle);
                 }
@@ -703,7 +732,7 @@ namespace SMT
                     _firstRun = false;
                     if (MapConf.IntelChannels != null)
                         EVEManager.SetupIntelFiles(MapConf.IntelChannels);
-                    EVEManager.MqttConnect(MapConf.Url, MapConf.Token);
+                    EVEManager.MqttConnect(MapConf.Url);
                     EVEManager.MqttIntelInit();
                 }
             }
@@ -984,16 +1013,10 @@ namespace SMT
                     {
                         foreach (EVEData.LocalCharacter lc in EVEManager.LocalCharacters)
                         {
-                            if (lc.WarningSystems != null)
+                            if (lc.WarningSystems == null || !lc.DangerzoneActive) continue;
+                            if (lc.WarningSystems.Any(ls => ls == s))
                             {
-                                foreach (string ls in lc.WarningSystems)
-                                {
-                                    if (ls == s)
-                                    {
-                                        playSound = true;
-                                        break;
-                                    }
-                                }
+                                playSound = true;
                             }
                         }
                     }
@@ -1003,13 +1026,14 @@ namespace SMT
                     playSound = true;
                 }
             }
-
-            if (playSound)
+            //TODO App Dispatcher shit here
+            Application.Current.Dispatcher.Invoke((Action)(() =>
             {
+                if (!playSound) return;
                 mediaPlayer.Stop();
                 mediaPlayer.Position = new TimeSpan(0, 0, 0);
                 mediaPlayer.Play();
-            }
+            }), DispatcherPriority.ApplicationIdle);
         }
 
         private void ClearIntelBtn_Click(object sender, RoutedEventArgs e)
@@ -1134,6 +1158,7 @@ namespace SMT
             JumpBridgeList.IsEnabled = false;
             ImportPasteJumpGatesBtn.IsEnabled = false;
             ExportJumpGatesBtn.IsEnabled = false;
+            SyncDMTBtn.IsEnabled = false;
 
             foreach (EVEData.LocalCharacter c in EVEManager.LocalCharacters)
             {
@@ -1232,6 +1257,7 @@ namespace SMT
             JumpBridgeList.IsEnabled = true;
             ImportPasteJumpGatesBtn.IsEnabled = true;
             ExportJumpGatesBtn.IsEnabled = true;
+            SyncDMTBtn.IsEnabled = true;
 
         }
 
@@ -1369,6 +1395,8 @@ namespace SMT
         {
             EVEManager.JumpBridges.Clear();
             EVEData.Navigation.ClearJumpBridges();
+            RegionUC.ReDrawMap(true);
+            UniverseUC.ReDrawMap(true, true, false);
         }
 
 
@@ -1492,43 +1520,61 @@ namespace SMT
         /// <summary>
         /// Clear system Anoms button clicked
         /// </summary>
-        private void btnClearAnomList_Click(object sender, RoutedEventArgs e)
-        {
-            EVEData.AnomData ad = ANOMManager.ActiveSystem;
-            if (ad != null)
-            {
-                ad.Anoms.Clear();
-                AnomSigList.Items.Refresh();
-                AnomSigList.UpdateLayout();
-                CollectionViewSource.GetDefaultView(AnomSigList.ItemsSource).Refresh();
-            }
-        }
+        //private void btnClearAnomList_Click(object sender, RoutedEventArgs e)
+        //{
+        //    EVEData.AnomData ad = ANOMManager.ActiveSystem;
+        //    if (ad != null)
+        //    {
+        //        ad.Anoms.Clear();
+        //        AnomSigList.Items.Refresh();
+        //        AnomSigList.UpdateLayout();
+        //        CollectionViewSource.GetDefaultView(AnomSigList.ItemsSource).Refresh();
+        //    }
+        //}
 
         /// <summary>
         /// Update Anoms clicked
         /// </summary>
-        private void btnUpdateAnomList_Click(object sender, RoutedEventArgs e)
-        {
-            string pasteData = Clipboard.GetText();
+        //private void btnUpdateAnomList_Click(object sender, RoutedEventArgs e)
+        //{
+        //    string pasteData = Clipboard.GetText();
 
-            if (pasteData != null || pasteData != string.Empty)
-            {
-                EVEData.AnomData ad = ANOMManager.ActiveSystem;
+        //    if (pasteData != null || pasteData != string.Empty)
+        //    {
+        //        EVEData.AnomData ad = ANOMManager.ActiveSystem;
 
-                if (ad != null)
-                {
-                    ad.UpdateFromPaste(pasteData);
-                    AnomSigList.Items.Refresh();
-                    AnomSigList.UpdateLayout();
-                    CollectionViewSource.GetDefaultView(AnomSigList.ItemsSource).Refresh();
-                }
-            }
-        }
+        //        if (ad != null)
+        //        {
+        //            ad.UpdateFromPaste(pasteData);
+        //            AnomSigList.Items.Refresh();
+        //            AnomSigList.UpdateLayout();
+        //            CollectionViewSource.GetDefaultView(AnomSigList.ItemsSource).Refresh();
+        //        }
+        //    }
+        //}
 
 
 
 
         #endregion Anoms
+
+        private void TrigInvasionsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender != null)
+            {
+                DataGrid grid = sender as DataGrid;
+                if (grid != null && grid.SelectedItems != null && grid.SelectedItems.Count == 1)
+                {
+                    DataGridRow dgr = grid.ItemContainerGenerator.ContainerFromItem(grid.SelectedItem) as DataGridRow;
+                    Triangles.Invasion tc = dgr.Item as Triangles.Invasion;
+
+                    if (tc != null)
+                    {
+                        RegionUC.SelectSystem(tc.SystemName, true);
+                    }
+                }
+            }
+        }
 
         private void SyncDMTBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -1544,43 +1590,66 @@ namespace SMT
 
             EVEData.IntelData chat = RawChatBox.SelectedItem as EVEData.IntelData;
 
+            bool selectedSystem = false;
+
             foreach (string s in chat.IntelString.Split(' '))
             {
                 if (s == "")
                 {
                     continue;
                 }
-
-                if (s.StartsWith("https://") || s.StartsWith("http://"))
+                var linkParser = new Regex(@"\b(?:https?://|www\.)\S+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                foreach (Match m in linkParser.Matches(s))
                 {
-                    //Check if niggas said something after url
-                    int end = s.IndexOf(" ", StringComparison.Ordinal);
-                    string url;
-                    if (end == -1)
-                        url = s.Substring(0);
-                    else
-                        url = s.Substring(0, end);
-
+                    string url = m.Value;
+                    if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                    {
+                        url = "http://" + url;
+                    }
                     if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
                     {
                         Process.Start(url);
                     }
                 }
-
-                foreach (EVEData.System sys in EVEManager.Systems)
+                // only select the first system
+                if (!selectedSystem)
                 {
-                    if (s.IndexOf(sys.Name, StringComparison.OrdinalIgnoreCase) == 0)
+                    foreach (EVEData.System sys in EVEManager.Systems)
                     {
-                        if (RegionUC.Region.Name != sys.Region)
+                        if (s.IndexOf(sys.Name, StringComparison.OrdinalIgnoreCase) == 0)
                         {
-                            RegionUC.SelectRegion(sys.Region);
-                        }
+                            if (RegionUC.Region.Name != sys.Region)
+                            {
+                                RegionUC.SelectRegion(sys.Region);
+                            }
 
-                        RegionUC.SelectSystem(s, true);
-                        return;
+                            RegionUC.SelectSystem(s, true);
+                            selectedSystem = true;
+                        }
                     }
                 }
             }
+        }
+
+        private void CorpCharactersList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke((Action)(() =>
+            {
+                if (sender == null) return;
+                if (!(sender is DataGrid grid) || grid.SelectedItems == null || grid.SelectedItems.Count != 1) return;
+                DataGridRow dgr = grid.ItemContainerGenerator.ContainerFromItem(grid.SelectedItem) as DataGridRow;
+
+                if (dgr?.Item is DMTLocation lc)
+                {
+                    RegionUC.SelectSystem(lc.Location, true);
+                }
+            }), DispatcherPriority.Normal, null);
+
+        }
+
+        private void StatusBarItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            EVEManager.MqttForceReconnect(MapConf.Url);
         }
     }
 

@@ -14,7 +14,6 @@ using MQTTnet.Client.Options;
 using MQTTnet.Extensions.ManagedClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using SMT.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -31,6 +30,8 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml;
 using System.Xml.Serialization;
+using DMT.Helper.Models;
+using System.Net.Http;
 
 namespace SMT.EVEData
 {
@@ -63,11 +64,32 @@ namespace SMT.EVEData
         public bool SubscribeAllIntelChannels;
         public bool SubscribeToCorp { get; set; }
         public bool SubscribeToAlliance { get; set; }
+        public readonly string Fingerprint;
 
+        public int WarningSystemRange { get; set; }
         // Create a new MQTT client.
         private MqttFactory factory = new MqttFactory();
         private static IManagedMqttClient mqttClient;
         private IMqttClientOptions mqttOptions;
+        private bool retryAllowed = false;
+        private int mqttConnects = 0;
+        public int MaxChatLines;
+
+        public enum ChatMode
+        {
+            Intel = 0,
+            Chat = 1
+        }
+
+        public ObservableCollection<DMTLocation> DMTLocations = new ObservableCollection<DMTLocation>();
+        public DMTBridges DMTBridges;
+        private readonly object _intelLocker = new object();
+        public bool AutoSyncJb;
+
+        public delegate void JBUpdateButtonHandler(DateTimeOffset lastUpdate, int Count);
+        public event JBUpdateButtonHandler JBUpdateButtonEvent;
+        public delegate void JBAutoSyncEventHandler();
+        public event JBAutoSyncEventHandler JBAutoSyncEvent;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EveManager" /> class
@@ -75,8 +97,11 @@ namespace SMT.EVEData
         public EveManager(string version)
         {
 
-            LocalCharacters = new BindingList<LocalCharacter>();
+            LocalCharacters = new ObservableCollection<LocalCharacter>();
+            LocalCharacters.CollectionChanged += LocalCharacters_CollectionChanged;
+            //LocalCharacters.ListChanged += LocalCharacters_ListChanged;
             VersionStr = version;
+            Fingerprint = Security.FingerPrint.Value();
 
             // ensure we have the cache folder setup
             DataCacheFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\DMTCache";
@@ -124,6 +149,32 @@ namespace SMT.EVEData
 
             ServerInfo = new Server();
         }
+        private LocalCharacter AuthCharacter;
+        private bool authCharRemoved = false;
+
+        private void LocalCharacters_CollectionChanged(object sender, global::System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke((Action)(async () =>
+            {
+                if (e.Action == global::System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+                {
+                    if (AuthCharacter == null) return;
+                    if (LocalCharacters.Any(x => x.Name == AuthCharacter.Name)) return;
+                    authCharRemoved = true;
+                    if (mqttClient.IsConnected)
+                        mqttClient.StopAsync();
+                }
+
+                if (e.Action == global::System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+                {
+                }
+                if (e.Action == global::System.Collections.Specialized.NotifyCollectionChangedAction.Replace)
+                {
+                }
+            }), DispatcherPriority.Normal, null);
+        }
+
+        public ObservableCollection<DMTLocation> RemovedCharacters = new ObservableCollection<DMTLocation>();
 
         /// <summary>
         /// Intel Added Event Handler
@@ -205,11 +256,11 @@ namespace SMT.EVEData
         /// <summary>
         /// Gets or sets the Intel List
         /// </summary>
-        public BindingList<IntelData> IntelDataList { get; set; }
+        public ObservableCollection<IntelData> IntelDataList { get; set; }
         /// <summary>
         /// Gets or sets the Chat List
         /// </summary>
-        public BindingList<IntelData> ChatDataList { get; set; }
+        public ObservableCollection<IntelData> ChatDataList { get; set; }
 
         /// <summary>
         /// Gets or sets the current list of Jump Bridges
@@ -220,7 +271,7 @@ namespace SMT.EVEData
         /// Gets or sets the list of Characters we are tracking
         /// </summary>
         [XmlIgnore]
-        public BindingList<LocalCharacter> LocalCharacters { get; set; }
+        public ObservableCollection<LocalCharacter> LocalCharacters { get; set; }
 
         /// <summary>
         /// Gets or sets the master list of Regions
@@ -258,6 +309,8 @@ namespace SMT.EVEData
         /// Gets or sets the current list of thera connections
         /// </summary>
         public ObservableCollection<TheraConnection> TheraConnections { get; set; }
+
+        public ObservableCollection<Triangles.Invasion> TrigInvasions { get; set; }
 
         public ObservableCollection<SOVCampaign> ActiveSovCampaigns { get; set; }
 
@@ -1167,6 +1220,8 @@ namespace SMT.EVEData
             if (esiChar == null)
             {
                 esiChar = new LocalCharacter(acd.CharacterName, string.Empty, string.Empty);
+                esiChar.PropertyChanged += SomethingChanged;
+
 
                 Application.Current.Dispatcher.Invoke((Action)(() =>
                 {
@@ -1180,8 +1235,27 @@ namespace SMT.EVEData
             esiChar.ESIAccessTokenExpiry = acd.ExpiresOn;
             esiChar.ID = acd.CharacterID;
             esiChar.ESIAuthData = acd;
-
+            var item = LocalCharacters.FirstOrDefault(x => x.Name == esiChar.Name);
+            if (item == null) return;
+            var index = LocalCharacters.IndexOf(item);
+            if (index > -1)
+                Application.Current.Dispatcher.Invoke((Action)(() =>
+                {
+                    LocalCharacters[index] = item;
+                }), DispatcherPriority.Normal, null);
             // now to find if a matching character
+        }
+
+        public delegate void UpdateDataGridColorHandler(LocalCharacter lc, LocalCharacter ac);
+
+        public event UpdateDataGridColorHandler UpdateDataGridColors;
+        private void SomethingChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var character = sender as LocalCharacter;
+            if (e.PropertyName == "ESILinked")
+            {
+                UpdateDataGridColors?.Invoke(character, AuthCharacter);
+            }
         }
 
         public void InitNavigation()
@@ -1470,9 +1544,11 @@ namespace SMT.EVEData
         /// </summary>
         public void SetupIntelWatcher()
         {
-            IntelDataList = new BindingList<IntelData>();
-            ChatDataList = new BindingList<IntelData>();
+            IntelDataList = new ObservableCollection<IntelData>();
+            ChatDataList = new ObservableCollection<IntelData>();
             IntelClearFilters = new List<string> { "Clear", "Clr", "Despike" };
+            IntelDataList.CollectionChanged += IntelDataList_CollectionChanged;
+            ChatDataList.CollectionChanged += ChatDataList_CollectionChanged;
 
 
             intelFileReadPos = new Dictionary<string, int>();
@@ -1504,6 +1580,69 @@ namespace SMT.EVEData
 
             // END SUPERHACK
             // -----------------------------------------------------------------
+        }
+
+        private void IntelDataList_CollectionChanged(object sender, global::System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+
+            if (e.Action == global::System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            {
+                if (IntelDataList.Count > MaxChatLines)
+                {
+                    _cleanIntel = true;
+
+                }
+            }
+        }
+
+        private void ChatDataList_CollectionChanged(object sender, global::System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+
+            if (e.Action == global::System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            {
+                if (ChatDataList.Count > MaxChatLines)
+                {
+                    _cleanChat = true;
+
+                }
+            }
+        }
+
+        private bool _cleanIntel;
+        private bool _cleanChat;
+
+        public void CheckChatLines(ChatMode mode)
+        {
+            switch (mode)
+            {
+                case ChatMode.Intel:
+                    {
+                        if (IntelDataList.Count > MaxChatLines)
+                        {
+                            for (int i = MaxChatLines - 1; i < IntelDataList.Count; i++)
+                            {
+                                IntelDataList.RemoveAt(i);
+                            }
+                            _cleanIntel = false;
+                        }
+                        break;
+                    }
+                case ChatMode.Chat:
+                    {
+                        if (ChatDataList.Count > MaxChatLines)
+                        {
+                            for (int i = MaxChatLines - 1; i < ChatDataList.Count; i++)
+                            {
+                                ChatDataList.RemoveAt(i);
+                            }
+                            _cleanChat = false;
+                        }
+
+                        break;
+                    }
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+            }
         }
 
         private void FileWatcher(string eveLogFolder)
@@ -1639,6 +1778,58 @@ namespace SMT.EVEData
 
             request.BeginGetResponse(new AsyncCallback(UpdateTheraConnectionsCallback), request);
         }
+        /// <summary> 
+        /// Update the current Trig Invasions 
+        /// </summary> 
+        public void UpdateTrigInvasions()
+        {
+            try
+            {
+                string trigApiURL = "https://kybernaut.space/invasions.json";
+
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(trigApiURL);
+                request.Method = WebRequestMethods.Http.Get;
+                request.Timeout = 20000;
+                request.Proxy = null;
+
+                Application.Current.Dispatcher.Invoke((Action)(() =>
+                {
+                    TrigInvasions.Clear();
+                }), DispatcherPriority.Normal, null);
+
+                request.BeginGetResponse(new AsyncCallback(UpdateTrigInvasionsCallback), request);
+            }
+            catch { }
+        }
+        private void UpdateTrigInvasionsCallback(IAsyncResult asyncResult)
+        {
+            HttpWebRequest request = (HttpWebRequest)asyncResult.AsyncState;
+            try
+            {
+                using (HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResult))
+                {
+                    Stream responseStream = response.GetResponseStream();
+                    using (StreamReader sr = new StreamReader(responseStream))
+                    {
+                        // Need to return this response 
+                        string strContent = sr.ReadToEnd();
+
+                        var invasions = Triangles.Invasion.FromJson(strContent);
+                        foreach (Triangles.Invasion ti in invasions)
+                        {
+                            Application.Current.Dispatcher.Invoke((Action)(() =>
+                            {
+                                TrigInvasions.Add(ti);
+                            }), DispatcherPriority.Normal, null);
+
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
         internal void AddUpdateJumpBridge(string from, string to, long stationID)
         {
             // validate
@@ -1761,6 +1952,7 @@ namespace SMT.EVEData
             LoadCharacters();
 
             InitTheraConnections();
+            InitTrigInvasions();
 
             ActiveSovCampaigns = new ObservableCollection<SOVCampaign>();
 
@@ -1768,40 +1960,65 @@ namespace SMT.EVEData
             StartUpdateCoalitionInfo();
 
             StartBackgroundThread();
-            DMTCharacters.CollectionChanged += DMTCharacters_CollectionChanged;
+            DMTLocations.CollectionChanged += DMTCharacters_CollectionChanged;
         }
 
         public void MqttInit()
         {
             mqttClient = factory.CreateManagedMqttClient();
         }
-        public async void MqttConnect(string url, string token)
+        public MqttApplicationMessage LastWillMessage()
         {
-            IntelDataList.ListChanged += IntelDataList_ListChanged;
-#if DEBUG
-            mqttOptions = new MqttClientOptionsBuilder()
-                .WithTcpServer("127.0.0.1", 1738)
-                //.WithTcpServer(url, 1738)
-                .WithClientId($"{Environment.MachineName}\\{Environment.UserName}")
-                .WithCredentials(token, VersionStr)
+            return new MqttApplicationMessageBuilder()
+                .WithTopic($"lwt")
+                .WithPayload($"{Environment.MachineName}\\{Environment.UserName}")
+                .WithExactlyOnceQoS()
                 .Build();
-#else
+        }
+
+        public async void MqttForceReconnect(string url)
+        {
+            if (mqttClient.IsConnected) return;
+            if (mqttClient.IsStarted)
+                await mqttClient.StopAsync();
+            MqttConnect(url);
+
+        }
+
+        private string dmtUrl;
+        public async void MqttConnect(string url)
+        {
+            dmtUrl = url;
+            var esiChars = LocalCharacters.Where(w => w.ESILinked);
+            if (!esiChars.Any())
+            {
+                ServerInfo.MqttStatusColor = Colors.Orange;
+                SetStatus($"No ESI'd Character!");
+                return;
+            }
+            LocalCharacter chr = esiChars.First();
+            AuthCharacter = chr;
             mqttOptions = new MqttClientOptionsBuilder()
+                .WithWillMessage(LastWillMessage())
                 .WithTcpServer(url, 1738)
-                .WithClientId($"{Environment.MachineName}\\{Environment.UserName}")
-                .WithCredentials(token, VersionStr)
+                .WithClientId($"{Fingerprint}")
+                .WithCredentials(chr.ESIAccessToken, $"{Environment.MachineName}\\{Environment.UserName}|{VersionStr}")
                 .Build();
-#endif
             var managedOptions = new ManagedMqttClientOptionsBuilder()
              .WithAutoReconnectDelay(TimeSpan.FromSeconds(30))
              .WithClientOptions(mqttOptions)
              .Build();
+            if (mqttClient.IsStarted || mqttClient.IsConnected)
+                await mqttClient.StopAsync();
             await mqttClient.StartAsync(managedOptions);
 
-            if (ServerInfo != null)
+            if (ServerInfo != null && mqttClient.IsStarted)
             {
-                SetStatus("Connecting");
-                ServerInfo.MqttStatusColor = Colors.Orange;
+                if (!authCharRemoved)
+                {
+                    SetStatus($"Connecting to {url}");
+                    ServerInfo.MqttStatusColor = Colors.Orange;
+                }
             }
             mqttClient.ConnectingFailedHandler = new ConnectingFailedHandlerDelegate(OnMqttFailed);
             mqttClient.UseConnectedHandler(OnMqttConnect);
@@ -1809,29 +2026,33 @@ namespace SMT.EVEData
             mqttClient.UseDisconnectedHandler(OnMqttDisconnect);
             await Task.FromResult(true);
         }
-
+        private bool WasConnected = false;
         private async void OnMqttConnect(MqttClientConnectedEventArgs arg)
         {
+            if (mqttConnects > 0)
+                mqttConnects = 0;
+            if (authCharRemoved)
+                authCharRemoved = false;
             if (ServerInfo != null)
             {
                 SetStatus("Connected");
                 ServerInfo.MqttStatusColor = Colors.LightGreen;
+                WasConnected = true;
             }
+            retryAllowed = false;
             await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "location/#" });
             await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "info/jbs" });
             await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "info/dmt_stats" });
             await mqttClient.SubscribeAsync(new MqttTopicFilter() { Topic = "chat/#" });
             MqttIntelInit();
         }
-        private bool retryAllowed = false;
-        private int mqttConnects = 0;
         private void OnMqttDisconnect(MqttClientDisconnectedEventArgs arg)
         {
             if (mqttConnects >= 5 && mqttClient.IsStarted)
             {
                 mqttClient.StopAsync();
                 SetStatus("Server might be offline. Ray????");
-                ServerInfo.MqttStatusColor = Colors.Red;
+                ServerInfo.MqttStatusColor = Colors.IndianRed;
                 retryAllowed = true;
             }
             else
@@ -1843,8 +2064,28 @@ namespace SMT.EVEData
                 }
                 else
                 {
-                    SetStatus($"Connection Attempt #{mqttConnects + 1}");
-                    ServerInfo.MqttStatusColor = Colors.Orange;
+                    if (authCharRemoved)
+                    {
+                        var nextChar = LocalCharacters.FirstOrDefault(x => x.ESILinked == true);
+                        if (nextChar == null)
+                        {
+                            ServerInfo.MqttStatusColor = Colors.IndianRed;
+                            ServerInfo.MqttStatus = $"Authed character removed.";
+                            retryAllowed = true;
+                        }
+                        else
+                        {
+                            ServerInfo.MqttStatusColor = Colors.Orange;
+                            ServerInfo.MqttStatus = $"Re-authing with {nextChar.Name}";
+                            MqttConnect(dmtUrl);
+                        }
+                    }
+                    else
+                    {
+                        SetStatus($"Connection Attempt #{mqttConnects + 1}");
+                        ServerInfo.MqttStatusColor = Colors.Orange;
+
+                    }
 
                 }
             }
@@ -1856,26 +2097,28 @@ namespace SMT.EVEData
             Exception ex = obj.Exception;
             if (ex.Message.Contains("ClientIdentifierNotValid") || ex.Message.Contains("NotAuthorized"))
             {
-                ServerInfo.MqttStatusColor = Colors.Red;
+                ServerInfo.MqttStatusColor = Colors.IndianRed;
                 MessageBox.Show("DMT Token invalid.", "Error");
                 mqttClient.StopAsync();
             }
             if (ex.Message.Contains("ServerUnavailable"))
             {
-                ServerInfo.MqttStatusColor = Colors.Red;
+                ServerInfo.MqttStatusColor = Colors.IndianRed;
                 mqttClient.StopAsync();
                 MessageBox.Show("New Update. Go download please.");
                 Application.Current.Shutdown(0);
             }
             if (ex.Message.Contains("BadUserNameOrPassword"))
             {
+                retryAllowed = true;
                 mqttClient.StopAsync();
-                ServerInfo.MqttStatusColor = Colors.Red;
-                MessageBox.Show("You're banned kid. Uninstall DMT. Alt+F4ing...", "B A N N E D !");
-                Application.Current.Dispatcher.Invoke((Action)(() =>
-                {
-                    Environment.Exit(0);
-                }), DispatcherPriority.Normal, null);
+                ServerInfo.MqttStatusColor = Colors.Orange;
+                ServerInfo.MqttStatus = "No characters found in Seat";
+                //MessageBox.Show("You're banned kid. Uninstall DMT. Alt+F4ing...", "B A N N E D !");
+                //Application.Current.Dispatcher.Invoke((Action)(() =>
+                //{
+                //    Environment.Exit(0);
+                //}), DispatcherPriority.Normal, null);
             }
         }
 
@@ -1923,57 +2166,86 @@ namespace SMT.EVEData
             switch (topic)
             {
                 case "location":
-                    var dmtc = JsonConvert.DeserializeObject<DMTCharacter>(payload);
-                    //Check to see if we own them. #Slavery
-                    if (!dmtc.BroadcastLocation)
+                    if (Application.Current != null)
+                        Application.Current.Dispatcher.Invoke((Action)(() =>
+                        {
+                            var dmtl = JsonConvert.DeserializeObject<DMTLocation>(payload);
+                            //Check to see if we own them. #Slavery
+                            var local = DMTLocations.FirstOrDefault(x => x.Name == dmtl.Name);
+                            if (!dmtl.BroadcastLocation)
+                            {
+                                if (local != null)
+                                    DMTLocations.Remove(local);
+                                return;
+                            }
+                            else
+                            {
+                                if (LocalCharacters.Any(lc => dmtl.Name == lc.Name))
+                                {
+                                    return;
+                                }
+                                //var cdmtl = DMTLocations.FirstOrDefault(x => x.Name == dmtl.Name);
+                                var idx = DMTLocations.IndexOf(local);
+                                if (local != null)
+                                {
+                                    DMTLocations[idx] = dmtl;
+
+                                }
+                                else
+                                    DMTLocations.Add(dmtl);
+                            }
+                        }), DispatcherPriority.Normal, null);
+                    break;
+                case "chat":
+                    DMTIntel chat = JsonConvert.DeserializeObject<DMTIntel>(payload);
+                    IntelData chatData = new IntelData(chat.RawIntel, chat.Channel);
+                    switch (chatData.IntelChannel)
                     {
-                        foreach (var ch in DMTCharacters)
-                        {
-                            if (ch.Name == dmtc.Name)
-                                DMTCharacters.Remove(ch);
-                        }
-                    }
-                    else
-                    {
-                        if (LocalCharacters.Any(lc => dmtc.Name == lc.Name))
-                        {
-                            return;
-                        }
-                        bool found = false;
-                        for (int i = 0; i < DMTCharacters.Count; i++)
-                        {
-                            if (DMTCharacters[i].Name != dmtc.Name) continue;
-                            DMTCharacters[i] = dmtc;
-                            found = true;
-                        }
-                        if (!found)
-                        {
-                            DMTCharacters.Add(dmtc);
-                        }
+                        case "(Corp)":
+                            if (SubscribeToCorp)
+                                CheckChat(false, chatData);
+                            break;
+                        case "(Alliance)":
+                            if (SubscribeToAlliance)
+                                CheckChat(false, chatData);
+                            break;
                     }
                     break;
                 case "intel":
                     DMTIntel intel = JsonConvert.DeserializeObject<DMTIntel>(payload);
                     IntelData newIdl = new IntelData(intel.RawIntel, intel.Channel);
-                    switch (newIdl.IntelChannel)
+                    foreach (string s in newIdl.IntelString.Split(' '))
                     {
-                        case "(Corp)":
-                            if (SubscribeToCorp)
-                                CheckChat(false, newIdl);
-                            break;
-                        case "(Alliance)":
-                            if (SubscribeToAlliance)
-                                CheckChat(false, newIdl);
-                            break;
-                        default:
-                            CheckIntel(false, newIdl);
-                            break;
+                        if (s == "" || s.Length < 3)
+                        {
+                            continue;
+                        }
+
+                        foreach (String clearMarker in IntelClearFilters)
+                        {
+                            if (clearMarker.IndexOf(s, StringComparison.OrdinalIgnoreCase) == 0)
+                            {
+                                newIdl.ClearNotification = true;
+                            }
+                        }
+
+                        foreach (System sys in Systems)
+                        {
+                            if (sys.Name.IndexOf(s, StringComparison.OrdinalIgnoreCase) == 0 || s.IndexOf(sys.Name, StringComparison.OrdinalIgnoreCase) == 0)
+                            {
+                                newIdl.Systems.Add(sys.Name);
+                            }
+                        }
                     }
+                    CheckIntel(false, newIdl);
                     break;
                 case "info":
                     if (subtopic == "jbs")
                     {
-                        DMTBridges = JsonConvert.DeserializeObject<List<string>>(payload);
+                        DMTBridges = JsonConvert.DeserializeObject<DMTBridges>(payload);
+                        if (AutoSyncJb)
+                            JBAutoSyncEvent?.Invoke();
+                        //JBUpdateButtonEvent?.Invoke(DMTBridges.LastModified, DMTBridges.Bridges.Count);
                     }
                     break;
             }
@@ -1984,7 +2256,7 @@ namespace SMT.EVEData
             if (Application.Current == null) return;
             Application.Current.Dispatcher.Invoke((Action)(() =>
             {
-                lock (IntelLocker)
+                lock (_intelLocker)
                 {
                     try
                     {
@@ -2003,7 +2275,7 @@ namespace SMT.EVEData
             if (Application.Current == null) return;
             Application.Current.Dispatcher.Invoke((Action)(() =>
             {
-                lock (IntelLocker)
+                lock (_intelLocker)
                 {
                     try
                     {
@@ -2018,25 +2290,21 @@ namespace SMT.EVEData
 
         }
 
-        private void IntelDataList_ListChanged(object sender, ListChangedEventArgs e)
+
+        private void SendCharacters()
         {
-            if (e.ListChangedType == ListChangedType.ItemAdded)
-            {
-                var newID = IntelDataList[e.NewIndex];
-
-                for (int i = 0; i < IntelDataList.Count; i++)
-                {
-                    if (IntelDataList[i].IntelString == newID.IntelString && i != e.NewIndex)
-                    {
-                        IntelDataList.RemoveAt(i);
-                    }
-                }
-            }
+            if (mqttClient == null) return;
+            if (!mqttClient.IsConnected) return;
+            if (Fingerprint == string.Empty) return;
+            string payload = JsonConvert.SerializeObject(LocalCharacters);
+            var message = new MqttApplicationMessageBuilder()
+                .WithTopic($"pilots/{Fingerprint}")
+                .WithPayload(payload)
+                .WithExactlyOnceQoS()
+                .WithRetainFlag(true)
+                .Build();
+            mqttClient.PublishAsync(message);
         }
-
-        public List<string> DMTBridges = new List<string>();
-        private object IntelLocker = new object();
-
 
         public void SendCharLocation(LocalCharacter c)
         {
@@ -2044,7 +2312,7 @@ namespace SMT.EVEData
             if (!mqttClient.IsConnected || c.Location.Length == 0)
                 return;
             c.LastUpdate = DateTime.Now;
-            string payload = JsonConvert.SerializeObject(c);
+            string payload = JsonConvert.SerializeObject(new DMTLocation { BroadcastLocation = c.BroadcastLocation, Id = c.ID, IsOnline = c.IsOnline, LastUpdated = c.LastUpdate, Location = c.Location, Name = c.Name, Region = c.Region });
             var message = new MqttApplicationMessageBuilder()
                .WithTopic($"location/{c.Name}")
                .WithPayload(payload)
@@ -2100,7 +2368,6 @@ namespace SMT.EVEData
             MqttIntelInit();
         }
 
-        public ObservableCollection<DMTCharacter> DMTCharacters = new ObservableCollection<DMTCharacter>();
         private void DMTCharacters_CollectionChanged(object sender, global::System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             //throw new NotImplementedException();
@@ -2113,7 +2380,11 @@ namespace SMT.EVEData
             TheraConnections = new ObservableCollection<TheraConnection>();
             UpdateTheraConnections();
         }
-
+        private void InitTrigInvasions()
+        {
+            TrigInvasions = new ObservableCollection<Triangles.Invasion>();
+            UpdateTrigInvasions();
+        }
         /// <summary>
         /// Initialise the ZKillBoard Feed
         /// </summary>
@@ -2214,7 +2485,9 @@ namespace SMT.EVEData
                                     {
                                         Application.Current.Dispatcher.Invoke((Action)(() =>
                                         {
-                                            LocalCharacters.Add(new LocalCharacter(characterName, changedFile, system));
+                                            var localChar = new LocalCharacter(characterName, changedFile, system);
+                                            localChar.PropertyChanged += SomethingChanged;
+                                            LocalCharacters.Add(localChar);
                                         }), DispatcherPriority.Normal, null);
                                     }
 
@@ -2392,6 +2665,7 @@ namespace SMT.EVEData
                     c.LocalChatFile = string.Empty;
                     c.Location = string.Empty;
                     c.Region = string.Empty;
+                    c.PropertyChanged += SomethingChanged;
 
                     LocalCharacters.Add(c);
                     SendCharLocation(c);
@@ -2410,13 +2684,17 @@ namespace SMT.EVEData
             {
                 Thread.CurrentThread.IsBackground = false;
 
+                TimeSpan ChatCleanupUpdateRate = TimeSpan.FromSeconds(2);
                 TimeSpan CharacterUpdateRate = TimeSpan.FromSeconds(1);
                 TimeSpan LowFreqUpdateRate = TimeSpan.FromMinutes(20);
                 TimeSpan SOVCampaignUpdateRate = TimeSpan.FromSeconds(30);
+                TimeSpan NextDMTCharacterSendRate = TimeSpan.FromMinutes(5);
 
                 DateTime NextCharacterUpdate = DateTime.Now;
                 DateTime NextLowFreqUpdate = DateTime.Now;
                 DateTime NextSOVCampaignUpdate = DateTime.Now;
+                DateTime NextDMTCharacterSend = DateTime.Now;
+                DateTime NextChatCleanup = DateTime.Now;
 
                 // loop forever
                 while (BackgroundThreadShouldTerminate == false)
@@ -2429,8 +2707,39 @@ namespace SMT.EVEData
                         for (int i = 0; i < LocalCharacters.Count; i++)
                         {
                             LocalCharacter c = LocalCharacters.ElementAt(i);
+                            if (c.WarningSystemRange != WarningSystemRange)
+                                c.WarningSystemRange = WarningSystemRange;
                             await c.Update();
+                            if (Application.Current != null)
+                                Application.Current.Dispatcher.Invoke((Action)(() =>
+                                {
+                                    var dmtl = DMTLocations.FirstOrDefault(x => x.Name == c.Name);
+                                    if (dmtl != null)
+                                    {
+                                        DMTLocations.Remove(dmtl);
+                                    }
+
+                                }), DispatcherPriority.Normal, null);
                         }
+                    }
+                    if ((NextDMTCharacterSend - DateTime.Now).Ticks < 0)
+                    {
+                        NextDMTCharacterSend = DateTime.Now + NextDMTCharacterSendRate;
+                        SendCharacters();
+                    }
+                    if ((NextChatCleanup - DateTime.Now).Ticks < 0)
+                    {
+                        NextChatCleanup = DateTime.Now + ChatCleanupUpdateRate;
+                        if (Application.Current != null)
+                            Application.Current.Dispatcher.Invoke((Action)(() =>
+                            {
+                                if (_cleanIntel)
+                                    CheckChatLines(ChatMode.Intel);
+                                if (_cleanChat)
+                                    CheckChatLines(ChatMode.Chat);
+                            }), DispatcherPriority.Normal, null);
+
+                        //CheckChatLines(ChatMode.Chat);
                     }
 
                     // sov update
@@ -2526,17 +2835,26 @@ namespace SMT.EVEData
         /// </summary>
         private async void StartUpdateJumpsFromESI()
         {
-            EsiResponse<List<ESI.NET.Models.Universe.Jumps>> esr = await ESIClient.Universe.Jumps();
-            if (ESIHelpers.ValidateESICall(esr))
+            try
             {
-                foreach (ESI.NET.Models.Universe.Jumps j in esr.Data)
+
+                EsiResponse<List<ESI.NET.Models.Universe.Jumps>> esr = await ESIClient.Universe.Jumps();
+                if (ESIHelpers.ValidateESICall(esr))
                 {
-                    System es = GetEveSystemFromID(j.SystemId);
-                    if (es != null)
+                    foreach (ESI.NET.Models.Universe.Jumps j in esr.Data)
                     {
-                        es.JumpsLastHour = j.ShipJumps;
+                        System es = GetEveSystemFromID(j.SystemId);
+                        if (es != null)
+                        {
+                            es.JumpsLastHour = j.ShipJumps;
+                        }
                     }
                 }
+
+            }
+            catch (HttpRequestException ex)
+            {
+                //For when Zahzi wakes up his PC.
             }
         }
 

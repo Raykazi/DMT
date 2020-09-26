@@ -34,7 +34,7 @@ namespace SMT
         public ObservableCollection<StaticJumpOverlay> StaticJumpPoints;
 
         private bool m_AlwaysOnTop;
-        
+
         private string m_DefaultRegion;
 
         private double m_IntelTextSize = 10;
@@ -106,6 +106,8 @@ namespace SMT
         private string DMTToken;
         private string DMTUrl;
         private bool m_ShowOnlinePlayers { get; set; }
+        private bool m_AutoSyncJB;
+        private int m_MaxChatLines;
 
         public MapConfig()
         {
@@ -114,6 +116,17 @@ namespace SMT
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        [Category("General")]
+        [DisplayName("Max Chat Lines")]
+        public int MaxChatLines
+        {
+            get => m_MaxChatLines;
+            set
+            {
+                m_MaxChatLines = value;
+                OnPropertyChanged("MaxChatLines");
+            }
+        }
         [Category("General")]
         [DisplayName("Always on top")]
         public bool AlwaysOnTop
@@ -313,6 +326,17 @@ namespace SMT
             {
                 m_ShowDangerZone = value;
                 OnPropertyChanged("ShowDangerZone");
+            }
+        }
+        [Category("SOV")]
+        [DisplayName("Auto Sync JBs")]
+        public bool AutoSyncJB
+        {
+            get => m_AutoSyncJB;
+            set
+            {
+                m_AutoSyncJB = value;
+                OnPropertyChanged("AutoSyncJBs");
             }
         }
 
@@ -692,8 +716,8 @@ namespace SMT
 
         public bool UseESIForCharacterPositions { get; set; }
 
-        public bool ShowCharacterNamesOnMap 
-        { 
+        public bool ShowCharacterNamesOnMap
+        {
             get => m_ShowCharacterNamesOnMap;
             set
             {
@@ -712,7 +736,7 @@ namespace SMT
             }
 
         }
-        
+
         public bool SyncActiveCharacterBasedOnActiveEVEClient
         {
             get => m_SyncActiveCharacterBasedOnActiveEVEClient;
@@ -732,7 +756,7 @@ namespace SMT
                 OnPropertyChanged("DisableJumpBridgesPathAnimation");
             }
         }
-        
+
         public bool DisableRoutePathAnimation
         {
             get => m_DisableRoutePathAnimation;
@@ -743,7 +767,34 @@ namespace SMT
             }
         }
 
+        private bool m_ShowTrigInvasions = true;
+        private bool m_ShowOnlyFinalLiminality = false;
 
+        public bool ShowTrigInvasions
+        {
+            get
+            {
+                return m_ShowTrigInvasions;
+            }
+            set
+            {
+                m_ShowTrigInvasions = value;
+                OnPropertyChanged("ShowTrigInvasions");
+            }
+        }
+
+        public bool ShowOnlyFinalLiminality
+        {
+            get
+            {
+                return m_ShowOnlyFinalLiminality;
+            }
+            set
+            {
+                m_ShowOnlyFinalLiminality = value;
+                OnPropertyChanged("ShowOnlyFinalLiminality");
+            }
+        }
         public void SetDefaultColours()
         {
             MapColours defaultColours = new MapColours
@@ -754,14 +805,14 @@ namespace SMT
                 DisabledJumpBridgeColour = Color.FromRgb(205, 55, 50),
                 SystemOutlineColour = Color.FromRgb(0, 0, 0),
                 InRegionSystemColour = Color.FromRgb(255, 239, 213),
-                InRegionSystemTextColour = Color.FromRgb(0, 0, 0),
+                InRegionSystemTextColour = Colors.WhiteSmoke,
                 OutRegionSystemColour = Color.FromRgb(218, 165, 32),
                 OutRegionSystemTextColour = Color.FromRgb(0, 0, 0),
 
                 PopupText = Color.FromRgb(0, 0, 0),
                 PopupBackground = (Color)ColorConverter.ConvertFromString("#FF959595"),
 
-                MapBackgroundColour = (Color)ColorConverter.ConvertFromString("#FF4E5B68"),
+                MapBackgroundColour = Colors.DimGray,
                 RegionMarkerTextColour = (Color)ColorConverter.ConvertFromString("#6E716E"),
                 RegionMarkerTextColourFull = Color.FromRgb(0, 0, 0),
                 ESIOverlayColour = Color.FromRgb(188, 143, 143),
@@ -820,13 +871,15 @@ namespace SMT
             ShowIhubVunerabilities = true;
             PlaySoundOnlyInDangerZone = true;
             PlayIntelSoundOnUnknown = false;
+            PlayIntelSound = true;
 
-            ShowJoveObservatories = true;
+            ShowJoveObservatories = false;
 
             UniverseMaxZoomDisplaySystems = 1.3f;
             UniverseMaxZoomDisplaySystemsText = 2.0f;
 
             WarningRange = 4;
+            MaxChatLines = 20;
         }
 
         protected void OnPropertyChanged(string name)

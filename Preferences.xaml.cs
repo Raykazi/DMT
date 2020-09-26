@@ -29,6 +29,13 @@ namespace SMT
                 MapConf.SetDefaults();
             }
         }
+        /// <summary>
+        /// so you can exit without alt-f4 if you don't have a DMT token, etc.
+        /// </summary>
+        private void Prefs_Exit_Click(object sender, RoutedEventArgs e)
+        {
+            System.Environment.Exit(0);
+        }
 
         private void syncESIPositionChk_Checked(object sender, RoutedEventArgs e)
         {

@@ -19,6 +19,11 @@ namespace SMT
             new Task(StartServer).Start();
         }
 
+        private void AuthWindow_Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
         private void StartServer()
         {
             // create the http Server
@@ -43,7 +48,7 @@ namespace SMT
                 // Obtain a response object.
                 HttpListenerResponse response = context.Response;
                 // Construct a response.
-                string responseString = "<HTML><BODY>DMT Character Added, please close</BODY></HTML>";
+                string responseString = "<!DOCTYPE html><html><body><p style='font-family:verdana;'>DMT character added, please close this window.</p></body></html>";
                 byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
                 // Get a response stream and write the response to it.
                 response.ContentLength64 = buffer.Length;
