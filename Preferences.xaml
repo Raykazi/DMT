@@ -148,7 +148,7 @@
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <Label Content="Channels"></Label>
                                     </StackPanel>
-                                    <TextBox Height="100" AcceptsReturn="True" Text="{Binding IntelChannels}" VerticalScrollBarVisibility="Visible" ToolTip="Type the name of the channels to monitor in this text box. One channel per line."/>
+                                    <TextBox Height="120" AcceptsReturn="True" Text="{Binding IntelChannels}" VerticalScrollBarVisibility="Visible" ToolTip="Type the name of the channels to monitor in this text box. One channel per line."/>
                                 </StackPanel>
                             </GroupBox>
 
@@ -228,7 +228,6 @@
                         <StackPanel Grid.Column="0">
                             <GroupBox  Margin="4" Height="355">
                                 <StackPanel>
-                                    <!--<Button Content="Add Character" Background="{DynamicResource MouseOverForegroundBrush}" Margin="0,2" Width="100" Click="Prefs_OK_Click" ToolTip="Apply and save preferences." HorizontalAlignment="Left"/>-->
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>
@@ -278,7 +277,7 @@
                             </DataGrid>
                             <StackPanel>
                                 <CheckBox Content="Show characters on map" IsChecked="{Binding MapConf.ShowCharacterNamesOnMap}" Margin="3" ToolTip="Show or hide character locations on the map."/>
-                                <!--<Button x:Name="btn_AddCharacter" Click="btn_AddCharacter_Click" Content="Add Character" Margin="3" ToolTip="Add a character to DMT using the ESI."/>-->
+                                <Button x:Name="btn_AddCharacter" Background="{DynamicResource MouseOverForegroundBrush}" Click="Prefs_OK_Click" Content="Add Character" Margin="3" ToolTip="Add a character to DMT using the ESI." Width="110" HorizontalAlignment="Left"/>
                             </StackPanel>
                         </StackPanel>
                     </Grid>
