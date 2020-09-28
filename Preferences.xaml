@@ -219,77 +219,15 @@
                         </StackPanel>
                     </Grid>
                 </TabItem>
-                <TabItem Header="Characters">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="50*" />
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Grid.Column="0">
-                            <GroupBox  Margin="4" Height="355">
-                                <StackPanel>
-                                </StackPanel>
-                            </GroupBox>
-                        </StackPanel>
-                        <StackPanel>
-                            <DataGrid x:Name="CharactersList" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" SelectionUnit="FullRow" GridLinesVisibility="None" IsSynchronizedWithCurrentItem="False"> <!--MouseDoubleClick="CharactersList_MouseDoubleClick"-->
-
-                                <DataGrid.ContextMenu>
-                                    <ContextMenu>
-                                        <!--<MenuItem Header="Delete" Click="CharactersListMenuItemDelete_Click"/>-->
-                                    </ContextMenu>
-                                </DataGrid.ContextMenu>
-
-
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Name" Binding="{Binding MainWindow.Name}" CanUserReorder="False" Width="*" IsReadOnly="True" SortDirection="Ascending"/>
-                                    <DataGridTextColumn Header="Location" Binding="{Binding MainWindow.Location}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="Region" Binding="{Binding MainWindow.Region}" CanUserReorder="False" Width="*" IsReadOnly="True"/>
-                                    <DataGridCheckBoxColumn Header="Broadcast" Binding="{Binding MainWindow.BroadcastLocation}" CanUserReorder="False" Width="*" IsReadOnly="False">
-                                        <DataGridCheckBoxColumn.CellStyle>
-                                            <Style>
-                                                <!--<EventSetter Event="CheckBox.Checked" Handler="BroadcastChanged"/>
-                                                <EventSetter Event="CheckBox.Unchecked" Handler="BroadcastChanged"/>-->
-                                            </Style>
-                                        </DataGridCheckBoxColumn.CellStyle>
-                                        <DataGridCheckBoxColumn.ElementStyle>
-                                            <Style TargetType="CheckBox">
-                                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridCheckBoxColumn.ElementStyle>
-                                    </DataGridCheckBoxColumn>
-                                    <DataGridCheckBoxColumn Header="Dangerzone" Binding="{Binding MainWindow.DangerzoneActive}"  CanUserReorder="False" Width="*" IsReadOnly="False">
-                                        <DataGridCheckBoxColumn.CellStyle>
-                                            <Style>
-                                                <!--<EventSetter Event="CheckBox.Checked" Handler="MainWindow.DangerzoneChanged"/>
-                                                <EventSetter Event="CheckBox.Unchecked" Handler="MainWindow.DangerzoneChanged"/>-->
-                                            </Style>
-                                        </DataGridCheckBoxColumn.CellStyle>
-                                        <DataGridCheckBoxColumn.ElementStyle>
-                                            <Style TargetType="CheckBox">
-                                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridCheckBoxColumn.ElementStyle>
-                                    </DataGridCheckBoxColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                            <StackPanel>
-                                <CheckBox Content="Show characters on map" IsChecked="{Binding MapConf.ShowCharacterNamesOnMap}" Margin="3" ToolTip="Show or hide character locations on the map."/>
-                                <Button x:Name="btn_AddCharacter" Background="{DynamicResource MouseOverForegroundBrush}" Click="Prefs_OK_Click" Content="Add Character" Margin="3" ToolTip="Add a character to DMT using the ESI." Width="110" HorizontalAlignment="Left"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
-                </TabItem>
-
-
 
             </TabControl>
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,2">
                 <Button Content="Exit" Margin="3,0" Width="55" Click="Prefs_Exit_Click" ToolTip="Close DMT."/>
                 <Button Content="Default" Margin="3,0" Width="55" Click="Prefs_Default_Click" ToolTip="Reset preferences to their default state."/>
                 <Button Content="OK" Margin="3,0" Width="55" Click="Prefs_OK_Click" ToolTip="Apply and save preferences."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="0,-22">
+                <Button Content="Add Character" Margin="3,0" Width="100" Click="Prefs_OK_Click" ToolTip="Add a character."/>
             </StackPanel>
         </DockPanel>
 
