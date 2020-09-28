@@ -807,7 +807,7 @@ namespace SMT
                 InRegionSystemColour = Color.FromRgb(255, 239, 213),
                 InRegionSystemTextColour = Colors.WhiteSmoke,
                 OutRegionSystemColour = Color.FromRgb(218, 165, 32),
-                OutRegionSystemTextColour = Color.FromRgb(0, 0, 0),
+                OutRegionSystemTextColour = Colors.WhiteSmoke,
 
                 PopupText = Color.FromRgb(0, 0, 0),
                 PopupBackground = (Color)ColorConverter.ConvertFromString("#FF959595"),
@@ -852,7 +852,7 @@ namespace SMT
 
         public void SetDefaults()
         {
-            DefaultRegion = "Impass";
+            DefaultRegion = "Impass"; // HOLY FUCK THIS IS TOP SECRET ZAHZI
             ShowSystemPopup = true;
             MaxIntelSeconds = 200;
             UpcomingSovMinutes = 30;
@@ -872,25 +872,17 @@ namespace SMT
             PlaySoundOnlyInDangerZone = true;
             PlayIntelSoundOnUnknown = false;
             PlayIntelSound = true;
-
             ShowJoveObservatories = false;
-
             UniverseMaxZoomDisplaySystems = 1.3f;
             UniverseMaxZoomDisplaySystemsText = 2.0f;
-
             WarningRange = 4;
-            MaxChatLines = 35;
-            DMTUrl = "dmt.windrammers.com";
+            MaxChatLines = 50;
+            AutoSyncJB = true;
+            DMTUrl = "";
             IntelTextSize = 12;
             SubscribeToCorp = true;
             SubscribeToAlliance = true;
-            IntelChannels = @"int.catch
-int.querious
-int.impass
-int.tenerifis
-int.delve
-int.querious
-int.immenseaz";
+            IntelChannels = "";
         }
 
         protected void OnPropertyChanged(string name)
