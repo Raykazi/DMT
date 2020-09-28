@@ -53,7 +53,7 @@
 
             <Label Margin="30,0,0,0" Padding="7">Active Character:</Label>
             <ComboBox x:Name="CurrentActiveCharacterCombo" Width="180"  IsReadOnly="True" SelectionChanged="CurrentActiveCharacterCombo_Selected"  Height="18"/>
-            <CheckBox x:Name="FollowCharacterChk" Margin="20,6,0,5" Content="Auto follow active character" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="False" Checked="FollowCharacterChk_Checked" Unchecked="FollowCharacterChk_Unchecked"/>
+            <CheckBox x:Name="FollowCharacterChk" Margin="20,6,0,5" Content="Auto follow active character" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="False" Checked="FollowCharacterChk_Checked" Unchecked="FollowCharacterChk_Unchecked" ToolTip="Change region views based on your active characters location."/>
             <!--  this should probably be here instead -->
 
         </StackPanel>
@@ -88,8 +88,8 @@
                 <TextBlock Text="Players" />
             </StatusBarItem>
             <Separator />
-            <StatusBarItem MouseDoubleClick="StatusBarItem_MouseDoubleClick">
-                <Ellipse x:Name="mqttStatusColor" Fill="Orange" Width="15" Height="15" />
+            <StatusBarItem MouseDoubleClick="StatusBarItem_MouseDoubleClick" ToolTip="Click to refresh.">
+                <Ellipse x:Name="mqttStatusColor" Fill="Orange" Width="10" Height="10" />
             </StatusBarItem>
             <StatusBarItem x:Name="MqttStatusBarItem">
                 <TextBlock x:Name="mqttStatus" Text="{Binding MqttStatus}" Foreground="White" />
@@ -197,7 +197,7 @@
                                                         </Style>
                                                     </DataGridCheckBoxColumn.ElementStyle>
                                                 </DataGridCheckBoxColumn>
-                                                <DataGridCheckBoxColumn Header="Dangerzone" Binding="{Binding DangerzoneActive}"  CanUserReorder="False" Width="*" IsReadOnly="False">
+                                                <DataGridCheckBoxColumn Header="Danger Zone" Binding="{Binding DangerzoneActive}"  CanUserReorder="False" Width="*" IsReadOnly="False">
                                                     <DataGridCheckBoxColumn.CellStyle>
                                                         <Style>
                                                             <EventSetter Event="CheckBox.Checked" Handler="DangerzoneChanged"/>
@@ -465,7 +465,7 @@
                                 <Grid>
                                     <ScrollViewer>
                                         <StackPanel CanVerticallyScroll="True" ScrollViewer.CanContentScroll="True">
-                                            <CheckBox Content="Selected region only" x:Name="ZKBFeedFilterViewChk" IsChecked="True" Checked="ZKBFeedFilterViewChk_Checked" Unchecked="ZKBFeedFilterViewChk_Checked" Margin="3" />
+                                            <CheckBox Content="Selected region only" x:Name="ZKBFeedFilterViewChk" IsChecked="True" Checked="ZKBFeedFilterViewChk_Checked" Unchecked="ZKBFeedFilterViewChk_Checked" Margin="3" ToolTip="Only show kills from your active characters region."/>
                                             <DataGrid x:Name="ZKBFeed" Grid.Row="1" AreRowDetailsFrozen="True" AutoGenerateColumns="False" CanUserAddRows="False" MouseDoubleClick="ZKBFeed_MouseDoubleClick_1" HeadersVisibility="Column" SelectionUnit="FullRow" GridLinesVisibility="None">
                                                 <DataGrid.Columns>
                                                     <DataGridTextColumn Header="System" Binding="{Binding SystemName}" Width="30*" IsReadOnly="True" CanUserReorder="False" CanUserSort="False" />
@@ -493,20 +493,20 @@
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="*" />
-                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="20" />
                                     </Grid.RowDefinitions>
                                     <ListView x:Name="RawChatBox" Margin="0,2" MouseDoubleClick="RawChatBox_MouseDoubleClick" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.Row="0" ItemTemplate="{StaticResource intelDataDataTemplate}" />
-                                    <Button Content="Clear Chat" Grid.Row="1" x:Name="ClearChatBtn" Click="ClearChatBtn_Click" />
+                                    <Button Content="Clear Chat" Grid.Row="1" x:Name="ClearChatBtn" Click="ClearChatBtn_Click" ToolTip="Clear all current chat messages."/>
                                 </Grid>
                             </xcadl:LayoutAnchorable>
                             <xcadl:LayoutAnchorable x:Name="IntelLayoutAnchorable"  Title="Intel" CanClose="False" CanAutoHide="True" CanHide="False" ContentId="IntelContentID" AutoHideMinHeight="200" AutoHideMinWidth="280">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="*" />
-                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="20" />
                                     </Grid.RowDefinitions>
                                     <ListView x:Name="RawIntelBox" Margin="0,2" MouseDoubleClick="RawIntelBox_MouseDoubleClick" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.Row="0" ItemTemplate="{StaticResource intelDataDataTemplate}" />
-                                    <Button Content="Clear Intel" Grid.Row="1" x:Name="ClearIntelBtn" Click="ClearIntelBtn_Click" />
+                                    <Button Content="Clear Intel" Grid.Row="1" x:Name="ClearIntelBtn" Click="ClearIntelBtn_Click" ToolTip="Clear all current intel messages."/>
                                 </Grid>
                             </xcadl:LayoutAnchorable>
                         </xcadl:LayoutAnchorablePane>
