@@ -85,6 +85,7 @@
                                     <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowSimpleSecurityView}" Content="Show simple security view (HS/LS/NS)"/>
                                     <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowTrigInvasions}" Content="Show Trig Invasions" />
                                     <CheckBox Margin="0,3" IsChecked="{Binding Path=ShowOnlyFinalLiminality}" Content="Limit Trig Invasions to Final Luminality" />
+                                    <CheckBox IsChecked="{Binding Path=AutoSyncJB}" Margin="0,2" Content="Auto sync JB list" ToolTip="Automatically sync Jump Bridge list from DMT."/>
 
 
                                 </StackPanel>
@@ -186,7 +187,6 @@
 
                                     <CheckBox IsChecked="{Binding Path=ShowIhubVunerabilities}" Margin="0,2" Content="Show IHUB timer" ToolTip="Show IHUB timer on the map."/>
                                     <CheckBox IsChecked="{Binding Path=ShowTCUVunerabilities}" Margin="0,2" Content="Show TCU timer" ToolTip="Show TCU timer on the map."/>
-                                    <CheckBox IsChecked="{Binding Path=AutoSyncJB}" Margin="0,2" Content="Auto sync JB list" ToolTip="Automatically sync Jump Bridge list from DMT."/>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <xctk:IntegerUpDown Value="{Binding Path=UpcomingSovMinutes}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="5" Maximum="360" Background="Transparent"  Foreground="White" ToolTip="Change the scale of the upcoming period timer in minutes."/>
