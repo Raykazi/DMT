@@ -1068,7 +1068,7 @@ namespace SMT.EVEData
         /// </summary>
         public string GetESILogonURL(string challengeCode)
         {
-            return ESIClient.SSO.CreateAuthenticationUrlV2(ESIScopes, challengeCode, VersionStr);
+            return ESIClient.SSO.CreateAuthenticationUrl(ESIScopes, VersionStr, challengeCode );
         }
 
         /// <summary>
@@ -1194,7 +1194,7 @@ namespace SMT.EVEData
 
             try
             {
-                sst = await ESIClient.SSO.GetTokenV2(GrantType.AuthorizationCode, code, challengeCode, null);
+                sst = await ESIClient.SSO.GetToken(GrantType.AuthorizationCode, code, challengeCode);
                 if (sst == null || sst.ExpiresIn == 0)
                 {
                     return;
@@ -1921,7 +1921,8 @@ namespace SMT.EVEData
                 ClientId = EveAppConfig.ClientID,
                 SecretKey = EveAppConfig.SecretKey,
                 CallbackUrl = EveAppConfig.CallbackURL,
-                UserAgent = "DMT-map-app"
+                UserAgent = "DMT-map-app",
+                AuthVersion = AuthVersion.v2
             });
 
             ESIClient = new EsiClient(config);
@@ -3215,7 +3216,7 @@ namespace SMT.EVEData
             {
                 ServerInfo.Name = "Tranquility";
                 ServerInfo.NumPlayers = 0;
-                ServerInfo.ServerVersion = 0;
+                ServerInfo.ServerVersion = "";
             }
         }
 
