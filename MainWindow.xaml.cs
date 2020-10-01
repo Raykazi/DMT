@@ -173,6 +173,7 @@ namespace SMT
             SovCampaignList.ItemsSource = EVEManager.ActiveSovCampaigns;
             EVEManager.ActiveSovCampaigns.CollectionChanged += ActiveSovCampaigns_CollectionChanged;
 
+            TrigInvasionsList.ItemsSource = EVEManager.TrigInvasions;
             RegionUC.MapConf = MapConf;
             //RegionUC.ShowOnlineChk.DataContext = MapConf;
             RegionUC.Init();
