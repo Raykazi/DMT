@@ -151,10 +151,28 @@ namespace SMT
             trigLogoImage = ResourceLoader.LoadBitmapFromResource("Images/TrigTile.png");
             edencomLogoImage = ResourceLoader.LoadBitmapFromResource("Images/edencom.png");
             fightImage = ResourceLoader.LoadBitmapFromResource("Images/fight.png");
-        }
 
-
-
+            helpIcon.MouseLeftButtonDown += HelpIcon_MouseLeftButtonDown;
+        }
+
+        private void HelpIcon_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if(HelpList.Visibility == Visibility.Hidden)
+            {
+                HelpList.Visibility = Visibility.Visible;
+                helpIcon.Fill = new SolidColorBrush(Colors.Yellow);
+                HelpQM.Foreground = new SolidColorBrush(Colors.Black);
+            }
+            else
+            {
+                HelpList.Visibility = Visibility.Hidden;
+                helpIcon.Fill = new SolidColorBrush(Colors.Black);
+                HelpQM.Foreground = new SolidColorBrush(Colors.White);
+            }
+        }
+
+
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public event PropertyChangedEventHandler RegionChanged;
