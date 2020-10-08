@@ -139,15 +139,14 @@
                                 <StackPanel>
                                     <CheckBox IsChecked="{Binding SubscribeToCorp}" Margin="0,2" Content="Watch corp chat" ToolTip="Watch corp chat for intel reports."/>
                                     <CheckBox IsChecked="{Binding SubscribeToAlliance}" Margin="0,2" Content="Watch alliance chat" ToolTip="Watch alliance chat for intel reports."/>
-                                    <CheckBox IsChecked="{Binding SubscribeToAllIntel}" Margin="0,2" Content="Subscribe to all remote intel channels" ToolTip="Recieve intel even if you are not currently in-game or part of the intel channel."/>
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <Label Content="Intel Channels"></Label>
                                     </StackPanel>
-                                    <TextBox Height="80" AcceptsReturn="True" Text="{Binding IntelChannels}" VerticalScrollBarVisibility="Visible" ToolTip="Type the name of the channels to monitor in this text box. One channel per line."/>
+                                    <TextBox Height="65" AcceptsReturn="True" Text="{Binding IntelChannels}" VerticalScrollBarVisibility="Visible" ToolTip="Type the name of the channels to monitor in this text box. One channel per line."/>
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <Label Content="Custom Keywords"></Label>
                                     </StackPanel>
-                                    <TextBox AcceptsReturn="True" Height="40" Text="{Binding IntelCustomWords}" VerticalScrollBarVisibility="Visible" ToolTip="List keywords that play a sound."/>
+                                    <TextBox AcceptsReturn="True" Height="65" Text="{Binding IntelCustomWords}" VerticalScrollBarVisibility="Visible" ToolTip="List custom keywords that play a sound. One word per line."/>
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>
