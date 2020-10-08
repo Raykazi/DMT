@@ -54,7 +54,7 @@
                                     <CheckBox IsChecked="{Binding Path=DisableRoutePathAnimation}" Margin="0,3" Content="Disable route path animation" ToolTip="Turn off route path animations."/>
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <xctk:IntegerUpDown Value="{Binding Path=MaxChatLines}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="20" MaxLength="9999" Background="Transparent"  Foreground="White" ToolTip="Truncates chat after a set number of lines, helps prevent lag over longer periods."/>
-                                        <Label Content="Max Chat Lines" ToolTip="Truncates chat after a set number of lines, helps prevent lag over longer periods."/>
+                                        <Label Content="Max chat lines" ToolTip="Truncates chat after a set number of lines, helps prevent lag over longer periods."/>
                                     </StackPanel>
                                 </StackPanel>
                             </GroupBox>
@@ -122,13 +122,55 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0">
-                            <GroupBox Header="General" Margin="4" Height="355">
+                            <GroupBox Header="General" Margin="4" Height="85">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2">
+                                        <xctk:IntegerUpDown Value="{Binding Path=MaxIntelSeconds}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="30" Maximum="1200" Background="Transparent"  Foreground="White" ToolTip="Change the amount of time the red warning marker will be displayed around a system."/>
+                                        <Label Content="Intel TTL (s)" ToolTip="Change the amount of time the red warning marker will be displayed around a system."/>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,2">
+                                        <xctk:IntegerUpDown Value="{Binding Path=IntelTextSize}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="8" Maximum="20" Background="Transparent"  Foreground="White" ToolTip="Change the size of the text in the intel channel."/>
+                                        <Label Content="Intel text size" ToolTip="Change the size of the text in the intel channel."/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Header="Intel Sources" Margin="4" Height="262">
+                                <StackPanel>
+                                    <CheckBox IsChecked="{Binding SubscribeToCorp}" Margin="0,2" Content="Watch corp chat" ToolTip="Watch corp chat for intel reports."/>
+                                    <CheckBox IsChecked="{Binding SubscribeToAlliance}" Margin="0,2" Content="Watch alliance chat" ToolTip="Watch alliance chat for intel reports."/>
+                                    <CheckBox IsChecked="{Binding SubscribeToAllIntel}" Margin="0,2" Content="Subscribe to all remote intel channels" ToolTip="Recieve intel even if you are not currently in-game or part of the intel channel."/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2">
+                                        <Label Content="Intel Channels"></Label>
+                                    </StackPanel>
+                                    <TextBox Height="80" AcceptsReturn="True" Text="{Binding IntelChannels}" VerticalScrollBarVisibility="Visible" ToolTip="Type the name of the channels to monitor in this text box. One channel per line."/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2">
+                                        <Label Content="Custom Keywords"></Label>
+                                    </StackPanel>
+                                    <TextBox AcceptsReturn="True" Height="40" Text="{Binding IntelCustomWords}" VerticalScrollBarVisibility="Visible" ToolTip="List keywords that play a sound."/>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1">
+                            <GroupBox Header="Danger Zone" Margin="4" Height="85">
                                 <StackPanel>
 
-                                    <CheckBox IsChecked="{Binding Path=PlayIntelSound}" Margin="0,2" Content="Warning sound" ToolTip="Play a sound when intel is reported."/>
-                                    <CheckBox IsChecked="{Binding Path=PlayIntelSoundOnUnknown}" Margin="0,2" Content="Warning on unknown" ToolTip="Play a sound when intel is reported, but cannot be attributed to a system."/>
-                                    <CheckBox IsChecked="{Binding Path=PlayIntelSoundOnClear}" Margin="0,2" Content="Warning on clear" ToolTip="Play a sound when system clear intel is reported."/>
-                                    <CheckBox IsChecked="{Binding Path=PlayIntelSoundOnCustom}" Margin="0,2" Content="Warning on custom keyword" ToolTip="Play a sound when a keyword is detected."/>
+                                    <CheckBox IsChecked="{Binding Path=ShowDangerZone}" Margin="0,2" Content="Show danger zone" ToolTip="Show the danger zone red system outlines on the map."/>
+                                    <CheckBox IsChecked="{Binding Path=PlaySoundOnlyInDangerZone}" Margin="0,2" Content="Limit sound to danger zone" ToolTip="Only play a sound when intel is reported in a system within the danger zone range."/> 
+                                    <StackPanel Orientation="Horizontal" Margin="0,2">
+                                        <xctk:IntegerUpDown Value="{Binding Path=WarningRange}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="1" MaxLength="5" Background="Transparent"  Foreground="White" ToolTip="Change the size of the danger zone."/>
+                                        <Label Content="Danger zone range" ToolTip="Change the range of the danger zone (number of jumps)."/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Header="Sounds" Margin="4" Height="262">
+                                <StackPanel>
+
+                                    <CheckBox IsChecked="{Binding Path=PlayIntelSound}" Margin="0,2" Content="Warning for known intel" ToolTip="Play a sound when intel is reported."/>
+                                    <CheckBox IsChecked="{Binding Path=PlayIntelSoundOnUnknown}" Margin="0,2" Content="Warning for unknown intel" ToolTip="Play a sound when intel is reported, but cannot be attributed to a system."/>
+                                    <CheckBox IsChecked="{Binding Path=PlayIntelSoundOnClear}" Margin="0,2" Content="Warning for clear intel" ToolTip="Play a sound when system clear intel is reported."/>
+                                    <CheckBox IsChecked="{Binding Path=PlayIntelSoundOnCustom}" Margin="0,2" Content="Warning for custom keywords" ToolTip="Play a sound when a keyword is detected."/>
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <ComboBox Width="80">
                                             <ComboBoxItem Content="woop.mp3"></ComboBoxItem>
@@ -138,7 +180,18 @@
                                             <ComboBoxItem Content="zahzigrunt.mp3"></ComboBoxItem>
                                             <ComboBoxItem Content="cawww.mp3"></ComboBoxItem>
                                         </ComboBox>
-                                        <Label Content="Warning sound file" ToolTip="Change the intel warning sound."/>
+                                        <Label Content="Known intel sound" ToolTip="Change the intel warning sound."/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2">
+                                        <ComboBox Width="80">
+                                            <ComboBoxItem Content="woop.mp3"></ComboBoxItem>
+                                            <ComboBoxItem Content="alert.mp3"></ComboBoxItem>
+                                            <ComboBoxItem Content="HELPHELP.mp3"></ComboBoxItem>
+                                            <ComboBoxItem Content="weewoo.mp3"></ComboBoxItem>
+                                            <ComboBoxItem Content="zahzigrunt.mp3"></ComboBoxItem>
+                                            <ComboBoxItem Content="cawww.mp3"></ComboBoxItem>
+                                        </ComboBox>
+                                        <Label Content="Unknown intel sound" ToolTip="Change the intel warning sound."/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <ComboBox Width="80">
@@ -147,7 +200,7 @@
                                             <ComboBoxItem Content="bzzzt.mp3"></ComboBoxItem>
                                             <ComboBoxItem Content="reeee.mp3"></ComboBoxItem>
                                         </ComboBox>
-                                        <Label Content="Clear sound file" ToolTip="Change the clear notification sound."/>
+                                        <Label Content="Clear intel sound" ToolTip="Change the clear notification sound."/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,2">
                                         <ComboBox Width="80">
@@ -155,56 +208,8 @@
                                             <ComboBoxItem Content="boop.mp3"></ComboBoxItem>
                                             <ComboBoxItem Content="hello.mp3"></ComboBoxItem>
                                         </ComboBox>
-                                        <Label Content="Custom keyword sound file" ToolTip="Change the custom notification sound."/>
+                                        <Label Content="Custom keyword sound" ToolTip="Change the custom notification sound."/>
                                     </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <xctk:IntegerUpDown Value="{Binding Path=IntelTextSize}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="8" Maximum="20" Background="Transparent"  Foreground="White" ToolTip="Change the size of the text in the intel channel."/>
-                                        <Label Content="Intel text size" ToolTip="Change the size of the text in the intel channel."/>
-                                    </StackPanel>
-
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <xctk:IntegerUpDown Value="{Binding Path=MaxIntelSeconds}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="30" Maximum="1200" Background="Transparent"  Foreground="White" ToolTip="Change the amount of time the red warning marker will be displayed around a system."/>
-                                        <Label Content="Intel TTL (s)" ToolTip="Change the amount of time the red warning marker will be displayed around a system."/>
-                                    </StackPanel>
-
-                                </StackPanel>
-                            </GroupBox>
-                            <GroupBox Header="Intel Sources" Margin="4" Height="230">
-                                <StackPanel>
-                                    <CheckBox IsChecked="{Binding SubscribeToCorp}" Margin="0,2" Content="Watch corp chat" ToolTip="Watch corp chat for intel reports."/>
-                                    <CheckBox IsChecked="{Binding SubscribeToAlliance}" Margin="0,2" Content="Watch alliance chat" ToolTip="Watch alliance chat for intel reports."/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <Label Content="Custom Keywords"></Label>
-                                    </StackPanel>
-                                    <TextBox AcceptsReturn="True" Text="{Binding IntelCustomWords}" VerticalScrollBarVisibility="Visible" ToolTip="List keywords that play a sound."/>
-
-                                </StackPanel>
-                            </GroupBox>
-                            
-
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="1">
-                            <GroupBox Header="Danger Zone" Margin="4" Height="90">
-                                <StackPanel>
-
-                                    <CheckBox IsChecked="{Binding Path=ShowDangerZone}" Margin="0,2" Content="Show danger zone" ToolTip="Show the danger zone red system outlines on the map."/>
-                                    <CheckBox IsChecked="{Binding Path=PlaySoundOnlyInDangerZone}" Margin="0,2" Content="Limit sound to danger zone" ToolTip="Only play a sound when intel is reported in a system within the danger zone range."/> 
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <xctk:IntegerUpDown Value="{Binding Path=WarningRange}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="1" MaxLength="5" Background="Transparent"  Foreground="White" ToolTip="Change the size of the danger zone."/>
-                                        <Label Content="Danger zone size" ToolTip="Change the size of the danger zone."/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </GroupBox>
-                            <GroupBox Header="Intel Sources" Margin="4" Height="250">
-                                <StackPanel>
-                                    <CheckBox IsChecked="{Binding SubscribeToCorp}" Margin="0,2" Content="Watch corp chat" ToolTip="Watch corp chat for intel reports."/>
-                                    <CheckBox IsChecked="{Binding SubscribeToAlliance}" Margin="0,2" Content="Watch alliance chat" ToolTip="Watch alliance chat for intel reports."/>
-                                    <CheckBox IsChecked="{Binding SubscribeToAllIntel}" Margin="0,2" Content="Subscribe to all remote intel channels" ToolTip="Recieve intel even if you are not currently in-game or part of the intel channel."/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <Label Content="Intel Channels"></Label>
-                                    </StackPanel>
-                                    <TextBox Height="100" AcceptsReturn="True" Text="{Binding IntelChannels}" VerticalScrollBarVisibility="Visible" ToolTip="Type the name of the channels to monitor in this text box. One channel per line."/>
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>
