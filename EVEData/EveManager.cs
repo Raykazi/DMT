@@ -2556,7 +2556,7 @@ namespace SMT.EVEData
                                 {
                                     foreach (IntelData idl in IntelDataList)
                                     {
-                                        if (idl.IntelString == newIntelString && (DateTime.Now - idl.IntelTime).Seconds < 5)
+                                        if (idl.IntelString == newIntelString && (DateTime.UtcNow - idl.IntelTime).Seconds < 5)
                                         {
                                             addToIntel = false;
                                             break;
