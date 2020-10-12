@@ -22,7 +22,7 @@
                                 <StackPanel>
                                     <CheckBox IsChecked="{Binding Path=AlwaysOnTop}" Margin="0,3" Content="Always on top" ToolTip="Always display DMT above other windows."/>
                                     <CheckBox IsChecked="{Binding Path=SyncActiveCharacterBasedOnActiveEVEClient}" Margin="0,3" Content="Auto sync character to active window" ToolTip="Always display the active characters current region."/>
-                                    <CheckBox x:Name="syncESIPositionChk" Margin="0,3" Checked="syncESIPositionChk_Checked" Unchecked="syncESIPositionChk_Checked" Content="Use ESI for character positions" ToolTip="ESI decides where your character is, not your local files."/>
+                                    <!--<CheckBox x:Name="syncESIPositionChk" Margin="0,3" Checked="syncESIPositionChk_Checked" Unchecked="syncESIPositionChk_Checked" Content="Use ESI for character positions" ToolTip="ESI decides where your character is, not your local files."/>-->
                                     <Grid VerticalAlignment="Top" Height="Auto" Margin="0,5,0,0">
                                         <Grid.Resources>
                                             <Style TargetType="{x:Type TextBox}">
