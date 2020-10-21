@@ -1649,6 +1649,11 @@ namespace SMT.EVEData
         {
             Thread.CurrentThread.IsBackground = false;
 
+            if (!Directory.Exists(eveLogFolder))
+            {
+                return;
+            }
+
             // loop forever
             while (WatcherThreadShouldTerminate == false)
             {
