@@ -883,10 +883,6 @@ namespace SMT.EVEData
 
 
 
-
-
-
-
             // now create the voronoi regions
             foreach (MapRegion mr in Regions)
             {
@@ -3030,13 +3026,12 @@ namespace SMT.EVEData
         {
             try
             {
-
-                EsiResponse<List<ESI.NET.Models.Universe.Jumps>> esr = await ESIClient.Universe.Jumps();
-                if (ESIHelpers.ValidateESICall(esr))
+                ESI.NET.EsiResponse<List<ESI.NET.Models.Universe.Jumps>> esr = await ESIClient.Universe.Jumps();
+                if (ESIHelpers.ValidateESICall<List<ESI.NET.Models.Universe.Jumps>>(esr))
                 {
                     foreach (ESI.NET.Models.Universe.Jumps j in esr.Data)
                     {
-                        System es = GetEveSystemFromID(j.SystemId);
+                        EVEData.System es = GetEveSystemFromID(j.SystemId);
                         if (es != null)
                         {
                             es.JumpsLastHour = j.ShipJumps;
@@ -3045,11 +3040,10 @@ namespace SMT.EVEData
                 }
 
             }
-            catch (HttpRequestException ex)
+            catch
             {
-                //For when Zahzi wakes up his PC.
             }
-        }
+       }
 
         /// <summary>
         /// Start the ESI download for the kill info
