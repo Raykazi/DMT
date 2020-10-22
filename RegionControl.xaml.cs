@@ -2918,6 +2918,7 @@ namespace SMT
                 {
                     setDesto.IsEnabled = true;
                     addWaypoint.IsEnabled = true;
+                    clearRoute.IsEnabled = true;
                 }
 
                 // get a list of characters in this system
