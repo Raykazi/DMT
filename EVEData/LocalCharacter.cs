@@ -37,6 +37,8 @@ namespace SMT.EVEData
 
         private bool esiRouteUpdating = false;
 
+        private bool esiSendRouteClear;
+
         /// <summary>
         /// The name of the system this character is currently in
         /// </summary>
@@ -317,6 +319,18 @@ namespace SMT.EVEData
             routeNeedsUpdate = true;
             esiRouteNeedsUpdate = true;
         }
+
+        public void ClearAllWaypoints()
+        {
+            lock (ActiveRouteLock)
+            {
+                ActiveRoute.Clear();
+                Waypoints.Clear();
+            }
+            routeNeedsUpdate = true;
+            esiSendRouteClear = true;
+        }
+
         public async Task<List<JumpBridge>> FindJumpGates(string JumpBridgeFilterString = " » ")
         {
             List<JumpBridge> jbl = new List<JumpBridge>();
@@ -569,6 +583,29 @@ namespace SMT.EVEData
         /// </summary>
         private async void UpdateActiveRoute()
         {
+            if (esiSendRouteClear)
+            {
+                esiSendRouteClear = false;
+                esiRouteNeedsUpdate = false;
+
+                System s = EveManager.Instance.GetEveSystem(Location);
+                if (s != null)
+                {
+                    ESI.NET.EsiClient esiClient = EveManager.Instance.ESIClient;
+                    esiClient.SetCharacterData(ESIAuthData);
+
+                    ESI.NET.EsiResponse<string> esr = await esiClient.UserInterface.Waypoint(s.ID, false, true);
+                    if (EVEData.ESIHelpers.ValidateESICall<string>(esr))
+                    {
+                        // failed to clear route
+                    }
+                }
+
+                return;
+            }
+
+
+
             if (Waypoints.Count == 0)
             {
                 return;
