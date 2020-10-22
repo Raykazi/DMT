@@ -134,11 +134,6 @@ namespace SMT
             EVEManager.MaxChatLines = MapConf.MaxChatLines;
             EVEManager.MqttInit();
 
-            // Auto populate JB list from DMT if preference checked
-            if (EVEManager.AutoSyncJb)
-            {
-                EVEManager_JbSyncedEvent();
-            }
 
             EVEManager.UseESIForCharacterPositions = MapConf.UseESIForCharacterPositions;
 
@@ -285,8 +280,12 @@ namespace SMT
                 EVEManager.SetStatus("Waiting on MQTT info");
                 Preferences_MenuItem_Click(null, null);
             }
-
             Timer_Tick(null, null);
+            // Auto populate JB list from DMT if preference checked
+            if (EVEManager.AutoSyncJb)
+            {
+                EVEManager_JbSyncedEvent();
+            }
         }
 
         private void Timer_Tick(object sender, EventArgs e)
