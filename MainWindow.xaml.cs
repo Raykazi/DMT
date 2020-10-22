@@ -134,6 +134,12 @@ namespace SMT
             EVEManager.MaxChatLines = MapConf.MaxChatLines;
             EVEManager.MqttInit();
 
+            // Auto populate JB list from DMT if preference checked
+            if (EVEManager.AutoSyncJb)
+            {
+                EVEManager_JbSyncedEvent();
+            }
+
             EVEManager.UseESIForCharacterPositions = MapConf.UseESIForCharacterPositions;
 
             // if we want to re-build the data as we've changed the format, recreate it all from scratch
