@@ -29,6 +29,8 @@ namespace SMT.EVEData
         /// </summary>
         public ObservableCollection<ZKBDataSimple> KillStream { get; set; }
 
+        public int KillExpireTimeMinutes { get; set; }
+
         /// <summary>
         ///
         /// </summary>
@@ -157,7 +159,7 @@ namespace SMT.EVEData
                     }
                 }
 
-                if (KillStream[i].KillTime + TimeSpan.FromMinutes(30) < DateTimeOffset.Now)
+                if (KillStream[i].KillTime + TimeSpan.FromMinutes(KillExpireTimeMinutes) < DateTimeOffset.Now)
                 {
 
                     Application.Current.Dispatcher.Invoke((Action)(() =>

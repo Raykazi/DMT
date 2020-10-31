@@ -86,6 +86,7 @@ namespace SMT
         private int m_UpcomingSovMinutes;
 
         private int m_WarningRange = 4;
+        private int m_ZkillExpireTimeMinutes;
 
         private int m_FleetMaxMembersPerSystem = 5;
 
@@ -714,6 +715,29 @@ namespace SMT
 
 
 
+
+
+        public int ZkillExpireTimeMinutes
+        {
+            get
+            {
+                return m_ZkillExpireTimeMinutes;
+            }
+
+            set
+            {
+                m_ZkillExpireTimeMinutes = value;
+                if (m_ZkillExpireTimeMinutes < 5)
+                {
+                    m_UpcomingSovMinutes = 5;
+                }
+
+                OnPropertyChanged("ZkillExpireTimeMinutes");
+            }
+        }
+
+        
+
         public bool UseESIForCharacterPositions { get; set; }
 
         public bool ShowCharacterNamesOnMap
@@ -856,6 +880,7 @@ namespace SMT
             ShowSystemPopup = true;
             MaxIntelSeconds = 200;
             UpcomingSovMinutes = 30;
+            ZkillExpireTimeMinutes = 30;
             AlwaysOnTop = false;
             ShowToolBox = true;
             ShowZKillData = true;

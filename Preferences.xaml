@@ -133,6 +133,13 @@
                                         <xctk:IntegerUpDown Value="{Binding Path=IntelTextSize}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="80" Minimum="8" Maximum="20" Background="Transparent"  Foreground="White" ToolTip="Change the size of the text in the intel channel."/>
                                         <Label Content="Intel text size" ToolTip="Change the size of the text in the intel channel."/>
                                     </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,2">
+                                        <xctk:IntegerUpDown Value="{Binding Path=ZkillExpireTimeMinutes}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="70" Minimum="5" Maximum="120" Background="Transparent"  Foreground="White" ValueChanged="zkilltime_ValueChanged" />
+                                        <Label Content="Zkill Max Time (minutes)" />
+                                    </StackPanel>
+
+
                                 </StackPanel>
                             </GroupBox>
                             <GroupBox Header="Intel Sources" Margin="4" Height="262">

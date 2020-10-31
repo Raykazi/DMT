@@ -157,6 +157,8 @@ namespace SMT
             RawIntelBox.ItemsSource = EVEManager.IntelDataList;
             RawChatBox.ItemsSource = EVEManager.ChatDataList;
 
+            EVEManager.ZKillFeed.KillExpireTimeMinutes = MapConf.ZkillExpireTimeMinutes;
+
             // load jump bridge data
             EVEManager.LoadJumpBridgeData();
             EVEManager.UpdateESIUniverseData();
