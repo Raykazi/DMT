@@ -31,6 +31,23 @@ namespace SMT.EVEData
             IntelChannel = intelChannel.Insert(0, "(");
             IntelChannel = IntelChannel.Insert(IntelChannel.Length, ")");
         }
+
+        public static bool IsBadIntel(string intelText)
+        {
+            bool Bad = false;
+
+            if (intelText.Length < 27)
+            {
+                Bad = true;
+            }
+            if (intelText.IndexOf('>') == -1 || intelText.IndexOf('[') == -1 || intelText.IndexOf(']') == -1)
+            {
+                Bad = true;
+            }
+
+            return Bad;
+        }
+
         public string IntelChannel { get; set; }
         public bool ClearNotification { get; set; }
 

@@ -124,6 +124,12 @@ namespace SMT.EVEData
                 Directory.CreateDirectory(SaveDataVersionFolder);
             }
 
+            string characterSaveFolder = SaveDataRootFolder + "\\Portraits";
+            if (!Directory.Exists(characterSaveFolder))
+            {
+                Directory.CreateDirectory(characterSaveFolder);
+            }
+
             string webCacheFoilder = DataCacheFolder + "\\WebCache";
             if (!Directory.Exists(webCacheFoilder))
             {
@@ -466,7 +472,7 @@ namespace SMT.EVEData
             Regions.Add(new MapRegion("Verge Vendor", "10000068", "Gallente", 245, 330));
             Regions.Add(new MapRegion("Wicked Creek", "10000006", string.Empty, 790, 615));
 
-      
+
 
 
 
@@ -623,7 +629,7 @@ namespace SMT.EVEData
                         s.RadiusAU = radius / 149597870700;
 
                         // manually patch pochven
-                        if(regionID == "10000070")
+                        if (regionID == "10000070")
                         {
                             s.Region = "Pochven";
                         }
@@ -813,7 +819,7 @@ namespace SMT.EVEData
             lonetrek.MapSystems.Remove("Kino");  // Pochven
             lonetrek.MapSystems.Remove("Nani");  // Pochven
             lonetrek.MapSystems.Remove("Arvasaras");  // Pochven
-            
+
 
 
             EVEData.MapRegion metropolis = GetRegion("Metropolis");
@@ -843,7 +849,7 @@ namespace SMT.EVEData
             MapRegion pochven = new MapRegion("Pochven", "10000008", "Triglavian", 50, 50);
             Regions.Add(pochven);
 
-             // Krai Perun
+            // Krai Perun
             pochven.MapSystems.Add("Otela", new MapSystem() { Name = "Otela", LayoutX = 915, LayoutY = 360, Region = "Pochven", OutOfRegion = false });
             pochven.MapSystems.Add("Otanuomi", new MapSystem() { Name = "Otanuomi", LayoutX = 600, LayoutY = 550, Region = "Pochven", OutOfRegion = false });
             pochven.MapSystems.Add("Kino", new MapSystem() { Name = "Kino", LayoutX = 790, LayoutY = 390, Region = "Pochven", OutOfRegion = false });
@@ -1001,7 +1007,7 @@ namespace SMT.EVEData
 
 
 
- 
+
 
 
 
@@ -1251,7 +1257,7 @@ namespace SMT.EVEData
         /// </summary>
         public string GetESILogonURL(string challengeCode)
         {
-            return ESIClient.SSO.CreateAuthenticationUrl(ESIScopes, VersionStr, challengeCode );
+            return ESIClient.SSO.CreateAuthenticationUrl(ESIScopes, VersionStr, challengeCode);
         }
 
         /// <summary>
@@ -2410,31 +2416,39 @@ namespace SMT.EVEData
                     break;
                 case "intel":
                     DMTIntel intel = JsonConvert.DeserializeObject<DMTIntel>(payload);
-                    IntelData newIdl = new IntelData(intel.RawIntel, intel.Channel);
-                    foreach (string s in newIdl.IntelString.Split(' '))
+                    IntelData newIdl = null;
+                    if (!IntelData.IsBadIntel(intel.RawIntel))
+                        newIdl = new IntelData(intel.RawIntel, intel.Channel);
+                    if (newIdl != null)
                     {
-                        if (s == "" || s.Length < 3)
+                        foreach (string s in newIdl.IntelString.Split(' '))
                         {
-                            continue;
-                        }
-
-                        foreach (String clearMarker in IntelClearFilters)
-                        {
-                            if (clearMarker.IndexOf(s, StringComparison.OrdinalIgnoreCase) == 0)
+                            if (s == "" || s.Length < 3)
                             {
-                                newIdl.ClearNotification = true;
+                                continue;
+                            }
+
+                            foreach (String clearMarker in IntelClearFilters)
+                            {
+                                if (clearMarker.IndexOf(s, StringComparison.OrdinalIgnoreCase) == 0)
+                                {
+                                    newIdl.ClearNotification = true;
+                                }
+                            }
+
+                            foreach (System sys in Systems)
+                            {
+                                if (sys.Name.IndexOf(s, StringComparison.OrdinalIgnoreCase) == 0 ||
+                                    s.IndexOf(sys.Name, StringComparison.OrdinalIgnoreCase) == 0)
+                                {
+                                    newIdl.Systems.Add(sys.Name);
+                                }
                             }
                         }
 
-                        foreach (System sys in Systems)
-                        {
-                            if (sys.Name.IndexOf(s, StringComparison.OrdinalIgnoreCase) == 0 || s.IndexOf(sys.Name, StringComparison.OrdinalIgnoreCase) == 0)
-                            {
-                                newIdl.Systems.Add(sys.Name);
-                            }
-                        }
+                        CheckIntel(false, newIdl);
                     }
-                    CheckIntel(false, newIdl);
+
                     break;
                 case "info":
                     if (subtopic == "jbs")
@@ -2490,17 +2504,22 @@ namespace SMT.EVEData
 
         private void SendCharacters()
         {
-            if (mqttClient == null) return;
-            if (!mqttClient.IsConnected) return;
-            if (Fingerprint == string.Empty) return;
-            string payload = JsonConvert.SerializeObject(LocalCharacters);
-            var message = new MqttApplicationMessageBuilder()
-                .WithTopic($"pilots/{Fingerprint}")
-                .WithPayload(payload)
-                .WithExactlyOnceQoS()
-                .WithRetainFlag(true)
-                .Build();
-            mqttClient.PublishAsync(message);
+            if (Application.Current == null) return;
+            Application.Current.Dispatcher.Invoke((Action)(() =>
+            {
+                if (mqttClient == null) return;
+                if (!mqttClient.IsConnected) return;
+                if (Fingerprint == string.Empty) return;
+                string payload = JsonConvert.SerializeObject(LocalCharacters);
+                var message = new MqttApplicationMessageBuilder()
+                    .WithTopic($"pilots/{Fingerprint}")
+                    .WithPayload(payload)
+                    .WithExactlyOnceQoS()
+                    .WithRetainFlag(true)
+                    .Build();
+                mqttClient.PublishAsync(message);
+            }), DispatcherPriority.Normal, null);
+
         }
 
         public void SendCharLocation(LocalCharacter c)
@@ -2769,40 +2788,47 @@ namespace SMT.EVEData
                                 }
                                 if (addToIntel)
                                 {
-                                    IntelData id = new IntelData(line, idlName);
+                                    IntelData id = null;
+                                    if (!IntelData.IsBadIntel(line))
+                                        id = new IntelData(line, idlName);
 
-                                    foreach (string s in id.IntelString.Split(' '))
+                                    if (id != null)
                                     {
-                                        if (s == "" || s.Length < 3)
+                                        foreach (string s in id.IntelString.Split(' '))
                                         {
-                                            continue;
-                                        }
-
-                                        foreach (String clearMarker in IntelClearFilters)
-                                        {
-                                            if (clearMarker.IndexOf(s, StringComparison.OrdinalIgnoreCase) == 0)
+                                            if (s == "" || s.Length < 3)
                                             {
-                                                id.ClearNotification = true;
+                                                continue;
+                                            }
+
+                                            foreach (String clearMarker in IntelClearFilters)
+                                            {
+                                                if (clearMarker.IndexOf(s, StringComparison.OrdinalIgnoreCase) == 0)
+                                                {
+                                                    id.ClearNotification = true;
+                                                }
+                                            }
+
+                                            foreach (System sys in Systems)
+                                            {
+                                                if (sys.Name.IndexOf(s, StringComparison.OrdinalIgnoreCase) == 0 ||
+                                                    s.IndexOf(sys.Name, StringComparison.OrdinalIgnoreCase) == 0)
+                                                {
+                                                    id.Systems.Add(sys.Name);
+                                                }
                                             }
                                         }
 
-                                        foreach (System sys in Systems)
+                                        if (id.IntelChannel == "(Corp)" || id.IntelChannel == "(Alliance)")
                                         {
-                                            if (sys.Name.IndexOf(s, StringComparison.OrdinalIgnoreCase) == 0 || s.IndexOf(sys.Name, StringComparison.OrdinalIgnoreCase) == 0)
-                                            {
-                                                id.Systems.Add(sys.Name);
-                                            }
+                                            CheckChat(true, id);
+                                            SendIntel(changedFile, id, true);
                                         }
-                                    }
-                                    if (id.IntelChannel == "(Corp)" || id.IntelChannel == "(Alliance)")
-                                    {
-                                        CheckChat(true, id);
-                                        SendIntel(changedFile, id, true);
-                                    }
-                                    else
-                                    {
-                                        CheckIntel(true, id);
-                                        SendIntel(changedFile, id);
+                                        else
+                                        {
+                                            CheckIntel(true, id);
+                                            SendIntel(changedFile, id);
+                                        }
                                     }
                                 }
                             }), DispatcherPriority.Normal, null);
@@ -2904,8 +2930,6 @@ namespace SMT.EVEData
                         for (int i = 0; i < LocalCharacters.Count; i++)
                         {
                             LocalCharacter c = LocalCharacters.ElementAt(i);
-                            if (c.WarningSystemRange != WarningSystemRange)
-                                c.WarningSystemRange = WarningSystemRange;
                             await c.Update();
                             if (Application.Current != null)
                                 Application.Current.Dispatcher.Invoke((Action)(() =>
@@ -3051,7 +3075,7 @@ namespace SMT.EVEData
             catch
             {
             }
-       }
+        }
 
         /// <summary>
         /// Start the ESI download for the kill info

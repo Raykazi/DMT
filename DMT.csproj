@@ -268,6 +268,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CharactersWindow.xaml.cs">
+      <DependentUpon>CharactersWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EVEData\Coalition.cs" />
     <Compile Include="EVEData\ESI\CharacterIDData.cs" />
     <Compile Include="EVEData\ESI\CoalitionInfo.cs" />
@@ -304,6 +307,10 @@
       <DependentUpon>UniverseControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utils.cs" />
+    <Page Include="CharactersWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="LogonWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

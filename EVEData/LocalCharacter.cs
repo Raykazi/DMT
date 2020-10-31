@@ -5,13 +5,16 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Drawing;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using System.Xml.Serialization;
+using System.Windows.Media.Imaging;
 using Newtonsoft.Json;
 
 namespace SMT.EVEData
@@ -52,6 +55,7 @@ namespace SMT.EVEData
         /// Does the route need updating
         /// </summary>
         private bool routeNeedsUpdate = false;
+        private int ssoErrorCount = 0;
 
         public DateTime LastUpdate { get; set; }
         public bool IsOnline { get; set; }
@@ -94,7 +98,14 @@ namespace SMT.EVEData
             UpdateLock = new SemaphoreSlim(1);
 
             CorporationID = -1;
+            CorporationName = null;
+            CorporationTicker = null;
             AllianceID = -1;
+            AllianceName = null;
+            AllianceTicker = null;
+
+            WarningSystemRange = 5;
+
             DockableStructures = new Dictionary<string, List<StructureIDs.StructureIdData>>();
 
             UseAnsiblexGates = true;
@@ -242,6 +253,7 @@ namespace SMT.EVEData
 
                 m_NavigationMode = value;
                 routeNeedsUpdate = true;
+                OnPropertyChanged("NavigationMode");
             }
         }
 
@@ -288,7 +300,18 @@ namespace SMT.EVEData
 
         public int WarningSystemRange { get; set; }
 
+        [XmlIgnoreAttribute]
         public List<string> WarningSystems { get; set; }
+
+
+
+
+        [XmlIgnoreAttribute]
+        public BitmapImage Portrait { get; set; }
+
+
+
+
 
         /// <summary>
         /// Gets or sets the current list of Waypoints
@@ -555,6 +578,20 @@ namespace SMT.EVEData
                     // a reauth
                     ESIRefreshToken = "";
                     ESILinked = false;
+
+                    ssoErrorCount++;
+
+                    Thread.Sleep(10000);
+
+                    if(ssoErrorCount > 50 )
+                    {
+                        // we have a valid refresh token BUT it failed to auth; we need to force
+                        // a reauth
+                        ESIRefreshToken = "";
+                        ESILinked = false;
+                    }
+
+
 
                     return;
                 }
@@ -901,7 +938,7 @@ namespace SMT.EVEData
 
                         if (EVEData.ESIHelpers.ValidateESICall(esr))
                         {
-                            if (esr.Pages.HasValue)
+                            if (esr.Pages.HasValue) ;
                             {
                                 maxPageCount = (int)esr.Pages;
                             }
@@ -927,6 +964,53 @@ namespace SMT.EVEData
                     }
                     while (page < maxPageCount);
                 }
+
+                // get the character portrait
+                string characterPortrait = EveManager.Instance.SaveDataRootFolder + "\\Portraits\\" + ID + ".png";
+                if(!File.Exists(characterPortrait))
+                {
+                    ESI.NET.EsiResponse<ESI.NET.Models.Images> esri = await esiClient.Character.Portrait((int)ID);
+                    if(esri.Data != null)
+                    {
+                        WebClient webClient = new WebClient();
+                        webClient.DownloadFile(esri.Data.x128, characterPortrait);
+                    }
+                }
+
+                Application.Current.Dispatcher.Invoke((Action)(() =>
+                {
+                    Uri imageLoc = new Uri(characterPortrait);
+                    Portrait = new BitmapImage(imageLoc);
+                }), DispatcherPriority.Normal, null);
+                
+                //get the corp info
+                if(CorporationID != -1)
+                {
+                    ESI.NET.EsiResponse<ESI.NET.Models.Corporation.Corporation> esrc = await esiClient.Corporation.Information((int)CorporationID);
+                    if(esrc.Data != null)
+                    {
+                        CorporationName = esrc.Data.Name;
+                        CorporationTicker = esrc.Data.Ticker;
+                    }
+                }
+
+                //get the Alliance info
+                if (AllianceID > 0)
+                {
+                    ESI.NET.EsiResponse<ESI.NET.Models.Alliance.Alliance> esra = await esiClient.Alliance.Information((int)AllianceID);
+                    if (esra.Data != null)
+                    {
+                        AllianceName = esra.Data.Name;
+                        AllianceTicker = esra.Data.Ticker;
+                    }
+                }
+                else
+                {
+                    AllianceName = null;
+                    AllianceTicker = null;
+                }
+
+
             }
             catch (Exception)
             {

@@ -249,7 +249,6 @@ namespace SMT
 
             foreach (EVEData.LocalCharacter lc in EVEManager.LocalCharacters)
             {
-                lc.WarningSystemRange = MapConf.WarningRange;
                 lc.Location = "";
             }
         }
@@ -855,6 +854,12 @@ namespace SMT
         /// </summary>
         private void btn_AddCharacter_Click(object sender, RoutedEventArgs e)
         {
+            AddCharacter();
+        }
+
+
+        public void AddCharacter()
+        { 
             if (logonBrowserWindow != null)
             {
                 logonBrowserWindow.Close();
@@ -865,6 +870,8 @@ namespace SMT
             logonBrowserWindow.Owner = this;
             logonBrowserWindow.ShowDialog();
         }
+
+
 
         private void CharactersList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
@@ -1632,6 +1639,17 @@ namespace SMT
             }
         }
 
+
+        private void Characters_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            CharactersWindow charactersWindow = new CharactersWindow();
+            charactersWindow.characterLV.ItemsSource = EVEManager.LocalCharacters;
+
+            charactersWindow.Owner = this;
+
+            charactersWindow.ShowDialog();
+
+        }
         private void CorpCharactersList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             Application.Current.Dispatcher.Invoke((Action)(() =>
