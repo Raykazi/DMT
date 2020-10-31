@@ -2209,6 +2209,7 @@ namespace SMT.EVEData
                     ServerInfo.MqttStatusColor = Colors.Orange;
                 }
             }
+            mqttClient.SynchronizingSubscriptionsFailedHandler = new SynchronizingSubscriptionsFailedHandlerDelegate(OnSynchronizingSubscriptionsFailed);
             mqttClient.ConnectingFailedHandler = new ConnectingFailedHandlerDelegate(OnMqttFailed);
             mqttClient.UseConnectedHandler(OnMqttConnect);
             mqttClient.UseApplicationMessageReceivedHandler(HandleMessages);
@@ -2308,6 +2309,13 @@ namespace SMT.EVEData
                 //{
                 //    Environment.Exit(0);
                 //}), DispatcherPriority.Normal, null);
+            }
+        }
+        private void OnSynchronizingSubscriptionsFailed(ManagedProcessFailedEventArgs obj)
+        {
+            if (obj.Exception.Message.Contains("MQTTnet.Exceptions.MqttCommunicationTimedOutException"))
+            {
+                //CON TIMED OUT
             }
         }
 
