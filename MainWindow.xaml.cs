@@ -635,7 +635,7 @@ namespace SMT
             }
         }
 
-        private void OnCharacterSelectionChanged()
+        public void OnCharacterSelectionChanged()
         {
             CollectionViewSource.GetDefaultView(ZKBFeed.ItemsSource).Refresh();
 

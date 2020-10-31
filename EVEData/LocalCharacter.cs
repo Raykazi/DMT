@@ -892,7 +892,7 @@ namespace SMT.EVEData
         /// <summary>
         /// Update the character info from the ESI data if linked
         /// </summary>
-        private async Task UpdateInfoFromESI()
+        public async Task UpdateInfoFromESI()
         {
             if (ID == 0 || !ESILinked || ESIAuthData == null)
             {

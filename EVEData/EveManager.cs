@@ -1424,6 +1424,7 @@ namespace SMT.EVEData
             esiChar.ESIAccessTokenExpiry = acd.ExpiresOn;
             esiChar.ID = acd.CharacterID;
             esiChar.ESIAuthData = acd;
+            esiChar.UpdateInfoFromESI();
             var item = LocalCharacters.FirstOrDefault(x => x.Name == esiChar.Name);
             if (item == null) return;
             var index = LocalCharacters.IndexOf(item);
