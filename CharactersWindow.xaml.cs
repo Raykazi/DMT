@@ -68,7 +68,7 @@ namespace SMT
             EVEData.LocalCharacter lc = characterInfoGrid.DataContext as EVEData.LocalCharacter;
             if(lc != null)
             {
-                MessageBoxResult result = MessageBox.Show("Would you like to Delete \"" + lc.Name + " ?", "Delete Character?", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                MessageBoxResult result = MessageBox.Show("Would you like to delete " + lc.Name + "?", "Delete Character?", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if(result == MessageBoxResult.Yes)
                 {

@@ -28,17 +28,19 @@
 
         </Grid.RowDefinitions>
 
-        <ListView x:Name="characterLV"  Grid.Row="0" BorderBrush="Black"   SelectionChanged="characterLV_Selected" Margin="4">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <WrapPanel>
-                            <Image Source="{Binding Portrait}" Width="32" Height="32" Margin="1" />
-                            <TextBlock Text="{Binding Name}" FontSize="16"/>
-                        </WrapPanel>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        <Button DockPanel.Dock="Bottom" Content="Add Character" Grid.Row="1" Click="AddCharacter_Click" Margin="4"/>
+        <ListView x:Name="characterLV"  Grid.Row="0" SelectionChanged="characterLV_Selected" Margin="4">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <WrapPanel>
+                        <Image Source="{Binding Portrait}" Width="32" Height="32" Margin="1"/>
+                        <TextBlock Text="{Binding Name}" FontSize="16" VerticalAlignment="Center" Margin="3"/>
+                        <TextBlock Text="{Binding ESILinked}" FontSize="12" VerticalAlignment="Center" Margin="3"/>
+                        <TextBlock Text="{Binding IsOnline}" FontSize="12" VerticalAlignment="Center" Margin="3"/>
+                    </WrapPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <Button DockPanel.Dock="Bottom" Content="Add Character" Grid.Row="1" Click="AddCharacter_Click" Margin="4" Width="100" ToolTip="Click to add a character to DMT."/>
 
         <Grid x:Name="characterInfoGrid" Grid.Column="1" Grid.RowSpan="2" Visibility="Hidden"
               Background="{DynamicResource ListBackground}" >
@@ -67,19 +69,15 @@
 
                 <TextBlock FontSize="14" Foreground="LightGray">
                                     <Run Text="{Binding CorporationName, FallbackValue='????'}"/>
-                                    <Run Text=" ["/>
-                                    <Run Text="{Binding CorporationTicker, FallbackValue='????'}"/>
-                                    <Run Text="]"/>
+                                    <Run Text="["/><Run Text="{Binding CorporationTicker, FallbackValue='????'}"/><Run Text="]"/>
                 </TextBlock>
                 <TextBlock FontSize="14" Foreground="LightGray">
-                                    <Run Text="{Binding AllianceName, FallbackValue='No Alliance'}"/>
-                                    <Run Text=" ["/>
-                                    <Run Text="{Binding AllianceTicker , FallbackValue=''}"/>
-                                    <Run Text="]"/>
+                                    <Run Text="{Binding AllianceName, TargetNullValue='No Alliance', FallbackValue='No Alliance'}"/>
+                                    <Run Text="&lt;"/><Run Text="{Binding AllianceTicker, TargetNullValue='?', FallbackValue='?'}"/><Run Text=">"/>
                 </TextBlock>
 
                 <TextBlock FontSize="14" Foreground="LightGray">
-                                    <Run Text="{Binding Location, FallbackValue='Unknown Location'}"/>
+                                    <Run Text="{Binding Location, TargetNullValue='Unknown Location', FallbackValue='Unknown Location'}"/>
                 </TextBlock>
 
                 <TextBlock Text=" " />
@@ -90,7 +88,7 @@
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ESILinked}" Value="True">
                                     <Setter Property="Text" Value="Authenticated" />
-                                    <Setter Property="Foreground" Value="Green" />
+                                    <Setter Property="Foreground" Value="LightGreen" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding ESILinked}" Value="False">
                                     <Setter Property="Text" Value="Unauthenticated" />
@@ -150,7 +148,7 @@
             </GroupBox>
 
 
-            <Button Content="Delete" Grid.Column="1" Grid.Row="8" Width="100" VerticalAlignment="Center"  HorizontalAlignment="Right" Margin="20,0" x:Name="deleteBtn" Click="deleteBtn_Click"/>
+            <Button Content="Delete" Grid.Column="1" Grid.Row="8" Width="100" VerticalAlignment="Center"  HorizontalAlignment="Right" Margin="20,0" x:Name="deleteBtn" Click="deleteBtn_Click" ToolTip="Delete your character from DMT."/>
 
 
 
