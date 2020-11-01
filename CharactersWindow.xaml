@@ -28,15 +28,24 @@
 
         </Grid.RowDefinitions>
 
-        <ListView x:Name="characterLV"  Grid.Row="0" SelectionChanged="characterLV_Selected" Margin="4">
+        <ListView x:Name="characterLV"  Grid.Row="0" BorderBrush="Black"   SelectionChanged="characterLV_Selected" Margin="4">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <WrapPanel>
-                        <Image Source="{Binding Portrait}" Width="32" Height="32" Margin="1"/>
-                        <TextBlock Text="{Binding Name}" FontSize="16" VerticalAlignment="Center" Margin="3"/>
-                        <TextBlock Text="{Binding ESILinked}" FontSize="12" VerticalAlignment="Center" Margin="3"/>
-                        <TextBlock Text="{Binding IsOnline}" FontSize="12" VerticalAlignment="Center" Margin="3"/>
-                    </WrapPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="64"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="20" />
+                        </Grid.RowDefinitions>
+                        <Image Source="{Binding Portrait}" Width="64" Height="64" Margin="0" Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" />
+                        <TextBlock Text="{Binding Name}" FontSize="16" Grid.Column="1" Grid.Row="0"/>
+                        <TextBlock Text="{Binding ESILinked}" FontSize="12" Grid.Column="1" Grid.Row="1"/>
+                        <TextBlock Text="{Binding IsOnline}" FontSize="12" Grid.Column="1" Grid.Row="2"></TextBlock>
+                    </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
