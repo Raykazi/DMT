@@ -838,8 +838,11 @@ namespace SMT.EVEData
 
                             }
 
+                            EVEData.System es = EveManager.Instance.GetEveSystemFromID(esifm.SolarSystemId);
+
                             fm.Name = EveManager.Instance.GetCharacterName(esifm.CharacterId);
-                            fm.Location = EveManager.Instance.GetEveSystemNameFromID(esifm.SolarSystemId);
+                            fm.Location = es.Name;
+                            fm.Region = es.Region;
                             fm.CharacterID = esifm.CharacterId;
                             if (EveManager.Instance.ShipTypes.ContainsKey(esifm.ShipTypeId.ToString()))
                             {
