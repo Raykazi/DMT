@@ -28,7 +28,7 @@
 
         </Grid.RowDefinitions>
 
-        <ListView x:Name="characterLV"  Grid.Row="0" SelectionChanged="characterLV_Selected" Margin="4">
+        <ListView x:Name="characterLV"  Grid.Row="0" SelectionChanged="characterLV_Selected" Margin="1" ScrollViewer.VerticalScrollBarVisibility="Visible" SelectedIndex="0">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Delete" Click="deleteBtn_Click"/>
@@ -48,13 +48,41 @@
                         </Grid.RowDefinitions>
                         <Image Source="{Binding Portrait, TargetNullValue='????', FallbackValue=''}" Width="64" Height="64" Margin="0" Grid.Column="0" Grid.Row="0" Grid.RowSpan="3"/>
                         <TextBlock Text="{Binding Name}" FontSize="16" Grid.Column="1" Grid.Row="0" Margin="3,2,5,0"/>
-                        <TextBlock Text="{Binding ESILinked, TargetNullValue='Unknown', FallbackValue='Unknown'}" FontSize="12" Grid.Column="1" Grid.Row="1" Margin="3,2,5,5"/>
-                        <TextBlock Text="{Binding IsOnline, TargetNullValue='Unknown', FallbackValue='Unknown'}" FontSize="12" Grid.Column="1" Grid.Row="2" Margin="3,2,5,5"/>
+                        <TextBlock FontSize="12" Grid.Column="1" Grid.Row="1" Margin="3,2,5,5">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ESILinked, TargetNullValue='Unknown', FallbackValue='Unknown'}" Value="True">
+                                            <Setter Property="Text" Value="Authenticated" />
+                                            <Setter Property="Foreground" Value="LightGreen" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ESILinked, TargetNullValue='Unknown', FallbackValue='Unknown'}" Value="False">
+                                            <Setter Property="Text" Value="Unauthenticated" />
+                                            <Setter Property="Foreground" Value="Red" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock FontSize="12" Grid.Column="1" Grid.Row="2" Margin="3,2,5,5">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsOnline, TargetNullValue='Unknown', FallbackValue='Unknown'}" Value="True">
+                                            <Setter Property="Text" Value="Online" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsOnline, TargetNullValue='Unknown', FallbackValue='Unknown'}" Value="False">
+                                            <Setter Property="Text" Value="Offline" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        <Button DockPanel.Dock="Bottom" Content="Add Character" Grid.Row="1" Click="AddCharacter_Click" Margin="4" Width="100" ToolTip="Click to add a character to DMT."/>
+        <Button DockPanel.Dock="Bottom" Content="Add Character" Grid.Row="1" Width="100" Click="AddCharacter_Click" Margin="4" ToolTip="Click to add a character to DMT."/>
 
         <Grid x:Name="characterInfoGrid" Grid.Column="1" Grid.RowSpan="2" Visibility="Hidden"
               Background="{DynamicResource ListBackground}" >
@@ -104,82 +132,29 @@
                 <TextBlock FontSize="14" Foreground="LightGray">
                                     <Run Text="{Binding Location, TargetNullValue='Unknown Location', FallbackValue='Unknown Location'}"/>
                 </TextBlock>
-
-                <TextBlock Text=" " />
-
-                <TextBlock Margin="0">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ESILinked}" Value="True">
-                                    <Setter Property="Text" Value="Authenticated" />
-                                    <Setter Property="Foreground" Value="LightGreen" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ESILinked}" Value="False">
-                                    <Setter Property="Text" Value="Unauthenticated" />
-                                    <Setter Property="Foreground" Value="Red" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-
-
-
-                <TextBlock>
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsOnline}" Value="True">
-                                    <Setter Property="Text" Value="Online" />
-                                    <Setter Property="Foreground" Value="LightGray" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsOnline}" Value="False">
-                                    <Setter Property="Text" Value="Offline" />
-                                    <Setter Property="Foreground" Value="DarkGray" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-
-
             </StackPanel>
 
-
-
-
-            <GroupBox Header="Navigation Options" Grid.Row="1" Grid.RowSpan="7" BorderBrush="DarkGray" Margin="5">
-                <StackPanel Margin="4">
-                    <StackPanel Orientation="Horizontal" Margin="4">
-                        <Label Content="Autopilot" />
-                        <ComboBox ItemsSource="{Binding Source={StaticResource navigationEnumData}}" SelectedItem="{Binding NavigationMode, Mode=TwoWay}" Margin="2" Width="140"  Background="Black"/>
-                    </StackPanel>
-                    <CheckBox IsChecked="{Binding UseAnsiblexGates}"  HorizontalAlignment="Left" Content="Use Ansiblex Gates" Margin="4"/>
-
- 
-                 </StackPanel>
-            </GroupBox>
-
-
-            <GroupBox Header="DangerZone"  Grid.Column="1" Grid.Row="1" Grid.RowSpan="7" BorderBrush="DarkGray" Margin="5">
+            <GroupBox Header="Intel" Grid.Column="0" Grid.Row="1" Grid.RowSpan="7" Margin="4">
                 <StackPanel Margin="4" >
-                    <CheckBox IsChecked="{Binding DangerZoneActive}" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Checked="dangerZoneEnabled_Checked" Content="DangerZone Enabled" Margin="4"/>
-                    <StackPanel Orientation="Horizontal" Margin="4">
-                        <xctk:IntegerUpDown Value="{Binding DangerZoneRange}" Grid.Row="5" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0" Width="45" Minimum="1" Maximum="6" Background="Transparent"  Foreground="White" ValueChanged="dangerzone_ValueChanged" />
-                        <Label Content="DangerZone Size" Grid.Column="0" Grid.Row="5" HorizontalAlignment="Right" />
+                    <CheckBox IsChecked="{Binding BroadcastLocation}" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Checked="dangerZoneEnabled_Checked" Content="Location broadcasting" Margin="3"/>
+                    <CheckBox IsChecked="{Binding DangerZoneActive}" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Checked="dangerZoneEnabled_Checked" Content="Danger zone" Margin="3"/>
+                    <StackPanel Orientation="Horizontal">
+                        <xctk:IntegerUpDown Value="{Binding DangerZoneRange}" Grid.Row="5" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0" Width="45" Minimum="1" Maximum="6" Background="Transparent"  Foreground="White" ValueChanged="dangerzone_ValueChanged"/>
+                        <Label Content="Danger zone range" Grid.Column="0" Grid.Row="5" HorizontalAlignment="Right"/>
                     </StackPanel>
                 </StackPanel>
             </GroupBox>
 
+            <GroupBox Header="Navigation Options" Grid.Column="1" Grid.Row="1" Grid.RowSpan="7" Margin="4">
+                <StackPanel Margin="4">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Autopilot setting"/>
+                        <ComboBox ItemsSource="{Binding Source={StaticResource navigationEnumData}}" SelectedItem="{Binding NavigationMode, Mode=TwoWay}" Margin="3" Width="100" Background="{DynamicResource ButtonBackground}"/>
+                    </StackPanel>
+                    <CheckBox IsChecked="{Binding UseAnsiblexGates}"  HorizontalAlignment="Left" Content="Use Ansiblex Gates" Margin="3"/>
 
-            <Button Content="Delete" Grid.Column="1" Grid.Row="8" Width="100" VerticalAlignment="Center"  HorizontalAlignment="Right" Margin="20,0" x:Name="deleteBtn" Click="deleteBtn_Click" ToolTip="Delete your character from DMT."/>
-
-
-
-
-
-
+                </StackPanel>
+            </GroupBox>
 
         </Grid>
     </Grid>
