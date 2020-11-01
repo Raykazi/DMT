@@ -28,7 +28,12 @@
 
         </Grid.RowDefinitions>
 
-        <ListView x:Name="characterLV"  Grid.Row="0" BorderBrush="Black"   SelectionChanged="characterLV_Selected" Margin="4">
+        <ListView x:Name="characterLV"  Grid.Row="0" SelectionChanged="characterLV_Selected" Margin="4">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Delete" Click="deleteBtn_Click"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <Grid>
@@ -37,14 +42,14 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="20" />
-                            <RowDefinition Height="20" />
-                            <RowDefinition Height="20" />
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
                         </Grid.RowDefinitions>
-                        <Image Source="{Binding Portrait}" Width="64" Height="64" Margin="0" Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" />
-                        <TextBlock Text="{Binding Name}" FontSize="16" Grid.Column="1" Grid.Row="0"/>
-                        <TextBlock Text="{Binding ESILinked}" FontSize="12" Grid.Column="1" Grid.Row="1"/>
-                        <TextBlock Text="{Binding IsOnline}" FontSize="12" Grid.Column="1" Grid.Row="2"></TextBlock>
+                        <Image Source="{Binding Portrait, TargetNullValue='????', FallbackValue=''}" Width="64" Height="64" Margin="0" Grid.Column="0" Grid.Row="0" Grid.RowSpan="3"/>
+                        <TextBlock Text="{Binding Name}" FontSize="16" Grid.Column="1" Grid.Row="0" Margin="3,2,5,0"/>
+                        <TextBlock Text="{Binding ESILinked, TargetNullValue='Unknown', FallbackValue='Unknown'}" FontSize="12" Grid.Column="1" Grid.Row="1" Margin="3,2,5,5"/>
+                        <TextBlock Text="{Binding IsOnline, TargetNullValue='Unknown', FallbackValue='Unknown'}" FontSize="12" Grid.Column="1" Grid.Row="2" Margin="3,2,5,5"/>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
@@ -67,21 +72,32 @@
                 <RowDefinition Height="25" />
                 <RowDefinition Height="25" />
                 <RowDefinition Height="25" />
-                <RowDefinition Height="30" />
-                <RowDefinition Height="30" />
-                <RowDefinition Height="30" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
             </Grid.RowDefinitions>
 
-            <Image Source="{Binding Portrait}" Width="170" Height="170" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Margin="10"/>
+            <Image Source="{Binding Portrait, FallbackValue=''}" Width="170" Height="170" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Margin="10"/>
             <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="1" Margin="-40,30" Grid.RowSpan="2">
                 <TextBlock Text="{Binding Name}" FontSize="24" Foreground="White" />
 
                 <TextBlock FontSize="14" Foreground="LightGray">
-                                    <Run Text="{Binding CorporationName, FallbackValue='????'}"/>
-                                    <Run Text="["/><Run Text="{Binding CorporationTicker, FallbackValue='????'}"/><Run Text="]"/>
+                                    <Run Text="{Binding CorporationName, TargetNullValue='Unknown', FallbackValue='????'}"/>
+                                    <Run Text="["/><Run Text="{Binding CorporationTicker, TargetNullValue='?', FallbackValue='?'}"/><Run Text="]"/>
                 </TextBlock>
                 <TextBlock FontSize="14" Foreground="LightGray">
-                                    <Run Text="{Binding AllianceName, TargetNullValue='No Alliance', FallbackValue='No Alliance'}"/>
+                                    <Run Text="{Binding AllianceName, TargetNullValue='Unknown', FallbackValue='No Alliance'}"/>
                                     <Run Text="&lt;"/><Run Text="{Binding AllianceTicker, TargetNullValue='?', FallbackValue='?'}"/><Run Text=">"/>
                 </TextBlock>
 
