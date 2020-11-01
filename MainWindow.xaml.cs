@@ -379,23 +379,11 @@ namespace SMT
         private AvalonDock.Layout.LayoutDocument RegionLayoutDoc { get; }
         private AvalonDock.Layout.LayoutDocument UniverseLayoutDoc { get; }
 
-        private void ActiveSovCampaigns_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            CollectionViewSource.GetDefaultView(SovCampaignList.ItemsSource).Refresh();
-        }
-
 
         private void LocalCharacters_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             CollectionViewSource.GetDefaultView(CharactersList.ItemsSource).Refresh();
 
-        }
-
-
-
-        private void Exit_MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Application.Current.Shutdown();
         }
 
         private AvalonDock.Layout.LayoutDocument FindDocWithContentID(AvalonDock.Layout.ILayoutElement root, string contentID)
