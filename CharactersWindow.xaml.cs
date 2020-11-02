@@ -44,6 +44,11 @@ namespace SMT
             mw.AddCharacter();
         }
 
+        private void Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            characterLV.Items.Refresh();
+        }
+
         private void dangerzone_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             EVEData.LocalCharacter lc = characterInfoGrid.DataContext as EVEData.LocalCharacter;

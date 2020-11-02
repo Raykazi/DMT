@@ -28,7 +28,7 @@
 
         </Grid.RowDefinitions>
 
-        <ListView x:Name="characterLV"  Grid.Row="0" SelectionChanged="characterLV_Selected" Margin="1" ScrollViewer.VerticalScrollBarVisibility="Visible" SelectedIndex="0">
+        <ListView x:Name="characterLV" Grid.Row="0" SelectionChanged="characterLV_Selected" Margin="2" ScrollViewer.VerticalScrollBarVisibility="Visible" SelectedIndex="0" Padding="0">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Delete" Click="deleteBtn_Click"/>
@@ -82,7 +82,20 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+        <TextBlock Margin="3" FontSize="12" Text="No characters added to DMT." Grid.Column="0" Grid.Row="0" Foreground="White">
+            <TextBlock.Style>
+                <Style TargetType="{x:Type TextBlock}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=characterLV, Path=Items.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
         <Button DockPanel.Dock="Bottom" Content="Add Character" Grid.Row="1" Width="100" Click="AddCharacter_Click" Margin="4" ToolTip="Click to add a character to DMT."/>
+        <Button DockPanel.Dock="Bottom" Content="Refresh" Grid.Row="1" Width="50" Click="Refresh_Click" Margin="190,4,10,4" ToolTip="Refresh."/> <!--This should be removed when it's automagic.-->
 
         <Grid x:Name="characterInfoGrid" Grid.Column="1" Grid.RowSpan="2" Visibility="Hidden"
               Background="{DynamicResource ListBackground}" >
