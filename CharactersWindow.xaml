@@ -149,11 +149,11 @@
 
             <GroupBox Header="Intel" Grid.Column="0" Grid.Row="1" Grid.RowSpan="7" Margin="4">
                 <StackPanel Margin="4" >
-                    <CheckBox IsChecked="{Binding BroadcastLocation}" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Checked="dangerZoneEnabled_Checked" Content="Location broadcasting" Margin="3"/>
-                    <CheckBox IsChecked="{Binding DangerZoneActive}" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Checked="dangerZoneEnabled_Checked" Content="Danger zone" Margin="3"/>
+                    <CheckBox IsChecked="{Binding BroadcastLocation}"  HorizontalAlignment="Left" VerticalAlignment="Center" Checked="dangerZoneEnabled_Checked" Content="Location broadcasting" Margin="3"/>
+                    <CheckBox IsChecked="{Binding DangerzoneActive}"  HorizontalAlignment="Left" VerticalAlignment="Center" Checked="dangerZoneEnabled_Checked" Content="Danger zone" Margin="3"/>
                     <StackPanel Orientation="Horizontal">
-                        <xctk:IntegerUpDown Value="{Binding DangerZoneRange}" Grid.Row="5" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0" Width="45" Minimum="1" Maximum="6" Background="Transparent"  Foreground="White" ValueChanged="dangerzone_ValueChanged"/>
-                        <Label Content="Danger zone range" Grid.Column="0" Grid.Row="5" HorizontalAlignment="Right"/>
+                        <xctk:IntegerUpDown Value="{Binding WarningSystemRange}"  HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0" Width="45" Minimum="1" Maximum="6" Background="Transparent"  Foreground="White" ValueChanged="dangerzone_ValueChanged"/>
+                        <Label Content="Danger zone range" HorizontalAlignment="Right"/>
                     </StackPanel>
                 </StackPanel>
             </GroupBox>

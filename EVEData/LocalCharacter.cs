@@ -16,6 +16,7 @@ using System.Windows.Threading;
 using System.Xml.Serialization;
 using System.Windows.Media.Imaging;
 using Newtonsoft.Json;
+using WpfHelpers.ResourceUsage;
 
 namespace SMT.EVEData
 {
@@ -115,6 +116,8 @@ namespace SMT.EVEData
             KnownStructures = new SerializableDictionary<string, ObservableCollection<Structure>>();
             BroadcastLocation = true;
             IsOnline = true;
+            Dispatcher.CurrentDispatcher.Invoke(() => Portrait = ResourceLoader.LoadBitmapFromResource("Images/BlankPilot.jpg"));
+
         }
 
         /// <summary>
@@ -168,14 +171,12 @@ namespace SMT.EVEData
         public AuthorizedCharacterData ESIAuthData { get; set; }
 
         private bool _esiLinked = false;
-        [XmlIgnore]
-        public Brush CLColor { get; set; }
         /// <summary>
         /// Gets or sets if this character is linked with ESI
         /// </summary>
         public bool ESILinked
         {
-            get { return _esiLinked; }
+            get => _esiLinked;
             set
             {
                 _esiLinked = value;
@@ -202,8 +203,8 @@ namespace SMT.EVEData
         [JsonIgnore]
         public Fleet FleetInfo { get; set; }
 
-        public bool IsOnline 
-        { 
+        public bool IsOnline
+        {
             get
             {
                 return m_isOnline;
@@ -597,7 +598,7 @@ namespace SMT.EVEData
 
                     Thread.Sleep(10000);
 
-                    if(ssoErrorCount > 50 )
+                    if (ssoErrorCount > 50)
                     {
                         // we have a valid refresh token BUT it failed to auth; we need to force
                         // a reauth
@@ -623,8 +624,8 @@ namespace SMT.EVEData
                 ESILinked = true;
                 ESIAuthData = acd;
             }
-            catch(Exception ex)
-            { 
+            catch (Exception ex)
+            {
 
             }
         }
@@ -853,7 +854,7 @@ namespace SMT.EVEData
                             }
 
                             EVEData.System es = EveManager.Instance.GetEveSystemFromID(esifm.SolarSystemId);
-
+                            if (es == null) continue; //Incase of WH
                             fm.Name = EveManager.Instance.GetCharacterName(esifm.CharacterId);
                             fm.Location = es.Name;
                             fm.Region = es.Region;
@@ -984,10 +985,10 @@ namespace SMT.EVEData
 
                 // get the character portrait
                 string characterPortrait = EveManager.Instance.SaveDataRootFolder + "\\Portraits\\" + ID + ".png";
-                if(!File.Exists(characterPortrait))
+                if (!File.Exists(characterPortrait))
                 {
                     ESI.NET.EsiResponse<ESI.NET.Models.Images> esri = await esiClient.Character.Portrait((int)ID);
-                    if(esri.Data != null)
+                    if (esri.Data != null)
                     {
                         WebClient webClient = new WebClient();
                         webClient.DownloadFile(esri.Data.x128, characterPortrait);
@@ -999,12 +1000,12 @@ namespace SMT.EVEData
                     Uri imageLoc = new Uri(characterPortrait);
                     Portrait = new BitmapImage(imageLoc);
                 }), DispatcherPriority.Normal, null);
-                
+
                 //get the corp info
-                if(CorporationID != -1)
+                if (CorporationID != -1)
                 {
                     ESI.NET.EsiResponse<ESI.NET.Models.Corporation.Corporation> esrc = await esiClient.Corporation.Information((int)CorporationID);
-                    if(esrc.Data != null)
+                    if (esrc.Data != null)
                     {
                         CorporationName = esrc.Data.Name;
                         CorporationTicker = esrc.Data.Ticker;

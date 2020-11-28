@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using SMT.EVEData;
 
 namespace SMT
 {
@@ -51,8 +52,7 @@ namespace SMT
 
         private void dangerzone_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            EVEData.LocalCharacter lc = characterInfoGrid.DataContext as EVEData.LocalCharacter;
-            if (lc != null)
+            if (characterInfoGrid.DataContext is LocalCharacter lc)
             {
                 lc.warningSystemsNeedsUpdate = true;
             }
@@ -60,8 +60,7 @@ namespace SMT
 
         private void dangerZoneEnabled_Checked(object sender, RoutedEventArgs e)
         {
-            EVEData.LocalCharacter lc = characterInfoGrid.DataContext as EVEData.LocalCharacter;
-            if (lc != null)
+            if (characterInfoGrid.DataContext is LocalCharacter lc)
             {
                 lc.warningSystemsNeedsUpdate = true;
             }
@@ -69,34 +68,27 @@ namespace SMT
 
         private void deleteBtn_Click(object sender, RoutedEventArgs e)
         {
+            if (!(characterInfoGrid.DataContext is LocalCharacter lc)) return;
+            MessageBoxResult result = MessageBox.Show("Would you like to delete " + lc.Name + "?", "Delete Character?", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
-            EVEData.LocalCharacter lc = characterInfoGrid.DataContext as EVEData.LocalCharacter;
-            if(lc != null)
-            {
-                MessageBoxResult result = MessageBox.Show("Would you like to delete " + lc.Name + "?", "Delete Character?", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-                if(result == MessageBoxResult.Yes)
-                {
-                    MainWindow mw = Owner as MainWindow;
+            if (result != MessageBoxResult.Yes) return;
+            MainWindow mw = Owner as MainWindow;
 
 
-                    mw.ActiveCharacter = null;
-                    mw.FleetMembersList.ItemsSource = null;
+            mw.ActiveCharacter = null;
+            mw.FleetMembersList.ItemsSource = null;
 
-                    mw.CurrentActiveCharacterCombo.SelectedIndex = -1;
-                    mw.RegionsViewUC.ActiveCharacter = null;
-                    mw.RegionUC.ActiveCharacter = null;
-                    mw.RegionUC.UpdateActiveCharacter();
-                    mw.UniverseUC.ActiveCharacter = null;
-                    mw.OnCharacterSelectionChanged();
+            mw.CurrentActiveCharacterCombo.SelectedIndex = -1;
+            mw.RegionsViewUC.ActiveCharacter = null;
+            mw.RegionUC.ActiveCharacter = null;
+            mw.RegionUC.UpdateActiveCharacter();
+            mw.UniverseUC.ActiveCharacter = null;
+            mw.OnCharacterSelectionChanged();
 
-                    mw.EVEManager.LocalCharacters.Remove(lc);
+            mw.EVEManager.LocalCharacters.Remove(lc);
 
 
-                    characterInfoGrid.Visibility = Visibility.Hidden;
-                }
-
-            }
+            characterInfoGrid.Visibility = Visibility.Hidden;
         }
     }
 }

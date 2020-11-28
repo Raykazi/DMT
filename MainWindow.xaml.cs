@@ -1653,12 +1653,16 @@ namespace SMT
 
         private void Characters_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            CharactersWindow charactersWindow = new CharactersWindow();
-            charactersWindow.characterLV.ItemsSource = EVEManager.LocalCharacters;
+            
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                CharactersWindow charactersWindow = new CharactersWindow();
+                charactersWindow.characterLV.ItemsSource = EVEManager.LocalCharacters;
 
-            charactersWindow.Owner = this;
+                charactersWindow.Owner = this;
 
-            charactersWindow.ShowDialog();
+                charactersWindow.ShowDialog();
+            });
 
         }
         private void CorpCharactersList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
