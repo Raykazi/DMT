@@ -1809,7 +1809,7 @@ namespace SMT.EVEData
                     {
                         if (IntelDataList.Count > MaxChatLines)
                         {
-                            for (int i = MaxChatLines - 1; i < IntelDataList.Count; i++)
+                            for (int i = IntelDataList.Count - 1; i >= MaxChatLines; i--)
                             {
                                 IntelDataList.RemoveAt(i);
                             }
@@ -1821,7 +1821,8 @@ namespace SMT.EVEData
                     {
                         if (ChatDataList.Count > MaxChatLines)
                         {
-                            for (int i = MaxChatLines - 1; i < ChatDataList.Count; i++)
+
+                            for (int i = ChatDataList.Count - 1; i >= MaxChatLines; i--)
                             {
                                 ChatDataList.RemoveAt(i);
                             }
