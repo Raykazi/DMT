@@ -706,7 +706,7 @@ namespace WpfHelpers.WpfControls.Zoombox
             if (!AllowScrolling)
                 return;
 
-            var handle = (Keyboard.Modifiers & ModifierKeys.Control) > 0 && ModifierMode == ZoomViewModifierMode.None;
+            var handle = ModifierMode == ZoomViewModifierMode.None;
             if (!handle)
                 return;
 
