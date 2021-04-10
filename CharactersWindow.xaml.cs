@@ -76,7 +76,7 @@ namespace SMT
 
 
                     mw.ActiveCharacter = null;
-                    mw.FleetMembersList.ItemsSource = null;
+                    //mw.FleetMembersList.ItemsSource = null;
 
                     mw.CurrentActiveCharacterCombo.SelectedIndex = -1;
                     mw.RegionsViewUC.ActiveCharacter = null;

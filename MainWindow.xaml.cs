@@ -138,7 +138,7 @@ namespace SMT
             CharactersList.ItemsSource = EVEManager.LocalCharacters;
             CurrentActiveCharacterCombo.ItemsSource = EVEManager.LocalCharacters;
 
-            FleetMembersList.DataContext = this;
+            //FleetMembersList.DataContext = this;
 
             TheraConnectionsList.ItemsSource = EVEManager.TheraConnections;
             JumpBridgeList.ItemsSource = EVEManager.JumpBridges;
@@ -466,14 +466,14 @@ namespace SMT
         private void UiRefreshTimer_Tick(object sender, EventArgs e)
         {
             uiRefreshCounter++;
-            if (uiRefreshCounter == 5)
-            {
-                uiRefreshCounter = 0;
-                if (FleetMembersList.ItemsSource != null)
-                {
-                    CollectionViewSource.GetDefaultView(FleetMembersList.ItemsSource).Refresh();
-                }
-            }
+            //if (uiRefreshCounter == 5)
+            //{
+            //    uiRefreshCounter = 0;
+            //    if (FleetMembersList.ItemsSource != null)
+            //    {
+            //        CollectionViewSource.GetDefaultView(FleetMembersList.ItemsSource).Refresh();
+            //    }
+            //}
             if (MapConf.SyncActiveCharacterBasedOnActiveEVEClient)
             {
                 UpdateCharacterSelectionBasedOnActiveWindow();
@@ -737,8 +737,8 @@ namespace SMT
                         ActiveCharacter = lc;
                         CurrentActiveCharacterCombo.SelectedItem = lc;
 
-                        FleetMembersList.ItemsSource = lc.FleetInfo.Members;
-                        CollectionViewSource.GetDefaultView(FleetMembersList.ItemsSource).Refresh();
+                        //FleetMembersList.ItemsSource = lc.FleetInfo.Members;
+                        //CollectionViewSource.GetDefaultView(FleetMembersList.ItemsSource).Refresh();
 
                         RegionUC.FollowCharacter = true;
                         RegionUC.SelectSystem(lc.Location, true);
@@ -760,7 +760,7 @@ namespace SMT
             EVEData.LocalCharacter lc = CharactersList.SelectedItem as EVEData.LocalCharacter;
 
             ActiveCharacter = null;
-            FleetMembersList.ItemsSource = null;
+            //FleetMembersList.ItemsSource = null;
 
             CurrentActiveCharacterCombo.SelectedIndex = -1;
             RegionsViewUC.ActiveCharacter = null;
@@ -778,7 +778,7 @@ namespace SMT
             {
                 RegionsViewUC.ActiveCharacter = null;
                 RegionUC.ActiveCharacter = null;
-                FleetMembersList.ItemsSource = null;
+                //FleetMembersList.ItemsSource = null;
                 RegionUC.UpdateActiveCharacter();
                 UniverseUC.UpdateActiveCharacter(null);
             }
@@ -787,8 +787,8 @@ namespace SMT
                 EVEData.LocalCharacter lc = CurrentActiveCharacterCombo.SelectedItem as EVEData.LocalCharacter;
                 ActiveCharacter = lc;
 
-                FleetMembersList.ItemsSource = lc.FleetInfo.Members;
-                CollectionViewSource.GetDefaultView(FleetMembersList.ItemsSource).Refresh();
+                //FleetMembersList.ItemsSource = lc.FleetInfo.Members;
+                //CollectionViewSource.GetDefaultView(FleetMembersList.ItemsSource).Refresh();
 
                 RegionsViewUC.ActiveCharacter = lc;
                 RegionUC.UpdateActiveCharacter(lc);
@@ -811,8 +811,8 @@ namespace SMT
                     {
                         ActiveCharacter = lc;
                         CurrentActiveCharacterCombo.SelectedItem = lc;
-                        FleetMembersList.ItemsSource = lc.FleetInfo.Members;
-                        CollectionViewSource.GetDefaultView(FleetMembersList.ItemsSource).Refresh();
+                        //FleetMembersList.ItemsSource = lc.FleetInfo.Members;
+                        //CollectionViewSource.GetDefaultView(FleetMembersList.ItemsSource).Refresh();
                         RegionUC.UpdateActiveCharacter(lc);
                         UniverseUC.UpdateActiveCharacter(lc);
 
