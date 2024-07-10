@@ -52,7 +52,20 @@ namespace SMT.EVEData
         private string VersionStr;
 
         private bool WatcherThreadShouldTerminate;
-
+        // Create a new MQTT client.
+        private MqttFactory factory = new MqttFactory();
+        private static IManagedMqttClient mqttClient;
+        private IMqttClientOptions mqttOptions;
+        private bool retryAllowed = false;
+        private int mqttConnects = 0;
+        private bool _cleanIntel;
+        public readonly string Fingerprint;
+        public int MaxChatLines;
+        public enum ChatMode
+        {
+            Intel = 0,
+            Chat = 1
+        }
         /// <summary>
         /// Initializes a new instance of the <see cref="EveManager" /> class
         /// </summary>
@@ -60,8 +73,9 @@ namespace SMT.EVEData
         {
             LocalCharacters = new ObservableCollection<LocalCharacter>();
             VersionStr = version;
+            Fingerprint = Security.FingerPrint.Value();
 
-  
+
             string SaveDataRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT";
             if (!Directory.Exists(SaveDataRoot))
             {
@@ -1447,7 +1461,7 @@ namespace SMT.EVEData
 
             
             // now add the beacons
-            string cynoBeaconsFile = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\CynoBeacons.txt";
+            string cynoBeaconsFile = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\DMT\\CynoBeacons.txt";
             if (File.Exists(cynoBeaconsFile))
             {
                 StreamReader file = new StreamReader(cynoBeaconsFile);
@@ -1631,9 +1645,9 @@ namespace SMT.EVEData
             }
 
             // save the intel channels / intel filters
-            File.WriteAllLines(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\IntelChannels.txt", IntelFilters);
-            File.WriteAllLines(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\IntelClearFilters.txt", IntelClearFilters);
-            File.WriteAllLines(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\CynoBeacons.txt", beaconsToSave);
+            File.WriteAllLines(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\DMT\\IntelChannels.txt", IntelFilters);
+            File.WriteAllLines(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\DMT\\IntelClearFilters.txt", IntelClearFilters);
+            File.WriteAllLines(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\DMT\\CynoBeacons.txt", beaconsToSave);
 
 
 
@@ -1646,7 +1660,7 @@ namespace SMT.EVEData
         {
             IntelFilters = new List<string>();
             IntelDataList = new BindingList<IntelData>();
-            string intelFileFilter = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\IntelChannels.txt";
+            string intelFileFilter = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\DMT\\IntelChannels.txt";
 
 
             if (File.Exists(intelFileFilter))
@@ -1668,7 +1682,7 @@ namespace SMT.EVEData
             }
 
             IntelClearFilters = new List<string>();
-            string intelClearFileFilter = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\IntelClearFilters.txt";
+            string intelClearFileFilter = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\DMT\\IntelClearFilters.txt";
 
             if (File.Exists(intelClearFileFilter))
             {
@@ -1721,7 +1735,40 @@ namespace SMT.EVEData
             // END SUPERHACK
             // -----------------------------------------------------------------
         }
+        public void CheckChatLines(ChatMode mode)
+        {
+            switch (mode)
+            {
+                case ChatMode.Intel:
+                {
+                    if (IntelDataList.Count > MaxChatLines)
+                    {
+                        for (int i = IntelDataList.Count - 1; i >= MaxChatLines; i--)
+                        {
+                            IntelDataList.RemoveAt(i);
+                        }
+                        _cleanIntel = false;
+                    }
+                    break;
+                }
+                //case ChatMode.Chat:
+                //{
+                //    if (ChatDataList.Count > MaxChatLines)
+                //    {
 
+                //        for (int i = ChatDataList.Count - 1; i >= MaxChatLines; i--)
+                //        {
+                //            ChatDataList.RemoveAt(i);
+                //        }
+                //        _cleanChat = false;
+                //    }
+
+                //    break;
+                //}
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+            }
+        }
         public void ShuddownIntelWatcher()
         {
             string eveLogFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\EVE\logs\Chatlogs\";

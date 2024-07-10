@@ -26,7 +26,7 @@ namespace SMT
     /// </summary>
     public partial class MainWindow : Window
     {
-        public const string SMT_VERSION = "SMT_100";
+        public const string DMT_VERSION = "DMT_2.0.0.0";
         public static MainWindow AppWindow;
         private LogonWindow logonBrowserWindow;
 
@@ -35,6 +35,7 @@ namespace SMT
 
         private int uiRefreshCounter = 0;
         private System.Windows.Threading.DispatcherTimer uiRefreshTimer;
+        private bool _firstRun = false;
 
         private List<InfoItem> InfoLayer;
 
@@ -52,12 +53,12 @@ namespace SMT
 
             InitializeComponent();
 
-            Title = "SMT (Light the Beacon! : " + SMT_VERSION + ")";
+            Title = "DMT (X Gon Give It To Ya " + DMT_VERSION + ")";
 
             CheckGitHubVersion();
 
             // Load the Dock Manager Layout file
-            string dockManagerLayoutName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\" + SMT_VERSION + "\\Layout.dat";
+            string dockManagerLayoutName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\DMT\\" + DMT_VERSION + "\\Layout.dat";
             if (File.Exists(dockManagerLayoutName))
             {
                 try
@@ -78,7 +79,7 @@ namespace SMT
             UniverseLayoutDoc = FindDocWithContentID(dockManager.Layout, "FullUniverseViewID");
 
             // load any custom map settings off disk
-            string mapConfigFileName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\" + SMT_VERSION + "\\MapConfig.dat";
+            string mapConfigFileName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\DMT\\" + DMT_VERSION + "\\MapConfig.dat";
 
             if (File.Exists(mapConfigFileName))
             {
@@ -102,10 +103,14 @@ namespace SMT
                 MapConf = new MapConfig();
                 MapConf.SetDefaultColours();
             }
+            if (MapConf.Url == null)
+            {
+                _firstRun = true;
+            }
 
             // Create the main EVE manager
 
-            EVEManager = new EVEData.EveManager(SMT_VERSION);
+            EVEManager = new EVEData.EveManager(DMT_VERSION);
             EVEData.EveManager.Instance = EVEManager;
 
             EVEManager.UseESIForCharacterPositions = MapConf.UseESIForCharacterPositions;
@@ -154,7 +159,7 @@ namespace SMT
 
             // load any custom universe view layout
             // Save any custom map Layout
-            string customLayoutFile = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\" + SMT_VERSION + "\\CustomUniverseLayout.txt";
+            string customLayoutFile = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\DMT\\" + DMT_VERSION + "\\CustomUniverseLayout.txt";
             if (File.Exists(customLayoutFile))
             {
                 try
@@ -338,7 +343,7 @@ namespace SMT
         {
             // save off the dockmanager layout
 
-            string dockManagerLayoutName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\" + SMT_VERSION + "\\Layout.dat";
+            string dockManagerLayoutName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\DMT\\" + DMT_VERSION + "\\Layout.dat";
             try
             {
                 AvalonDock.Layout.Serialization.XmlLayoutSerializer ls = new AvalonDock.Layout.Serialization.XmlLayoutSerializer(dockManager);
@@ -361,7 +366,7 @@ namespace SMT
 
 
                 // Save the Map Colours
-                string mapConfigFileName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\" + SMT_VERSION + "\\MapConfig.dat";
+                string mapConfigFileName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\DMT\\" + DMT_VERSION + "\\MapConfig.dat";
 
 
                 // save off the toolbar setup
@@ -384,7 +389,7 @@ namespace SMT
                 }
 
                 // Save any custom map Layout
-                string customLayoutFile = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\SMT\\" + SMT_VERSION + "\\CustomUniverseLayout.txt";
+                string customLayoutFile = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\DMT\\" + DMT_VERSION + "\\CustomUniverseLayout.txt";
                 using (TextWriter tw = new StreamWriter(customLayoutFile))
                 {
                     foreach(EVEData.System s in EVEManager.Systems)
@@ -671,13 +676,13 @@ namespace SMT
 
                         if (releaseInfo != null)
                         {
-                            if (releaseInfo.TagName != SMT_VERSION)
+                            if (releaseInfo.TagName != DMT_VERSION)
                             {
                                 Application.Current.Dispatcher.Invoke((Action)(() =>
                                 {
                                     NewVersionWindow nw = new NewVersionWindow();
                                     nw.ReleaseInfo = releaseInfo.Body;
-                                    nw.CurrentVersion = SMT_VERSION;
+                                    nw.CurrentVersion = DMT_VERSION;
                                     nw.NewVersion = releaseInfo.TagName;
                                     nw.ReleaseURL = releaseInfo.HtmlUrl.ToString();
                                     nw.Owner = this;

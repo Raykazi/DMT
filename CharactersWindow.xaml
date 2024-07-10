@@ -28,17 +28,75 @@
 
         </Grid.RowDefinitions>
 
-        <ListView x:Name="characterLV"  Grid.Row="0" BorderBrush="Black"   SelectionChanged="characterLV_Selected" Margin="4">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <WrapPanel>
-                            <Image Source="{Binding Portrait}" Width="32" Height="32" Margin="1" />
-                            <TextBlock Text="{Binding Name}" FontSize="16"/>
-                        </WrapPanel>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        <Button DockPanel.Dock="Bottom" Content="Add Character" Grid.Row="1" Click="AddCharacter_Click" Margin="4"/>
+        <ListView x:Name="characterLV" Grid.Row="0" SelectionChanged="characterLV_Selected" Margin="2" ScrollViewer.VerticalScrollBarVisibility="Visible" SelectedIndex="0" Padding="0">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Delete" Click="deleteBtn_Click"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="64"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                        </Grid.RowDefinitions>
+                        <Image Source="{Binding Portrait, TargetNullValue='????', FallbackValue=''}" Width="64" Height="64" Margin="0" Grid.Column="0" Grid.Row="0" Grid.RowSpan="3"/>
+                        <TextBlock Text="{Binding Name}" FontSize="16" Grid.Column="1" Grid.Row="0" Margin="3,2,5,0"/>
+                        <TextBlock FontSize="12" Grid.Column="1" Grid.Row="1" Margin="3,2,5,5">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ESILinked, TargetNullValue='Unknown', FallbackValue='Unknown'}" Value="True">
+                                            <Setter Property="Text" Value="Authenticated" />
+                                            <Setter Property="Foreground" Value="LightGreen" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ESILinked, TargetNullValue='Unknown', FallbackValue='Unknown'}" Value="False">
+                                            <Setter Property="Text" Value="Unauthenticated" />
+                                            <Setter Property="Foreground" Value="Red" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock FontSize="12" Grid.Column="1" Grid.Row="2" Margin="3,2,5,5">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsOnline, TargetNullValue='Unknown', FallbackValue='Unknown'}" Value="True">
+                                            <Setter Property="Text" Value="Online" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsOnline, TargetNullValue='Unknown', FallbackValue='Unknown'}" Value="False">
+                                            <Setter Property="Text" Value="Offline" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <TextBlock Margin="3" FontSize="12" Text="No characters added to DMT." Grid.Column="0" Grid.Row="0" Foreground="White">
+            <TextBlock.Style>
+                <Style TargetType="{x:Type TextBlock}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=characterLV, Path=Items.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+        <Button DockPanel.Dock="Bottom" Content="Add Character" Grid.Row="1" Width="100" Click="AddCharacter_Click" Margin="4" ToolTip="Click to add a character to DMT."/>
+        <Button DockPanel.Dock="Bottom" Content="Refresh" Grid.Row="1" Width="50" Click="Refresh_Click" Margin="190,4,10,4" ToolTip="Refresh."/>
+        <!--This should be removed when it's automagic.-->
 
         <Grid x:Name="characterInfoGrid" Grid.Column="1" Grid.RowSpan="2" Visibility="Hidden"
               Background="{DynamicResource ListBackground}" >
@@ -56,107 +114,61 @@
                 <RowDefinition Height="25" />
                 <RowDefinition Height="25" />
                 <RowDefinition Height="25" />
-                <RowDefinition Height="30" />
-                <RowDefinition Height="30" />
-                <RowDefinition Height="30" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
             </Grid.RowDefinitions>
 
-            <Image Source="{Binding Portrait}" Width="170" Height="170" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Margin="10"/>
+            <Image Source="{Binding Portrait, FallbackValue=''}" Width="170" Height="170" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Margin="10"/>
             <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="1" Margin="-40,30" Grid.RowSpan="2">
                 <TextBlock Text="{Binding Name}" FontSize="24" Foreground="White" />
 
                 <TextBlock FontSize="14" Foreground="LightGray">
-                                    <Run Text="{Binding CorporationName, FallbackValue='????'}"/>
-                                    <Run Text=" ["/>
-                                    <Run Text="{Binding CorporationTicker, FallbackValue='????'}"/>
-                                    <Run Text="]"/>
+                                    <Run Text="{Binding CorporationName, TargetNullValue='Unknown', FallbackValue='????'}"/>
+                                    <Run Text="["/><Run Text="{Binding CorporationTicker, TargetNullValue='?', FallbackValue='?'}"/><Run Text="]"/>
                 </TextBlock>
                 <TextBlock FontSize="14" Foreground="LightGray">
-                                    <Run Text="{Binding AllianceName, FallbackValue='No Alliance'}"/>
-                                    <Run Text=" ["/>
-                                    <Run Text="{Binding AllianceTicker , FallbackValue=''}"/>
-                                    <Run Text="]"/>
+                                    <Run Text="{Binding AllianceName, TargetNullValue='Unknown', FallbackValue='No Alliance'}"/>
+                                    <Run Text="&lt;"/><Run Text="{Binding AllianceTicker, TargetNullValue='?', FallbackValue='?'}"/><Run Text=">"/>
                 </TextBlock>
 
                 <TextBlock FontSize="14" Foreground="LightGray">
-                                    <Run Text="{Binding Location, FallbackValue='Unknown Location'}"/>
+                                    <Run Text="{Binding Location, TargetNullValue='Unknown Location', FallbackValue='Unknown Location'}"/>
                 </TextBlock>
-
-                <TextBlock Text=" " />
-
-                <TextBlock Margin="0">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ESILinked}" Value="True">
-                                    <Setter Property="Text" Value="Authenticated" />
-                                    <Setter Property="Foreground" Value="Green" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ESILinked}" Value="False">
-                                    <Setter Property="Text" Value="Unauthenticated" />
-                                    <Setter Property="Foreground" Value="Red" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-
-
-
-                <TextBlock>
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsOnline}" Value="True">
-                                    <Setter Property="Text" Value="Online" />
-                                    <Setter Property="Foreground" Value="LightGray" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsOnline}" Value="False">
-                                    <Setter Property="Text" Value="Offline" />
-                                    <Setter Property="Foreground" Value="DarkGray" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-
-
             </StackPanel>
 
-
-
-
-            <GroupBox Header="Navigation Options" Grid.Row="1" Grid.RowSpan="7" BorderBrush="DarkGray" Margin="5">
-                <StackPanel Margin="4">
-                    <StackPanel Orientation="Horizontal" Margin="4">
-                        <Label Content="Autopilot" />
-                        <ComboBox ItemsSource="{Binding Source={StaticResource navigationEnumData}}" SelectedItem="{Binding NavigationMode, Mode=TwoWay}" Margin="2" Width="140"  Background="Black"/>
-                    </StackPanel>
-                    <CheckBox IsChecked="{Binding UseAnsiblexGates}"  HorizontalAlignment="Left" Content="Use Ansiblex Gates" Margin="4"/>
-
- 
-                 </StackPanel>
-            </GroupBox>
-
-
-            <GroupBox Header="DangerZone"  Grid.Column="1" Grid.Row="1" Grid.RowSpan="7" BorderBrush="DarkGray" Margin="5">
+            <GroupBox Header="Intel" Grid.Column="0" Grid.Row="1" Grid.RowSpan="7" Margin="4">
                 <StackPanel Margin="4" >
-                    <CheckBox IsChecked="{Binding DangerZoneActive}" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Checked="dangerZoneEnabled_Checked" Content="DangerZone Enabled" Margin="4"/>
-                    <StackPanel Orientation="Horizontal" Margin="4">
-                        <xctk:IntegerUpDown Value="{Binding DangerZoneRange}" Grid.Row="5" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0" Width="45" Minimum="1" Maximum="6" Background="Transparent"  Foreground="White" ValueChanged="dangerzone_ValueChanged" />
-                        <Label Content="DangerZone Size" Grid.Column="0" Grid.Row="5" HorizontalAlignment="Right" />
+                    <CheckBox IsChecked="{Binding BroadcastLocation}"  HorizontalAlignment="Left" VerticalAlignment="Center" Checked="dangerZoneEnabled_Checked" Content="Location broadcasting" Margin="3"/>
+                    <CheckBox IsChecked="{Binding DangerZoneActive}"  HorizontalAlignment="Left" VerticalAlignment="Center" Checked="dangerZoneEnabled_Checked" Content="Danger zone" Margin="3"/>
+                    <StackPanel Orientation="Horizontal">
+                        <xctk:IntegerUpDown Value="{Binding DangerZoneRange}"  HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0" Width="45" Minimum="1" Maximum="6" Background="Transparent"  Foreground="White" ValueChanged="dangerzone_ValueChanged"/>
+                        <Label Content="Danger zone range" HorizontalAlignment="Right"/>
                     </StackPanel>
                 </StackPanel>
             </GroupBox>
 
+            <GroupBox Header="Navigation Options" Grid.Column="1" Grid.Row="1" Grid.RowSpan="7" Margin="4">
+                <StackPanel Margin="4">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Autopilot setting"/>
+                        <ComboBox ItemsSource="{Binding Source={StaticResource navigationEnumData}}" SelectedItem="{Binding NavigationMode, Mode=TwoWay}" Margin="3" Width="100" Background="{DynamicResource ButtonBackground}"/>
+                    </StackPanel>
+                    <CheckBox IsChecked="{Binding UseAnsiblexGates}"  HorizontalAlignment="Left" Content="Use Ansiblex Gates" Margin="3"/>
 
-            <Button Content="Delete" Grid.Column="1" Grid.Row="8" Width="100" VerticalAlignment="Center"  HorizontalAlignment="Right" Margin="20,0" x:Name="deleteBtn" Click="deleteBtn_Click"/>
-
-
-
-
-
-
+                </StackPanel>
+            </GroupBox>
 
         </Grid>
     </Grid>

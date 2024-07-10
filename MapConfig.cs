@@ -91,6 +91,13 @@ namespace SMT
 
         private int m_ZkillExpireTimeMinutes;
 
+        private string DMTUrl;
+        private bool m_ShowOnlinePlayers;
+        private bool m_AutoSyncJB;
+        private bool m_SubscribeToAllaince;
+        private bool m_SubscribeToCorp;
+        private int m_MaxChatLines;
+
 
         public MapConfig()
         {
@@ -800,6 +807,48 @@ namespace SMT
 
                 OnPropertyChanged("UpcomingSovMinutes");
             }
+        }
+        [Category("General")]
+        [DisplayName("Max Chat Lines")]
+        public int MaxChatLines
+        {
+            get => m_MaxChatLines;
+            set
+            {
+                m_MaxChatLines = value;
+                OnPropertyChanged("MaxChatLines");
+            }
+        }
+
+        [Category("Intel")]
+        [DisplayName("Subscribe To Corp")]
+        public bool SubscribeToCorp
+        {
+            get => m_SubscribeToCorp;
+            set
+            {
+                m_SubscribeToCorp = value;
+                OnPropertyChanged("SubscribeToCorp");
+            }
+        }
+
+        [Category("Intel")]
+        [DisplayName("Subscribe To Alliance")]
+        public bool SubscribeToAlliance
+        {
+            get => m_SubscribeToAllaince;
+            set
+            {
+                m_SubscribeToAllaince = value;
+                OnPropertyChanged("SubscribeToAlliance");
+            }
+        }
+        [Category("DMT")]
+        [DisplayName("DMT URL")]
+        public string Url
+        {
+            get => DMTUrl;
+            set => DMTUrl = value;
         }
 
 

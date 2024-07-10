@@ -43,6 +43,10 @@ namespace SMT
             MainWindow mw = Owner as MainWindow;
             mw.AddCharacter();
         }
+        private void Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            characterLV.Items.Refresh();
+        }
 
         private void dangerzone_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
