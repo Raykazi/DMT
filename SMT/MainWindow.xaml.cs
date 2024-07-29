@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
@@ -20,6 +21,7 @@ using System.Xml.Serialization;
 using Microsoft.Toolkit.Uwp.Notifications;
 using Microsoft.Win32;
 using SMT.EVEData;
+using SMTPlugin;
 
 namespace SMT
 {
@@ -56,6 +58,7 @@ namespace SMT
         private System.Windows.Forms.NotifyIcon nIcon = new System.Windows.Forms.NotifyIcon();
 
         private readonly string WindowLayoutVersion = "01";
+        private readonly string _pluginPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
 
         /// <summary>
         /// Main Window
@@ -382,6 +385,47 @@ namespace SMT
             CheckGitHubVersion();
 
             RegionUC.SelectRegion(MapConf.DefaultRegion);
+            LoadPlugins();
+        }
+        private void LoadPlugins()
+        {
+            List<PluginInfo> pluginList = new List<PluginInfo>();
+            if (!File.Exists(_pluginPath))
+            {
+                return;
+            }
+            foreach (var pluginPath in Directory.GetFiles(_pluginPath, "*.dll"))
+            {
+                try
+                {
+                    Assembly pluginAssembly = Assembly.LoadFrom(pluginPath);
+                    Type pluginType = typeof(ISMTPlugin);
+
+                    foreach (Type type in pluginAssembly.GetTypes())
+                    {
+                        if (pluginType.IsAssignableFrom(type) && !type.IsInterface && !type.IsAbstract)
+                        {
+                            ISMTPlugin pluginInstance = (ISMTPlugin)Activator.CreateInstance(type);
+                            PluginInfo pluginInfo = new PluginInfo
+                            {
+                                Version = pluginInstance.Version,
+                                MinimumSMTVersion = pluginInstance.MinimumSMTVersion,
+                                Name = pluginInstance.Name,
+                                Description = pluginInstance.Description,
+                                Author = pluginInstance.Author,
+                                GitHubLink = pluginInstance.GitHubLink,
+                                Settings = pluginInstance.Settings
+
+                            };
+                            pluginList.Add(pluginInfo);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error loading plugin {pluginPath}: {ex.Message}");
+                }
+            }
         }
 
         private void OnGamelogUpdated(List<EVEData.GameLogData> gll)

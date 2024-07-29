@@ -202,5 +202,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EVEData\EVEData.csproj" />
+    <ProjectReference Include="..\SMTPlugin\SMTPlugin.csproj" />
   </ItemGroup>
 </Project>

@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataGen", "DataGen\DataGen.
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj", "{9F3D6EC2-A182-4C10-87CB-D7091BE1231C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SMTPlugin", "SMTPlugin\SMTPlugin.csproj", "{8D213360-99BD-4092-8875-765DD6E8972A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +50,14 @@ Global
 		{9F3D6EC2-A182-4C10-87CB-D7091BE1231C}.Release|Any CPU.ActiveCfg = Release
 		{9F3D6EC2-A182-4C10-87CB-D7091BE1231C}.Release|x64.ActiveCfg = Release
 		{9F3D6EC2-A182-4C10-87CB-D7091BE1231C}.Release|x64.Build.0 = Release
+		{8D213360-99BD-4092-8875-765DD6E8972A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D213360-99BD-4092-8875-765DD6E8972A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D213360-99BD-4092-8875-765DD6E8972A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8D213360-99BD-4092-8875-765DD6E8972A}.Debug|x64.Build.0 = Debug|Any CPU
+		{8D213360-99BD-4092-8875-765DD6E8972A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D213360-99BD-4092-8875-765DD6E8972A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D213360-99BD-4092-8875-765DD6E8972A}.Release|x64.ActiveCfg = Release|Any CPU
+		{8D213360-99BD-4092-8875-765DD6E8972A}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

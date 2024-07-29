@@ -346,6 +346,46 @@
                         </ScrollViewer>
                     </Grid>
                 </TabItem>
+                <TabItem Header="Plugins">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Grid.ColumnSpan="2">
+                            <StackPanel>
+                                <GroupBox Margin="4" Height="Auto">
+                                    <GroupBox.Header>
+                                        <TextBlock FontWeight="Bold">Plugins</TextBlock>
+                                    </GroupBox.Header>
+                                    <Grid/>
+                                </GroupBox>
+                                <DataGrid x:Name="PluginsDataGrid" d:ItemsSource="{d:SampleData ItemCount=5}" AutoGenerateColumns="False"  Height="210">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="100" MinWidth="100"/>
+                                        <DataGridTextColumn Header="Version" Binding="{Binding Version}" Width="50" MinWidth="50"/>
+                                        <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="250" MinWidth="250"/>
+                                        <DataGridTextColumn Header="Author" Binding="{Binding Author}" Width="120" MinWidth="120"/>
+                                        <DataGridTextColumn Header="GitHub" Binding="{Binding GitHubLink}" Width="200" MinWidth="200"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <GroupBox Margin="4" Height="Auto">
+                                    <GroupBox.Header>
+                                        <TextBlock FontWeight="Bold" Text="Settings"/>
+                                    </GroupBox.Header>
+                                    <Grid/>
+                                </GroupBox>
+                                <DataGrid Height="165" d:ItemsSource="{d:SampleData ItemCount=5}" AutoGenerateColumns="False">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="150" MinWidth="150"/>
+                                        <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="400" MinWidth="400"/>
+                                        <DataGridTextColumn Header="Value" Binding="{Binding Author}" Width="150" MinWidth="150"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
                 <TabItem Header="Debug">
                     <Grid>
                         <Grid.ColumnDefinitions>
