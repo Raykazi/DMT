@@ -2,13 +2,13 @@
 {
     public interface ISMTPlugin
     {
-        int Version { get; }
-        int MinimumSMTVersion { get; } 
+        string Version { get; }
+        string MinimumSMTVersion { get; } 
         string Name { get; }    
         string Description { get; }
         string Author { get; } 
-        string GitHubLink { get; }
-        List<PluginSetting> Settings { get; }
+        Uri GitHubLink { get; }
+        List<PluginSetting> Settings { get; set; }
     }
     public enum SettingType
     {

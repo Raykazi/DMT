@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Utils
 {
@@ -27,6 +28,22 @@ namespace Utils
                 strTitle = stringBuilder.ToString();
             }
             return strTitle;
+        }
+        public static void ValidateAndLaunch(string url)
+        {
+            var linkParser = new Regex(@"\b(?:https?://|www\.)\S+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            foreach (Match m in linkParser.Matches(url))
+            {
+                string matchedUrl = m.Value;
+                if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                {
+                    matchedUrl = "http://" + matchedUrl;
+                }
+                if (Uri.IsWellFormedUriString(matchedUrl, UriKind.Absolute))
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(matchedUrl) { UseShellExecute = true });
+                }
+            }
         }
     }
 }

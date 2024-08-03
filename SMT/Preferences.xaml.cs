@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
@@ -6,7 +6,10 @@ using System.Windows.Data;
 using System.Windows.Forms;
 using System.Windows.Media;
 using SMT.EVEData;
+using SMTPlugin;
 using MessageBox = System.Windows.MessageBox;
+using Utils;
+using System.Windows.Navigation;
 
 namespace SMT
 {
@@ -46,7 +49,11 @@ namespace SMT
                 }
             }
         }
-
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            Utils.Misc.ValidateAndLaunch(e.Uri.AbsoluteUri);
+            e.Handled = true;
+        }
         private void Prefs_OK_Click(object sender, RoutedEventArgs e)
         {
             foreach (EVEData.System s in EM.Systems)
@@ -136,6 +143,20 @@ namespace SMT
             MapConf.CustomEveLogFolderLocation = string.Empty;
             MessageBoxResult result = MessageBox.Show("Restart SMT for the log folder location to take effect", "Please Restart SMT", MessageBoxButton.OK);
         }
+
+        private void PluginsDataGrid_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (PluginsDataGrid.SelectedItem is PluginInfo selectedPlugin)
+            {
+                SettingsDataGrid.ItemsSource = selectedPlugin.Settings;
+                tbSettingsHeader.Text = $"Settings for {selectedPlugin.Name}";
+            }
+            else
+            {
+                SettingsDataGrid.ItemsSource = null;
+            }
+        }
+
     }
 
     public class JoinStringConverter : IValueConverter

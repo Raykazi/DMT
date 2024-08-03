@@ -20,8 +20,10 @@ using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Toolkit.Uwp.Notifications;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 using SMT.EVEData;
 using SMTPlugin;
+using Utils;
 
 namespace SMT
 {
@@ -126,7 +128,7 @@ namespace SMT
                 MapConf = new MapConfig();
                 MapConf.SetDefaultColours();
             }
-
+            LoadPlugins();
 
             if (MapConf.AlwaysOnTop)
             {
@@ -385,12 +387,14 @@ namespace SMT
             CheckGitHubVersion();
 
             RegionUC.SelectRegion(MapConf.DefaultRegion);
-            LoadPlugins();
         }
+        List<PluginInfo> _pluginList;
+        List<ISMTPlugin> _plugins;
         private void LoadPlugins()
         {
-            List<PluginInfo> pluginList = new List<PluginInfo>();
-            if (!File.Exists(_pluginPath))
+            _pluginList = new List<PluginInfo>();
+            _plugins = new List<ISMTPlugin>();
+            if (!Directory.Exists(_pluginPath))
             {
                 return;
             }
@@ -400,31 +404,56 @@ namespace SMT
                 {
                     Assembly pluginAssembly = Assembly.LoadFrom(pluginPath);
                     Type pluginType = typeof(ISMTPlugin);
-
-                    foreach (Type type in pluginAssembly.GetTypes())
+                    var matchedType = pluginAssembly.GetTypes().Where(t => pluginType.IsAssignableFrom(t)).FirstOrDefault();
+                    if (matchedType == null)
                     {
-                        if (pluginType.IsAssignableFrom(type) && !type.IsInterface && !type.IsAbstract)
+                        continue;
+                    }
+                    else
+                    {
+                        ISMTPlugin pluginInstance = (ISMTPlugin)Activator.CreateInstance(matchedType);
+                        PluginInfo pluginInfo = new PluginInfo
                         {
-                            ISMTPlugin pluginInstance = (ISMTPlugin)Activator.CreateInstance(type);
-                            PluginInfo pluginInfo = new PluginInfo
-                            {
-                                Version = pluginInstance.Version,
-                                MinimumSMTVersion = pluginInstance.MinimumSMTVersion,
-                                Name = pluginInstance.Name,
-                                Description = pluginInstance.Description,
-                                Author = pluginInstance.Author,
-                                GitHubLink = pluginInstance.GitHubLink,
-                                Settings = pluginInstance.Settings
-
-                            };
-                            pluginList.Add(pluginInfo);
+                            Enabled = ExtractVersionNumber(pluginInstance.MinimumSMTVersion) >= ExtractVersionNumber(EveAppConfig.SMT_VERSION),
+                            Version = pluginInstance.Version,
+                            MinimumSMTVersion = pluginInstance.MinimumSMTVersion,
+                            Name = pluginInstance.Name,
+                            Description = pluginInstance.Description,
+                            Author = pluginInstance.Author,
+                            GitHubLink = pluginInstance.GitHubLink,
+                            Settings = LoadPluginSettings(pluginInstance)
+                        };
+                        _pluginList.Add(pluginInfo);
+                        if(pluginInfo.Enabled)
+                        {
+                            _plugins.Add(pluginInstance);
                         }
+
                     }
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Error loading plugin {pluginPath}: {ex.Message}");
                 }
+            }
+            int ExtractVersionNumber(string version)
+            {
+                string[] parts = version.Split('_');
+                if (parts.Length > 1 && int.TryParse(parts[1], out int versionNumber))
+                {
+                    return versionNumber;
+                }
+                throw new ArgumentException("Invalid version format");
+            }
+            List<PluginSetting> LoadPluginSettings(ISMTPlugin plugin)
+            {
+                string settingsFile = Path.Combine(_pluginPath, plugin.Name + ".json");
+                if (File.Exists(settingsFile))
+                {
+                    var json = File.ReadAllText(settingsFile);
+                    return JsonConvert.DeserializeObject<List<PluginSetting>>(json);
+                }
+                return plugin.Settings;
             }
         }
 
@@ -949,19 +978,28 @@ namespace SMT
             }
 
             preferencesWindow = new PreferencesWindow();
+            preferencesWindow.Closed += PreferencesWindow_Closed;
             preferencesWindow.Owner = this;
             preferencesWindow.DataContext = MapConf;
             preferencesWindow.MapConf = MapConf;
             preferencesWindow.EM = EVEManager;
+            preferencesWindow.PluginsDataGrid.ItemsSource = _pluginList;
             preferencesWindow.Init();
             preferencesWindow.ShowDialog();
-            preferencesWindow.Closed += PreferencesWindow_Closed;
         }
 
         private void PreferencesWindow_Closed(object sender, EventArgs e)
         {
             RegionUC.ReDrawMap(true);
             UniverseUC.ReDrawMap(true, true, false);
+            foreach (var plugin in _pluginList)
+            {
+                var pluginInstance = _plugins.FirstOrDefault(p => p.Name == plugin.Name);
+                pluginInstance.Settings = plugin.Settings;
+                string settingsFile = Path.Combine(_pluginPath, plugin.Name + ".json");
+                var json = JsonConvert.SerializeObject(plugin.Settings, Newtonsoft.Json.Formatting.Indented);
+                File.WriteAllText(settingsFile, json);
+            }
         }
 
         #endregion Preferences & Options
@@ -1425,19 +1463,7 @@ namespace SMT
                 {
                     continue;
                 }
-                var linkParser = new Regex(@"\b(?:https?://|www\.)\S+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-                foreach (Match m in linkParser.Matches(s))
-                {
-                    string url = m.Value;
-                    if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
-                    {
-                        url = "http://" + url;
-                    }
-                    if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
-                    {
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true });
-                    }
-                }
+                Misc.ValidateAndLaunch(s);
                 // only select the first system
                 if (!selectedSystem)
                 {

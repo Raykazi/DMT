@@ -4,54 +4,61 @@ namespace SMTPlugin
 {
     public class PluginInfo : INotifyPropertyChanged
     {
-        private int version;
-        private int minimumSMTVersion;
-        private string name;
-        private string description;
-        private string author;
-        private string gitHubLink;
-        private List<PluginSetting> settings;
+        private bool _enabled;
+        private string _version;
+        private string _minimumSMTVersion;
+        private string _name;
+        private string _description;
+        private string _author;
+        private Uri _gitHubLink;
+        private List<PluginSetting> _settings;
 
-        public int Version
+
+        public bool Enabled
         {
-            get { return version; }
-            set { version = value; OnPropertyChanged(nameof(Version)); }
+            get { return _enabled; }
+            set { _enabled = value; }
+        }
+        public string Version
+        {
+            get { return _version; }
+            set { _version = value; }
         }
 
-        public int MinimumSMTVersion
+        public string MinimumSMTVersion
         {
-            get { return minimumSMTVersion; }
-            set { minimumSMTVersion = value; OnPropertyChanged(nameof(MinimumSMTVersion)); }
+            get { return _minimumSMTVersion; }
+            set { _minimumSMTVersion = value; }
         }
 
         public string Name
         {
-            get { return name; }
-            set { name = value; OnPropertyChanged(nameof(Name)); }
+            get { return _name; }
+            set { _name = value; }
         }
 
         public string Description
         {
-            get { return description; }
-            set { description = value; OnPropertyChanged(nameof(Description)); }
+            get { return _description; }
+            set { _description = value; }
         }
 
         public string Author
         {
-            get { return author; }
-            set { author = value; OnPropertyChanged(nameof(Author)); }
+            get { return _author; }
+            set { _author = value;  }
         }
 
-        public string GitHubLink
+        public Uri GitHubLink
         {
-            get { return gitHubLink; }
-            set { gitHubLink = value; OnPropertyChanged(nameof(GitHubLink)); }
+            get { return _gitHubLink; }
+            set { _gitHubLink = value; }
         }
 
         public List<PluginSetting> Settings
         {
-            get { return settings; }
-            set { settings = value; OnPropertyChanged(nameof(Settings)); }
+            get { return _settings; }
+            set { _settings = value; OnPropertyChanged(nameof(Settings)); }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
